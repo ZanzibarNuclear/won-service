@@ -1,9 +1,21 @@
-import fastify from 'fastify'
+import Fastify from 'fastify'
+import AutoLoad from '@fastify/autoload'
+import { join } from 'path'
 
-const server = fastify()
+const server = Fastify({
+  logger: true
+})
 
-server.get('/', async (request, reply) => {
-  return { hello: 'Zanzibar\'s World of Nuclear Energy' }
+// Autoload plugins
+server.register(AutoLoad, {
+  dir: join(__dirname, 'plugins'),
+  options: { /* optional options */ }
+})
+
+// Autoload routes
+server.register(AutoLoad, {
+  dir: join(__dirname, 'routes'),
+  options: { /* optional options */ }
 })
 
 const start = async () => {
