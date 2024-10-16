@@ -1,31 +1,19 @@
 import * as path from 'path'
-import { Pool } from 'pg'
 import { promises as fs } from 'fs'
 import {
-  Kysely,
   Migrator,
-  PostgresDialect,
   FileMigrationProvider,
 } from 'kysely'
-import { Database } from '../types'
+import { db } from './Database'
 
 async function migrateToLatest() {
-  const db = new Kysely<Database>({
-    dialect: new PostgresDialect({
-      pool: new Pool({
-        host: 'localhost',
-        database: 'kysely_test',
-      }),
-    }),
-  })
-
   const migrator = new Migrator({
     db,
     provider: new FileMigrationProvider({
       fs,
       path,
       // This needs to be an absolute path.
-      migrationFolder: path.join(__dirname, 'some/path/to/migrations'),
+      migrationFolder: path.join(__dirname, 'migrations'),
     }),
   })
 

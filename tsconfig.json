@@ -3,7 +3,7 @@
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
     /* Language and Environment */
-    "target": "ES2018",
+    "target": "ES2022",
     "module": "CommonJS",
     "outDir": "./dist",
     "rootDir": "./src",
@@ -13,6 +13,6 @@
     "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "dist/**/*.js"],
   "exclude": ["node_modules"]
 }
