@@ -19,15 +19,15 @@ export interface FluxBoosts {
 }
 
 export interface Fluxes {
-  boost_count: Generated<number | null>;
-  content: string;
-  created_at: Generated<Timestamp>;
-  deleted_at: Timestamp | null;
-  flux_user_id: number;
   id: Generated<number>;
+  content: string;
+  flux_user_id: number;
   parent_id: number | null;
   reply_count: Generated<number | null>;
+  boost_count: Generated<number | null>;
+  created_at: Generated<Timestamp>;
   updated_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
 }
 
 export interface FluxUsers {
