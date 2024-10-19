@@ -1,4 +1,4 @@
-import Fastify from 'fastify'
+import Fastify, { FastifyPluginOptions } from 'fastify'
 import AutoLoad from '@fastify/autoload'
 import { join } from 'path'
 
@@ -9,7 +9,9 @@ const server = Fastify({
 // Autoload plugins
 server.register(AutoLoad, {
   dir: join(__dirname, 'plugins'),
-  options: { /* optional options */ }
+  autoHooks: true,
+  logLevel: 'info',
+  cascadeHooks: true,
 })
 
 // Autoload routes

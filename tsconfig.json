@@ -4,7 +4,9 @@
 
     /* Language and Environment */
     "target": "ES2022",
+    "experimentalDecorators": true,
     "module": "CommonJS",
+    "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
