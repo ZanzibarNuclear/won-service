@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify'
 
 const corsPlugin: FastifyPluginAsync = async (fastify, options) => {
-  fastify.register(require('@fastify/cors'), {
+  await fastify.register(require('@fastify/cors'), {
     name: 'cors',
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

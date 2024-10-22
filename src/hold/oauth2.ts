@@ -11,9 +11,8 @@ const X_CONFIGURATION = {
 const apiUrlBase = process.env.API_URL_BASE
 
 const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
-
-  fastify.register(async (instance, opts, done) => {
-    fastify.register(oauthPlugin, {
+  await fastify.register(async (instance, opts, done) => {
+    await instance.register(oauthPlugin, {
       name: 'githubOAuth2',
       scope: [],
       credentials: {
@@ -27,7 +26,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       callbackUri: `${apiUrlBase}/login/github/callback`
     })
 
-    fastify.register(oauthPlugin, {
+    await instance.register(oauthPlugin, {
       name: 'googleOAuth2',
       scope: ['profile'],
       credentials: {
@@ -41,7 +40,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       callbackUri: `${apiUrlBase}/login/google/callback`
     })
 
-    fastify.register(oauthPlugin, {
+    await instance.register(oauthPlugin, {
       name: 'xOAuth2',
       credentials: {
         client: {
@@ -50,16 +49,12 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
         },
         auth: X_CONFIGURATION
       },
-      // register a fastify url to start the redirect flow to the service provider's OAuth2 login
       startRedirectPath: '/login/x',
-      // service provider redirects here after user login
       callbackUri: `${apiUrlBase}/login/x/callback`
-      // You can also define callbackUri as a function that takes a FastifyRequest and returns a string
-      // callbackUri: req => `${req.protocol}://${req.hostname}/login/facebook/callback`,
     })
 
     done()
-  }, { dependencies: ['cookie', 'dotenv', 'cors'] })
+  }, { dependencies: ['cookie', 'env', 'cors'] })
 }
 
 export default oauth2Plugin
