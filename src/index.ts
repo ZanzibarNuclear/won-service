@@ -17,15 +17,24 @@ const server = Fastify({
 
 // load plugins
 server.register(envPlugin)
+server.register(corsPlugin)
 server.register(sensiblePlugin)
 server.register(examplePlugin)
-server.register(corsPlugin)
 server.register(cookiePlugin)
 server.register(oauth2GithubPlugin)
 
 // Autoload routes
 server.register(AutoLoad, {
   dir: join(__dirname, 'routes'),
+})
+
+server.addHook('onRequest', (request, reply, done) => {
+  console.log('Incoming request:', {
+    method: request.method,
+    url: request.url,
+    headers: request.headers,
+  })
+  done()
 })
 
 server.ready(err => {
