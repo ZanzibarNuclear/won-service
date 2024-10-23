@@ -9,55 +9,101 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Timestamp = ColumnType<Date, Date | string>;
+export type Json = JsonValue;
+
+export type JsonArray = JsonValue[];
+
+export type JsonObject = {
+  [x: string]: JsonValue | undefined;
+};
+
+export type JsonPrimitive = boolean | number | string | null;
+
+export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
+
+export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface FluxBoosts {
   created_at: Generated<Timestamp>;
   flux_id: number;
   flux_user_id: number;
-  id: Generated<number>;
 }
 
 export interface Fluxes {
-  id: Generated<number>;
+  blargy: string | null;
+  boost_count: Generated<number>;
   content: string;
-  flux_user_id: number;
-  parent_id: number | null;
-  reply_count: Generated<number | null>;
-  boost_count: Generated<number | null>;
   created_at: Generated<Timestamp>;
-  updated_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
+  flux_user_id: number;
+  id: Generated<number>;
+  parent_id: number | null;
+  reply_count: Generated<number>;
+  updated_at: Generated<Timestamp>;
 }
 
 export interface FluxUsers {
-  avatar_url: string | null;
-  bio: string | null;
   created_at: Generated<Timestamp>;
   display_name: string;
   handle: string;
   id: Generated<number>;
-  location: string | null;
+  updated_at: Generated<Timestamp>;
   user_id: string;
-  website: string | null;
 }
 
-export interface Teams {
+export interface Identities {
+  created_at: Generated<Timestamp>;
+  email: Generated<string>;
+  id: Generated<string>;
+  identity_data: Json;
+  last_sign_in_at: Timestamp;
+  provider: string;
+  provider_id: string;
+  updated_at: Generated<Timestamp>;
+  user_id: string;
+}
+
+export interface OauthTokens {
+  access_token: string;
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
   id: Generated<number>;
-  name: string;
+  provider: string;
+  refresh_token: string | null;
+  user_id: string;
+}
+
+export interface Profiles {
+  avatar_url: string | null;
+  bio: string | null;
+  created_at: Generated<Timestamp>;
+  full_name: string | null;
+  id: Generated<string>;
+  join_reason: string | null;
+  location: string | null;
+  nuclear_likes: string | null;
+  screen_name: string | null;
+  updated_at: Generated<Timestamp>;
+  username: string;
+  website: string | null;
+  x_username: string | null;
 }
 
 export interface Users {
+  alias: string | null;
+  created_at: Generated<Timestamp>;
   email: string;
-  family_name: string;
-  given_name: string;
   id: Generated<string>;
+  last_sign_in_at: Timestamp;
+  updated_at: Generated<Timestamp>;
 }
 
 export interface DB {
   flux_boosts: FluxBoosts;
   flux_users: FluxUsers;
   fluxes: Fluxes;
-  teams: Teams;
+  identities: Identities;
+  oauth_tokens: OauthTokens;
+  profiles: Profiles;
   users: Users;
 }

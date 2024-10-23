@@ -1,11 +1,14 @@
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
 import fastifyOAuth2, { FastifyOAuth2Options, OAuth2Namespace } from '@fastify/oauth2'
 import { db } from '../db/Database'
+import { createSessionToken } from '../utils/auth'
 
 interface SupportedProviders {
-  github: OAuth2Namespace
-  google: OAuth2Namespace
+  githubOAuth2: OAuth2Namespace
+  googleOAuth2: OAuth2Namespace
 }
+
+type User = { id: string; email: string; alias: string }
 
 const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   // GitHub OAuth2
@@ -39,7 +42,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   } as FastifyOAuth2Options)
 
   // Helper function to get user info based on provider
-  const getUserInfo = async (provider: keyof SupportedProviders, accessToken: string) => {
+  const getUserInfo = async (provider: 'github' | 'google', accessToken: string) => {
     let userInfo
     switch (provider) {
       case 'github':
@@ -59,32 +62,39 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   }
 
   // Generic callback handler
-  const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: keyof SupportedProviders) => {
+  const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google') => {
     const oauth2 = fastify[`${provider}OAuth2` as keyof SupportedProviders]
     const { token } = await oauth2.getAccessTokenFromAuthorizationCodeFlow(request)
 
     const userInfo = await getUserInfo(provider, token.access_token)
 
-    //TODO: Here you would typically:
     // 1. Check if the user exists in your database
-    let user = await db.selectFrom('users').where('email', '=', userInfo.email).executeTakeFirst()
+
+    let user = await db.selectFrom('users').where('email', '=', userInfo.email).executeTakeFirst() as User | undefined
 
     // 2. Create a new user if they don't exist
     if (!user) {
       user = await db.insertInto('users').values({
         email: userInfo.email,
         alias: userInfo.name,
-      }).returning('id').executeTakeFirst()
+        last_sign_in_at: new Date()
+      }).returning(['id', 'email', 'alias']).executeTakeFirst() as User | undefined
+    }
+    if (!user) {
+      throw new Error('Problem creating user record')
     }
 
     // 3. Store or update the OAuth tokens
-    await db.insertInto('oauth_tokens').values({
+    const authTokens = await db.insertInto('oauth_tokens').values({
       user_id: user.id,
       provider: provider,
       access_token: token.access_token,
       refresh_token: token.refresh_token,
       expires_at: new Date(Date.now() + token.expires_in * 1000)
-    }).onConflict(['user_id', 'provider']).merge().execute()
+    }).execute()
+    if (!authTokens.length) {
+      throw new Error('Problem creating OAuth tokens record')
+    }
 
     // 4. Create a session or JWT for the user
     const sessionToken = createSessionToken(user)
