@@ -7,7 +7,7 @@ import sensiblePlugin from './plugins/sensible'
 import examplePlugin from './plugins/example'
 import corsPlugin from './plugins/cors'
 import cookiePlugin from './plugins/cookie'
-import oauth2GithubPlugin from './plugins/oauth2-github'
+import oauth2Plugin from './plugins/oauth2'
 
 dotenv.config()
 
@@ -21,7 +21,7 @@ server.register(corsPlugin)
 server.register(sensiblePlugin)
 server.register(examplePlugin)
 server.register(cookiePlugin)
-server.register(oauth2GithubPlugin)
+server.register(oauth2Plugin)
 
 // Autoload routes
 server.register(AutoLoad, {
@@ -39,9 +39,6 @@ server.addHook('onRequest', (request, reply, done) => {
 
 server.ready(err => {
   server.log.info('Server ready')
-  if (!server.oauth2Github) {
-    server.log.warn('oauth2Github plugin not found')
-  }
   if (err) throw err
 })
 
