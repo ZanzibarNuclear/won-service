@@ -5,7 +5,6 @@ import { DB } from "./schema/types"
 import * as dotenv from 'dotenv'
 
 dotenv.config()
-console.log("DB connection string: " + process.env.DATABASE_URL)
 
 export const db = new Kysely<DB>({
   dialect: new PostgresDialect({

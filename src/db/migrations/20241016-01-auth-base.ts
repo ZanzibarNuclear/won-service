@@ -17,6 +17,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('provider_id', 'varchar', (col) => col.notNull())
     .addColumn('provider', 'varchar', (col) => col.notNull())
     .addColumn('identity_data', 'jsonb', (col) => col.notNull())
+    .addColumn('last_sign_in_at', 'timestamp', (col) => col.notNull())
     .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .addColumn('updated_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .addColumn('email', 'varchar', (col) => col.generatedAlwaysAs(sql`lower((identity_data ->> 'email')::text)`).stored().notNull().unique())
@@ -42,5 +43,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
-  await db.schema.dropTable('temp').execute()
+  await db.schema.dropTable('profiles').execute()
+  await db.schema.dropTable('identities').execute()
+  await db.schema.dropTable('users').execute()
 }

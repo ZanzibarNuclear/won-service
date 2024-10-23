@@ -10,7 +10,9 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "migrate": "bash scripts/migrate.sh",
+    "migrate:up": "bash scripts/migrate.sh up",
+    "migrate:down": "bash scripts/migrate.sh down",
+    "migrate:latest": "bash scripts/migrate.sh latest",
     "seed": "bash scripts/seed.sh",
     "generate": "kysely-codegen --dialect=postgres --out-file=./src/db/types.ts",
     "generate-help": "kysely-codegen --help",
@@ -45,6 +47,7 @@
     "@types/node": "^22.7.8",
     "@types/pg": "^8.11.10",
     "kysely-codegen": "^0.17.0",
+    "kysely-ctl": "^0.9.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.6.3"
   }
