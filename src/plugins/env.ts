@@ -10,6 +10,7 @@ const envSchema = {
     API_HOST: { type: 'string' },
     API_PORT: { type: 'number' },
     API_URL_BASE: { type: 'string' },
+    APP_BASE_URL: { type: 'string' },
     DATABASE_URL: { type: 'string' },
     GITHUB_CLIENT_ID: { type: 'string' },
     GITHUB_CLIENT_SECRET: { type: 'string' },

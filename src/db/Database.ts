@@ -1,7 +1,6 @@
 import { Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg"
-// import { Schema } from "./schema/Schema"
-import { DB } from "./schema/types"
+import { DB } from "./types"
 import * as dotenv from 'dotenv'
 
 dotenv.config()

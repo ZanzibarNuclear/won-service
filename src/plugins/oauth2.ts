@@ -23,7 +23,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       auth: fastifyOAuth2.GITHUB_CONFIGURATION
     },
     startRedirectPath: '/login/github',
-    callbackUri: 'http://localhost:3000/login/github/callback'
+    callbackUri: `${process.env.API_URL_BASE}/login/github/callback`
   } as FastifyOAuth2Options)
 
   // Google OAuth2
@@ -38,7 +38,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       auth: fastifyOAuth2.GOOGLE_CONFIGURATION
     },
     startRedirectPath: '/login/google',
-    callbackUri: 'http://localhost:3000/login/google/callback'
+    callbackUri: `${process.env.API_URL_BASE}/login/google/callback`
   } as FastifyOAuth2Options)
 
   // Helper function to get user info based on provider
@@ -100,7 +100,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     const sessionToken = createSessionToken(user)
 
     // For now, we'll just return the user info and token
-    reply.redirect(`http://your-frontend-url/auth-callback?token=${sessionToken}`)
+    reply.redirect(`${process.env.APP_BASE_URL}/signin/confirm?token=${sessionToken}`)
   }
 
   // Register callback routes for each provider
