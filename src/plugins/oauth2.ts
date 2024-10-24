@@ -8,6 +8,14 @@ interface SupportedProviders {
   googleOAuth2: OAuth2Namespace
 }
 
+const X_CONFIGURATION = {
+  authorizeHost: 'https://x.com',
+  authorizePath: 'i/oauth2/authorize',
+  tokenHost: 'https://x.com',
+  tokenPath: '/2/oauth2/token',
+  revokePath: '/2/oauth2/revoke'
+}
+
 type User = { id: string; email: string; alias: string }
 
 const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
@@ -41,8 +49,23 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     callbackUri: `${process.env.API_URL_BASE}/login/google/callback`
   } as FastifyOAuth2Options)
 
+  // Register X OAuth2
+  await fastify.register(fastifyOAuth2, {
+    name: 'xOAuth2',
+    scope: ['tweet.read', 'users.read'], // Adjust scopes as needed
+    credentials: {
+      client: {
+        id: process.env.X_CLIENT_ID,
+        secret: process.env.X_CLIENT_SECRET
+      },
+      auth: X_CONFIGURATION
+    },
+    startRedirectPath: '/login/x',
+    callbackUri: `${process.env.API_URL_BASE}/login/x/callback`
+  } as FastifyOAuth2Options)
+
   // Helper function to get user info based on provider
-  const getUserInfo = async (provider: 'github' | 'google', accessToken: string) => {
+  const getUserInfo = async (provider: 'github' | 'google' | 'x', accessToken: string) => {
     let userInfo
     switch (provider) {
       case 'github':
@@ -52,6 +75,11 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
         break
       case 'google':
         userInfo = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }).then(res => res.json())
+        break
+      case 'x':
+        userInfo = await fetch('https://api.x.com/2/users/me', {
           headers: { Authorization: `Bearer ${accessToken}` }
         }).then(res => res.json())
         break
@@ -67,6 +95,9 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     const { token } = await oauth2.getAccessTokenFromAuthorizationCodeFlow(request)
 
     const userInfo = await getUserInfo(provider, token.access_token)
+    fastify.log.info(`user info from ${provider}: ${JSON.stringify(userInfo)}`)
+
+    const { id: socialId, email: socialEmail, name: socialName } = userInfo
 
     // 1. Check if the user exists in your database
 
@@ -75,8 +106,8 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     // 2. Create a new user if they don't exist
     if (!user) {
       user = await db.insertInto('users').values({
-        email: userInfo.email,
-        alias: userInfo.name,
+        email: socialEmail,
+        alias: socialName,
         last_sign_in_at: new Date()
       }).returning(['id', 'email', 'alias']).executeTakeFirst() as User | undefined
     }
@@ -91,10 +122,24 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       access_token: token.access_token,
       refresh_token: token.refresh_token,
       expires_at: new Date(Date.now() + token.expires_in * 1000)
-    }).execute()
-    if (!authTokens.length) {
+    }).executeTakeFirst()
+    if (!authTokens) {
       throw new Error('Problem creating OAuth tokens record')
     }
+
+    const socialIdentity = await db.insertInto('identities').values({
+      user_id: user.id,
+      provider_id: socialId,
+      provider: provider,
+      identity_data: userInfo,
+      email: socialEmail,
+      last_sign_in_at: new Date()
+    }).executeTakeFirst()
+    if (!socialIdentity) {
+      throw new Error('Problem creating social identity record')
+    }
+
+    // 3.5 Get refresh token from identity provider
 
     // 4. Create a session or JWT for the user
     const sessionToken = createSessionToken(user)
