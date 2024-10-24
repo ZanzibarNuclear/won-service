@@ -7,7 +7,7 @@ declare module 'fastify' {
     githubOAuth2: FastifyPluginAsync,
     xOAuth2: FastifyPluginAsync,
     config: {
-      APP_BASE_URL: string
+      APP_URL_BASE: string
     }
   }
   interface FastifyRequest {

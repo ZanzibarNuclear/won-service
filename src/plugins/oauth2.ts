@@ -8,6 +8,10 @@ interface SupportedProviders {
   googleOAuth2: OAuth2Namespace
 }
 
+type Envs = {
+  APP_URL_BASE: string
+}
+
 const X_CONFIGURATION = {
   authorizeHost: 'https://x.com',
   authorizePath: 'i/oauth2/authorize',
@@ -102,6 +106,9 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
 
     // 2. Check if the user exists in your database
     let user = await db.selectFrom('users').selectAll().where('email', '=', socialEmail).executeTakeFirst()
+    if (user) {
+      fastify.log.info(`user: ${JSON.stringify(user)}`)
+    }
 
     if (user === null || user === undefined || Object.keys(user).length === 0) {
       fastify.log.info('Creating record for new user')
@@ -117,27 +124,35 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
 
     // 3. Create a social identity record including user info and auth tokens from identity provider
     let socialIdentity = await db.selectFrom('identities').selectAll().where('user_id', '=', user.id).where('provider', '=', provider).executeTakeFirst()
+    if (socialIdentity) {
+      fastify.log.info(`social identity: ${JSON.stringify(socialIdentity)}`)
+    }
 
-    socialIdentity = await db.insertInto('identities').values({
-      user_id: user.id,
-      provider_id: socialId,
-      provider: provider,
-      access_token: token.access_token,
-      refresh_token: token.refresh_token,
-      identity_data: userInfo,
-      last_sign_in_at: new Date()
-    }).returningAll().executeTakeFirst()
+    if (!socialIdentity) {
+      socialIdentity = await db.insertInto('identities').values({
+        user_id: user.id,
+        provider_id: socialId,
+        provider: provider,
+        access_token: token.access_token,
+        refresh_token: token.refresh_token,
+        identity_data: userInfo,
+        last_sign_in_at: new Date()
+      }).returningAll().executeTakeFirst()
+    }
     if (!socialIdentity) {
       throw new Error('Problem creating social identity record')
     }
 
-    // 5. Create a session or JWT for the user
-
-    // 6. Create a session token
+    // 4. Create a session token
     const sessionToken = createSessionToken(user)
 
+    fastify.log.info(`environment: ${JSON.stringify(process.env)}`)
+
     // For now, we'll just return the user info and token
-    reply.redirect(`${fastify.config.APP_BASE_URL}/signin/confirm?token=${sessionToken}`)
+    // fastify.log.info(`from config: ${JSON.stringify(fastify.config.APP_URL_BASE)}`)
+    const toUrl = process.env.APP_URL_BASE
+    fastify.log.info(`redirecting to ${toUrl}`)
+    reply.redirect(`${toUrl}/signin/confirm?token=${sessionToken}`)
   }
 
   // Register callback routes for each provider
