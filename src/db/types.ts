@@ -52,6 +52,7 @@ export interface FluxUsers {
 }
 
 export interface Identities {
+  access_token: string;
   created_at: Generated<Timestamp>;
   email: Generated<string>;
   id: Generated<string>;
@@ -59,17 +60,8 @@ export interface Identities {
   last_sign_in_at: Timestamp;
   provider: string;
   provider_id: string;
-  updated_at: Generated<Timestamp>;
-  user_id: string;
-}
-
-export interface OauthTokens {
-  access_token: string;
-  created_at: Generated<Timestamp>;
-  expires_at: Timestamp;
-  id: Generated<number>;
-  provider: string;
   refresh_token: string | null;
+  updated_at: Generated<Timestamp>;
   user_id: string;
 }
 
@@ -103,7 +95,6 @@ export interface DB {
   flux_users: FluxUsers;
   fluxes: Fluxes;
   identities: Identities;
-  oauth_tokens: OauthTokens;
   profiles: Profiles;
   users: Users;
 }

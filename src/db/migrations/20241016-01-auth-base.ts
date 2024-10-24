@@ -12,33 +12,19 @@ export async function up(db: Kysely<any>): Promise<void> {
     .execute()
 
   await db.schema
-    .createTable('oauth_tokens')
-    .addColumn('id', 'serial', (col) => col.primaryKey())
-    .addColumn('user_id', 'uuid', (col) =>
-      col.notNull().references('users.id').onDelete('cascade')
-    )
-    .addColumn('provider', 'varchar', (col) => col.notNull())
-    .addColumn('access_token', 'text', (col) => col.notNull())
-    .addColumn('refresh_token', 'text')
-    .addColumn('expires_at', 'timestamp', (col) => col.notNull())
-    .addColumn('created_at', 'timestamp', (col) =>
-      col.defaultTo(sql`now()`).notNull()
-    )
-    .addUniqueConstraint('oauth_tokens_user_provider_unique', ['user_id', 'provider'])
-    .execute()
-
-  await db.schema
     .createTable('identities')
     .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
     .addColumn('user_id', 'uuid', (col) => col.notNull())
     .addColumn('provider_id', 'varchar', (col) => col.notNull())
     .addColumn('provider', 'varchar', (col) => col.notNull())
     .addColumn('identity_data', 'jsonb', (col) => col.notNull())
+    .addColumn('access_token', 'text', (col) => col.notNull())
+    .addColumn('refresh_token', 'text')
     .addColumn('last_sign_in_at', 'timestamp', (col) => col.notNull())
     .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .addColumn('updated_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .addColumn('email', 'varchar', (col) => col.generatedAlwaysAs(sql`lower((identity_data ->> 'email')::text)`).stored().notNull().unique())
-    .addUniqueConstraint('identities_provider_id_provider_unique', ['provider_id', 'provider'])
+    .addUniqueConstraint('identities_user_id_provider_unique', ['user_id', 'provider'])
     .execute()
 
   await db.schema
