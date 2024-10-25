@@ -1,11 +1,9 @@
 import jwt from 'jsonwebtoken'
 import type { Session } from '../types/session'
 
-const SECRET_KEY = process.env.JWT_SECRET_KEY
-
-export function createSessionToken(user: any): string {
-  if (!SECRET_KEY) {
-    throw new Error('Cannot create session tokens. JWT_SECRET_KEY is not set.')
+export function createSessionToken(user: any, secretKey: string): string {
+  if (!secretKey) {
+    throw new Error('Cannot create session tokens with secret key. Make sure that JWT_SECRET_KEY is set.')
   }
 
   const sessionInfo: Session = {
@@ -13,5 +11,5 @@ export function createSessionToken(user: any): string {
     alias: user.alias,
     roles: ['member']
   }
-  return jwt.sign(sessionInfo, SECRET_KEY, { expiresIn: '1d' })
+  return jwt.sign(sessionInfo, secretKey, { expiresIn: '1d' })
 }

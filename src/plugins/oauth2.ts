@@ -1,15 +1,13 @@
+import jwt from 'jsonwebtoken'
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
 import fastifyOAuth2, { FastifyOAuth2Options, OAuth2Namespace } from '@fastify/oauth2'
 import { db } from '../db/Database'
-import { createSessionToken } from '../utils/auth'
+
+import type { Session } from '../types/session'
 
 interface SupportedProviders {
   githubOAuth2: OAuth2Namespace
   googleOAuth2: OAuth2Namespace
-}
-
-type Envs = {
-  APP_URL_BASE: string
 }
 
 const X_CONFIGURATION = {
@@ -19,8 +17,6 @@ const X_CONFIGURATION = {
   tokenPath: '/2/oauth2/token',
   revokePath: '/2/oauth2/revoke'
 }
-
-type User = { id: string; email: string; alias: string }
 
 const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   // GitHub OAuth2
@@ -144,9 +140,18 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     }
 
     // 4. Create a session token
-    const sessionToken = createSessionToken(user)
-
-    fastify.log.info(`environment: ${JSON.stringify(process.env)}`)
+    const sessionInfo: Session = {
+      userId: user.id,
+      alias: user.alias,
+      roles: ['member']
+    }
+    const secretKey: string = process.env.JWT_SECRET_KEY || ''
+    fastify.log.info(`found secretKey: ${secretKey}`)
+    const sessionToken = jwt.sign(sessionInfo, secretKey, { expiresIn: '1d' })
+    reply.setCookie('session_token', sessionToken, {
+      httpOnly: true,
+      secure: true
+    })
 
     // For now, we'll just return the user info and token
     // fastify.log.info(`from config: ${JSON.stringify(fastify.config.APP_URL_BASE)}`)

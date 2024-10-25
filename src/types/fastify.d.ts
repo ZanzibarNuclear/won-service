@@ -10,9 +10,11 @@ declare module 'fastify' {
     xOAuth2: FastifyPluginAsync
     config: {
       APP_URL_BASE: string
+      JWT_SECRET_KEY: string
     }
   }
   interface FastifyRequest {
     db: Kysely<DB>
+    session: Session | null
   }
 }

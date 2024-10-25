@@ -17,17 +17,17 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
       return
     }
 
-    if (!options.sessionSecret) {
-      throw new Error('Cannot verify session tokens. JWT_SECRET_KEY is not set.')
-    }
-
+    // TODO: remove...
+    fastify.log.info(`JWT secret key: ${fastify.config.JWT_SECRET_KEY}`)
     try {
-      const session = await verifySessionToken(sessionToken, options.sessionSecret)
+      const session = await verifySessionToken(sessionToken, fastify.config.JWT_SECRET_KEY)
       request.session = session
     } catch (error) {
+      if (!fastify.config.JWT_SECRET_KEY) {
+        fastify.log.error('Cannot verify session tokens. JWT_SECRET_KEY is not set.')
+      }
       fastify.log.error(`Failed to verify session token: ${error}`)
-      // Optionally, you can clear the invalid session cookie
-      // reply.clearCookie('session_token')
+      reply.clearCookie('session_token')
     }
   })
 }
@@ -41,14 +41,14 @@ async function verifySessionToken(token: string, secret: string): Promise<Sessio
   const { userId } = decoded as Session
 
   // TODO: look up session in database; need to store it somewhere
-  const user = await db.selectFrom('users').select(['alias']).where('id', '=', userId).executeTakeFirst()
+  const user = await db.selectFrom('users').select(['id', 'alias']).where('id', '=', userId).executeTakeFirst()
   if (!user) {
     throw new Error('User not found')
   }
 
   return {
     userId,
-    alias: user?.alias || 'Anonymous',
+    alias: user.alias,
     roles: ['user']
   }
 }

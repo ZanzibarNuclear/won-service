@@ -16,16 +16,17 @@ const server = Fastify({
   logger: true
 })
 
-// load plugins
-server.register(envPlugin)
-server.register(corsPlugin)
-server.register(sensiblePlugin)
-server.register(examplePlugin)
-server.register(cookiePlugin)
-server.register(oauth2Plugin)
-server.register(sessionAuthPlugin, {
-  sessionSecret: process.env.JWT_SECRET_KEY || 'undefined'
-})
+const loadPlugins = async () => {
+  await server.register(envPlugin)
+  await server.register(corsPlugin)
+  await server.register(cookiePlugin)
+  await server.register(sensiblePlugin)
+  await server.register(examplePlugin)
+  await server.register(oauth2Plugin)
+  await server.register(sessionAuthPlugin)
+}
+
+loadPlugins()
 
 // Autoload routes
 server.register(AutoLoad, {
@@ -48,8 +49,11 @@ server.ready(err => {
 
 const start = async () => {
   server.log.info('start server')
-  const host = process.env.API_HOST || 'localhost'
-  const port = process.env.API_PORT || 3000
+  const host = process.env.API_HOST
+  const port = process.env.API_PORT
+  if (!host || !port) {
+    throw new Error('API_HOST or API_PORT is not set')
+  }
   try {
     await server.listen({ host, port: Number(port) })
   } catch (err) {
