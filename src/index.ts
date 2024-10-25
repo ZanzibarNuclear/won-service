@@ -8,6 +8,7 @@ import examplePlugin from './plugins/example'
 import corsPlugin from './plugins/cors'
 import cookiePlugin from './plugins/cookie'
 import oauth2Plugin from './plugins/oauth2'
+import sessionAuthPlugin from './plugins/sessionAuth'
 
 dotenv.config()
 
@@ -22,6 +23,9 @@ server.register(sensiblePlugin)
 server.register(examplePlugin)
 server.register(cookiePlugin)
 server.register(oauth2Plugin)
+server.register(sessionAuthPlugin, {
+  sessionSecret: process.env.JWT_SECRET_KEY || 'undefined'
+})
 
 // Autoload routes
 server.register(AutoLoad, {
