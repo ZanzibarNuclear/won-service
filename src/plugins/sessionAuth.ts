@@ -1,8 +1,8 @@
-import fp from 'fastify-plugin'
 import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
 import jwt from 'jsonwebtoken'
 import { db } from '../db/Database'
 import type { Session } from '../types/session'
+import fp from 'fastify-plugin'
 
 interface SessionAuthPluginOptions {
   sessionSecret: string
@@ -16,12 +16,13 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
     if (!sessionToken) {
       return
     }
-
-    // TODO: remove...
-    fastify.log.info(`JWT secret key: ${fastify.config.JWT_SECRET_KEY}`)
     try {
-      const session = await verifySessionToken(sessionToken, fastify.config.JWT_SECRET_KEY)
-      request.session = session
+      if (process.env.JWT_SECRET_KEY) {
+        const session = await verifySessionToken(sessionToken, process.env.JWT_SECRET_KEY)
+        request.session = session
+      } else {
+        fastify.log.error('Cannot verify session tokens. JWT_SECRET_KEY is not set.')
+      }
     } catch (error) {
       if (!fastify.config.JWT_SECRET_KEY) {
         fastify.log.error('Cannot verify session tokens. JWT_SECRET_KEY is not set.')
@@ -30,6 +31,7 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
       reply.clearCookie('session_token')
     }
   })
+  fastify.log.info('registered sessionAuth plugin')
 }
 
 async function verifySessionToken(token: string, secret: string): Promise<Session> {
@@ -53,6 +55,4 @@ async function verifySessionToken(token: string, secret: string): Promise<Sessio
   }
 }
 
-export default fp(sessionAuthPlugin, {
-  name: 'sessionAuth'
-})
+export default fp(sessionAuthPlugin, { name: 'sessionAuth', dependencies: ['env', 'cookie'] })

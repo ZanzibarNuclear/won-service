@@ -1,3 +1,4 @@
+import fp from 'fastify-plugin'
 import { FastifyPluginAsync } from 'fastify'
 import fastifyEnv from '@fastify/env'
 
@@ -13,6 +14,7 @@ const envSchema = {
     APP_BASE_URL: { type: 'string' },
     DATABASE_URL: { type: 'string' },
     JWT_SECRET_KEY: { type: 'string' },
+    COOKIE_SECRET: { type: 'string' },
     GITHUB_CLIENT_ID: { type: 'string' },
     GITHUB_CLIENT_SECRET: { type: 'string' },
     GOOGLE_CLIENT_ID: { type: 'string' },
@@ -30,8 +32,8 @@ const envPlugin: FastifyPluginAsync = async (fastify, options) => {
     schema: envSchema,
     dotenv: true
   }
-
   await fastify.register(fastifyEnv, envOptions)
+  fastify.log.info('registered env plugin')
 }
 
-export default envPlugin
+export default fp(envPlugin, { name: 'env' })

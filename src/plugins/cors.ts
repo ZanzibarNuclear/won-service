@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from 'fastify'
 import fastifyCors from '@fastify/cors'
+import fp from 'fastify-plugin'
 
 const corsPlugin: FastifyPluginAsync = async (fastify, options) => {
   await fastify.register(fastifyCors, {
@@ -10,6 +11,7 @@ const corsPlugin: FastifyPluginAsync = async (fastify, options) => {
     preflightContinue: false,
     optionsSuccessStatus: 204,
   })
+  fastify.log.info('registered cors plugin')
 }
 
-export default corsPlugin
+export default fp(corsPlugin, { name: 'cors' })

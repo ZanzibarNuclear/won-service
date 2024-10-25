@@ -1,6 +1,7 @@
-import jwt from 'jsonwebtoken'
+import fp from 'fastify-plugin'
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
 import fastifyOAuth2, { FastifyOAuth2Options, OAuth2Namespace } from '@fastify/oauth2'
+import jwt from 'jsonwebtoken'
 import { db } from '../db/Database'
 
 import type { Session } from '../types/session'
@@ -91,6 +92,13 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
 
   // Generic callback handler
   const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google') => {
+
+    if (request.session) {
+      fastify.log.info('Session is active. No need to sign in.')
+      reply.redirect(`${process.env.APP_URL_BASE}/join?step=2`)
+      return
+    }
+
     const oauth2 = fastify[`${provider}OAuth2` as keyof SupportedProviders]
     const { token } = await oauth2.getAccessTokenFromAuthorizationCodeFlow(request)
 
@@ -170,4 +178,4 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   })
 }
 
-export default oauth2Plugin
+export default fp(oauth2Plugin, { name: 'oauth2', dependencies: ['env', 'cookie'] })

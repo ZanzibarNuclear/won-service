@@ -1,14 +1,18 @@
 import { FastifyPluginAsync } from 'fastify'
+import cookiePlugin from '@fastify/cookie'
+import fp from 'fastify-plugin'
 
 const cookiesPlugin: FastifyPluginAsync = async (fastify, options) => {
-  await fastify.register(require('@fastify/cookie'), {
-    secret: "nuclearRocks37#", // for cookies signature
-    hook: 'onRequest', // set to false to disable cookie autoparsing or set autoparsing on any of the following hooks: 'onRequest', 'preParsing', 'preHandler', 'preValidation'. default: 'onRequest'
+  fastify.log.info(`Registering cookie plugin with COOKIE_SECRET: ${process.env.COOKIE_SECRET}`)
+  fastify.log.info(`does fastify also have the cookie secret? ${fastify.config.COOKIE_SECRET}`)
+  await fastify.register(cookiePlugin, {
+    secret: process.env.COOKIE_SECRET, // for cookies signature
     parseOptions: {
-      secure: true,
-      httpOnly: true
+      // secure: true,
+      // httpOnly: true
     }  // options for parsing cookies
   })
+  fastify.log.info('registered cookie plugin')
 }
 
-export default cookiesPlugin
+export default fp(cookiesPlugin, { name: 'cookie', dependencies: ['env'] })
