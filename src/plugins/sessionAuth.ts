@@ -23,6 +23,7 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
     fastify.log.info(`token: ${token}`)
     try {
       const session = await verifySessionToken(token, fastify.config.JWT_SECRET_KEY)
+      fastify.log.info(`session verified: ${JSON.stringify(session)}`)
       request.session = session
     } catch (error) {
       if (!fastify.config.JWT_SECRET_KEY) {

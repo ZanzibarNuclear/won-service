@@ -32,11 +32,16 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
 
   fastify.post('/:fluxId/boost', async (request, reply) => {
     const { fluxId } = request.params as { fluxId: string }
-    const { fluxUserId } = request.body as { fluxUserId: string }
+    const { userId } = request.session as { userId: string }
     try {
-      const boost = await db.insertInto('flux_boosts').values({
+      const fluxUser = await db.selectFrom('flux_users').select('id').where('user_id', '=', userId).executeTakeFirst()
+      if (!fluxUser) {
+        return reply.status(404).send({ error: 'Flux user not found' })
+      }
+      const fluxUserId = fluxUser.id
+      await db.insertInto('flux_boosts').values({
         flux_id: Number(fluxId),
-        flux_user_id: Number(fluxUserId),
+        flux_user_id: fluxUserId,
       }).execute()
     } catch (error) {
       console.error(error)
@@ -49,8 +54,13 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
 
   fastify.delete('/:fluxId/boost', async (request, reply) => {
     const { fluxId } = request.params as { fluxId: string }
-    const { fluxUserId } = request.body as { fluxUserId: string }
-    const boost = await db.deleteFrom('flux_boosts').where('flux_id', '=', Number(fluxId)).where('flux_user_id', '=', Number(fluxUserId)).execute()
+    const { userId } = request.session as { userId: string }
+    const fluxUser = await db.selectFrom('flux_users').select('id').where('user_id', '=', userId).executeTakeFirst()
+    if (!fluxUser) {
+      return reply.status(404).send({ error: 'Flux user not found' })
+    }
+    const fluxUserId = fluxUser.id
+    const boost = await db.deleteFrom('flux_boosts').where('flux_id', '=', Number(fluxId)).where('flux_user_id', '=', fluxUserId).execute()
     fastify.log.info({ boost }, 'Unboosted flux')
     return reply.status(200).send({ message: 'Flux unboosted' })
   })

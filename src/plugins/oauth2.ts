@@ -93,12 +93,6 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   // Generic callback handler
   const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google') => {
 
-    // if (request.session) {
-    //   fastify.log.info('Session is active. No need to sign in.')
-    //   reply.redirect(`${fastify.config.APP_BASE_URL}/join?step=2`)
-    //   return
-    // }
-
     const oauth2 = fastify[`${provider}OAuth2` as keyof SupportedProviders]
     const { token } = await oauth2.getAccessTokenFromAuthorizationCodeFlow(request)
 
