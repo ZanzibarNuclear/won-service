@@ -13,8 +13,6 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
         return reply.status(404).send({ error: 'User not found' })
       }
 
-      // Return only the necessary user information
-      // TODO: include roles, app enrollments (Flex handle).
       return {
         id: user.id,
         alias: user.alias,

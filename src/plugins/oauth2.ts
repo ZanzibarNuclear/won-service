@@ -93,11 +93,11 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   // Generic callback handler
   const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google') => {
 
-    if (request.session) {
-      fastify.log.info('Session is active. No need to sign in.')
-      reply.redirect(`${fastify.config.APP_BASE_URL}/join?step=2`)
-      return
-    }
+    // if (request.session) {
+    //   fastify.log.info('Session is active. No need to sign in.')
+    //   reply.redirect(`${fastify.config.APP_BASE_URL}/join?step=2`)
+    //   return
+    // }
 
     const oauth2 = fastify[`${provider}OAuth2` as keyof SupportedProviders]
     const { token } = await oauth2.getAccessTokenFromAuthorizationCodeFlow(request)
@@ -160,12 +160,12 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       httpOnly: true,
       secure: true
     })
+    fastify.log.info(`set cookie session_token: ${sessionToken}`)
 
-    // For now, we'll just return the user info and token
-    // fastify.log.info(`from config: ${JSON.stringify(process.env.APP_URL_BASE)}`)
-    const toUrl = fastify.config.APP_BASE_URL
+    const toUrl = `${fastify.config.APP_BASE_URL}/signin/confirm?token=${sessionToken}`
     fastify.log.info(`redirecting to ${toUrl}`)
-    reply.redirect(`${toUrl}/signin/confirm?token=${sessionToken}`)
+    reply.redirect(toUrl)
+    fastify.log.info(`reply has cookies?: ${JSON.stringify(reply.getHeaders())}`)
   }
 
   // Register callback routes for each provider
@@ -178,7 +178,6 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   })
 
   fastify.log.info(`registered oauth2 plugin`)
-  fastify.log.info(`Is env plugin even working? This should be the Google client ID: ${fastify.config.GOOGLE_CLIENT_ID}`)
 }
 
 export default fp(oauth2Plugin, { name: 'oauth2', dependencies: ['sensible', 'sessionAuth', 'cookie'] })

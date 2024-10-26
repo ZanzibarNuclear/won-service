@@ -4,11 +4,12 @@ import fp from 'fastify-plugin'
 
 const cookiesPlugin: FastifyPluginAsync = async (fastify, options) => {
   await fastify.register(cookiePlugin, {
-    secret: fastify.config.COOKIE_SECRET, // for cookies signature
+    secret: fastify.config.COOKIE_SECRET,
     parseOptions: {
       secure: true,
-      httpOnly: true
-    }  // options for parsing cookies
+      httpOnly: true,
+      sameSite: 'lax',
+    }
   })
   fastify.log.info('registered cookie plugin')
 }

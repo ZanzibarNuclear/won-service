@@ -12,17 +12,15 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
   fastify.decorateRequest('session', null)
 
   fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
+    fastify.log.info(`looking for session token`)
     const sessionToken = request.cookies['session_token']
     if (!sessionToken) {
+      fastify.log.info(`no session token found among cookies: ${JSON.stringify(request.cookies)}`)
       return
     }
     try {
-      if (process.env.JWT_SECRET_KEY) {
-        const session = await verifySessionToken(sessionToken, process.env.JWT_SECRET_KEY)
-        request.session = session
-      } else {
-        fastify.log.error('Cannot verify session tokens. JWT_SECRET_KEY is not set.')
-      }
+      const session = await verifySessionToken(sessionToken, fastify.config.JWT_SECRET_KEY)
+      request.session = session
     } catch (error) {
       if (!fastify.config.JWT_SECRET_KEY) {
         fastify.log.error('Cannot verify session tokens. JWT_SECRET_KEY is not set.')
