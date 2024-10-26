@@ -156,7 +156,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     const secretKey: string = fastify.config.JWT_SECRET_KEY || ''
     fastify.log.info(`found secretKey: ${secretKey}`)
     const sessionToken = jwt.sign(sessionInfo, secretKey, { expiresIn: '1d' })
-    reply.setCookie('session_token', sessionToken, {
+    reply.setCookie('session-token', sessionToken, {
       httpOnly: true,
       secure: true
     })

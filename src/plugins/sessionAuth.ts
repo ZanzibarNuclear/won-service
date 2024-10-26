@@ -13,13 +13,16 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
 
   fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
     fastify.log.info(`looking for session token`)
-    const sessionToken = request.cookies['session_token']
-    if (!sessionToken) {
+    const sessionToken = request.cookies['session-token']
+    const sessionTokenHeader = request.headers['X-Session-Token']
+    if (!sessionToken && !sessionTokenHeader) {
       fastify.log.info(`no session token found among cookies: ${JSON.stringify(request.cookies)}`)
       return
     }
+    const token = sessionToken || sessionTokenHeader as string
+    fastify.log.info(`token: ${token}`)
     try {
-      const session = await verifySessionToken(sessionToken, fastify.config.JWT_SECRET_KEY)
+      const session = await verifySessionToken(token, fastify.config.JWT_SECRET_KEY)
       request.session = session
     } catch (error) {
       if (!fastify.config.JWT_SECRET_KEY) {
@@ -29,6 +32,11 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
       reply.clearCookie('session_token')
     }
   })
+
+  fastify.addHook('onSend', async (request: FastifyRequest, reply: FastifyReply) => {
+    console.log('Set-Cookie header:', reply.getHeader('Set-Cookie'))
+  })
+
   fastify.log.info('registered sessionAuth plugin')
 }
 
