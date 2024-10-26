@@ -4,7 +4,7 @@ import fp from 'fastify-plugin'
 
 const corsPlugin: FastifyPluginAsync = async (fastify, options) => {
   await fastify.register(fastifyCors, {
-    origin: ['http://localhost:3000', 'http://localhost:3030'],
+    origin: [fastify.config.APP_BASE_URL, fastify.config.API_BASE_URL],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
     credentials: true,
@@ -14,4 +14,4 @@ const corsPlugin: FastifyPluginAsync = async (fastify, options) => {
   fastify.log.info('registered cors plugin')
 }
 
-export default fp(corsPlugin, { name: 'cors' })
+export default fp(corsPlugin, { name: 'cors', dependencies: ['env'] })

@@ -26,13 +26,13 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     scope: ['user:email'],
     credentials: {
       client: {
-        id: process.env.GITHUB_CLIENT_ID,
-        secret: process.env.GITHUB_CLIENT_SECRET
+        id: fastify.config.GITHUB_CLIENT_ID,
+        secret: fastify.config.GITHUB_CLIENT_SECRET
       },
       auth: fastifyOAuth2.GITHUB_CONFIGURATION
     },
     startRedirectPath: '/login/github',
-    callbackUri: `${process.env.API_URL_BASE}/login/github/callback`
+    callbackUri: `${fastify.config.API_BASE_URL}/login/github/callback`
   } as FastifyOAuth2Options)
 
   // Google OAuth2
@@ -41,13 +41,13 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     scope: ['profile', 'email'],
     credentials: {
       client: {
-        id: process.env.GOOGLE_CLIENT_ID,
-        secret: process.env.GOOGLE_CLIENT_SECRET
+        id: fastify.config.GOOGLE_CLIENT_ID,
+        secret: fastify.config.GOOGLE_CLIENT_SECRET
       },
       auth: fastifyOAuth2.GOOGLE_CONFIGURATION
     },
     startRedirectPath: '/login/google',
-    callbackUri: `${process.env.API_URL_BASE}/login/google/callback`
+    callbackUri: `${fastify.config.API_BASE_URL}/login/google/callback`
   } as FastifyOAuth2Options)
 
   // Register X OAuth2
@@ -56,13 +56,13 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     scope: ['tweet.read', 'users.read'], // Adjust scopes as needed
     credentials: {
       client: {
-        id: process.env.X_CLIENT_ID,
-        secret: process.env.X_CLIENT_SECRET
+        id: fastify.config.X_CLIENT_ID,
+        secret: fastify.config.X_CLIENT_SECRET
       },
       auth: X_CONFIGURATION
     },
     startRedirectPath: '/login/x',
-    callbackUri: `${process.env.API_URL_BASE}/login/x/callback`
+    callbackUri: `${fastify.config.API_BASE_URL}/login/x/callback`
   } as FastifyOAuth2Options)
 
   // Helper function to get user info based on provider
@@ -95,7 +95,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
 
     if (request.session) {
       fastify.log.info('Session is active. No need to sign in.')
-      reply.redirect(`${process.env.APP_URL_BASE}/join?step=2`)
+      reply.redirect(`${fastify.config.APP_BASE_URL}/join?step=2`)
       return
     }
 
@@ -153,7 +153,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       alias: user.alias,
       roles: ['member']
     }
-    const secretKey: string = process.env.JWT_SECRET_KEY || ''
+    const secretKey: string = fastify.config.JWT_SECRET_KEY || ''
     fastify.log.info(`found secretKey: ${secretKey}`)
     const sessionToken = jwt.sign(sessionInfo, secretKey, { expiresIn: '1d' })
     reply.setCookie('session_token', sessionToken, {
@@ -162,8 +162,8 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     })
 
     // For now, we'll just return the user info and token
-    // fastify.log.info(`from config: ${JSON.stringify(fastify.config.APP_URL_BASE)}`)
-    const toUrl = process.env.APP_URL_BASE
+    // fastify.log.info(`from config: ${JSON.stringify(process.env.APP_URL_BASE)}`)
+    const toUrl = fastify.config.APP_BASE_URL
     fastify.log.info(`redirecting to ${toUrl}`)
     reply.redirect(`${toUrl}/signin/confirm?token=${sessionToken}`)
   }
@@ -176,6 +176,9 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   fastify.get('/login/google/callback', async (request, reply) => {
     return handleOAuthCallback(request, reply, 'google')
   })
+
+  fastify.log.info(`registered oauth2 plugin`)
+  fastify.log.info(`Is env plugin even working? This should be the Google client ID: ${fastify.config.GOOGLE_CLIENT_ID}`)
 }
 
-export default fp(oauth2Plugin, { name: 'oauth2', dependencies: ['env', 'cookie'] })
+export default fp(oauth2Plugin, { name: 'oauth2', dependencies: ['sensible', 'sessionAuth', 'cookie'] })

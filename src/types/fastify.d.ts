@@ -10,9 +10,18 @@ declare module 'fastify' {
     config: {
       API_HOST: string
       API_PORT: string
-      APP_URL_BASE: string
+      APP_BASE_URL: string
+      API_BASE_URL: string
       JWT_SECRET_KEY: string
       COOKIE_SECRET: string
+      GITHUB_CLIENT_ID: string
+      GITHUB_CLIENT_SECRET: string
+      GOOGLE_CLIENT_ID: string
+      GOOGLE_CLIENT_SECRET: string
+      X_CLIENT_ID: string
+      X_CLIENT_SECRET: string
+      APPLE_CLIENT_ID: string
+      APPLE_CLIENT_SECRET: string
     }
   }
   interface FastifyRequest {

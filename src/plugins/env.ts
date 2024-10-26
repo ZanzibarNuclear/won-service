@@ -10,7 +10,7 @@ const envSchema = {
     LOG_LEVEL: { type: 'string' },
     API_HOST: { type: 'string' },
     API_PORT: { type: 'number' },
-    API_URL_BASE: { type: 'string' },
+    API_BASE_URL: { type: 'string' },
     APP_BASE_URL: { type: 'string' },
     DATABASE_URL: { type: 'string' },
     JWT_SECRET_KEY: { type: 'string' },
