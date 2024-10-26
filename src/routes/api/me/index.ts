@@ -46,6 +46,8 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
       const userId = request.session.userId
       const body = request.body as { handle: string, displayName: string }
 
+      fastify.log.info(`creating flux profile for user ${userId}: ${JSON.stringify(body)}`)
+
       // TODO: validate handle and display name
       // handle must be unique and can only contain URL-safe characters
       // display name cannot have leading or trailing whitespace

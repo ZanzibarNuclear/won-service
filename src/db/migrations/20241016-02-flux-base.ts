@@ -4,7 +4,7 @@ export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('flux_users')
     .addColumn('id', 'serial', (col) => col.primaryKey())
-    .addColumn('user_id', 'uuid', (col) => col.references('profiles.id').unique().notNull())
+    .addColumn('user_id', 'uuid', (col) => col.references('users.id').unique().notNull())
     .addColumn('handle', 'varchar', (col) => col.notNull())
     .addColumn('display_name', 'varchar', (col) => col.notNull())
     .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
