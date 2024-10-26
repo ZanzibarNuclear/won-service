@@ -3,8 +3,8 @@ import { db } from '../../../db/Database'
 
 const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.get('/', async (request, reply) => {
-    const fluxes = await db.selectFrom('fluxes').selectAll().execute()
-    return fluxes
+    // TODO: will need to make put back selection and sorting criteria; plus pagination
+    return await db.selectFrom('fluxes').selectAll().execute()
   })
 
   fastify.post('/', async (request, reply) => {

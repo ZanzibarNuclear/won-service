@@ -30,7 +30,7 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
       const userId = request.session.userId
       const fluxProfile = await db.selectFrom('flux_users').where('user_id', '=', userId).selectAll().executeTakeFirst()
       if (!fluxProfile) {
-        return reply.status(404).send({ error: 'User not found' })
+        return reply.status(404).send()
       }
       fastify.log.info(`found flux profile: ${JSON.stringify(fluxProfile)}`)
       return fluxProfile
