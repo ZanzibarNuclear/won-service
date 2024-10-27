@@ -80,8 +80,14 @@ export const deboostFlux = async (fluxId: number, fluxUserId: number) => {
 }
 
 export const recountFluxBoosts = async (fluxId: number) => {
-  const boostCount = await db.selectFrom('flux_boosts').select('count(*)').where('flux_id', '=', fluxId).executeTakeFirst()
-  await db.updateTable('fluxes').set({ boost_count: boostCount?.count }).where('id', '=', fluxId).executeTakeFirst()
+  const boostCount = await db
+    .selectFrom('flux_boosts')
+    .select((eb) => eb.fn.count('flux_id').as('count'))
+    .where('flux_id', '=', fluxId)
+    .executeTakeFirst()
+
+  console.log('boost count:', { boostCount })
+  await db.updateTable('fluxes').set({ boost_count: Number(boostCount?.count) }).where('id', '=', fluxId).executeTakeFirst()
 }
 
 // subscriptions
