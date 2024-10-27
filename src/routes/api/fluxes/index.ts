@@ -1,19 +1,27 @@
 import { FastifyPluginAsync } from 'fastify'
 import { db } from '../../../db/Database'
+import { getFluxes } from '../../../db/access/flux'
 
 const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.get('/', async (request, reply) => {
     // TODO: will need to make put back selection and sorting criteria; plus pagination
-    return await db.selectFrom('fluxes').selectAll().execute()
+
+    return await getFluxes()
   })
 
   fastify.post('/', async (request, reply) => {
-    const { fluxUserId, parentFluxId, content } = request.body as { fluxUserId: string, parentFluxId: string, content: string }
-    const flux = await db.insertInto('fluxes').values({
-      flux_user_id: Number(fluxUserId),
-      parent_id: parentFluxId ? Number(parentFluxId) : null,
-      content,
-    }).executeTakeFirst()
+    const body = request.body as { fluxUserId: number, parentFluxId: number | null, content: string }
+    fastify.log.info(`flux post body: ${JSON.stringify(body)}`)
+
+    const flux = await db
+      .insertInto('fluxes')
+      .values({
+        flux_user_id: body.fluxUserId,
+        parent_id: body.parentFluxId,
+        content: body.content,
+      })
+      .returning(['id', 'flux_user_id', 'parent_id', 'content', 'created_at'])
+      .executeTakeFirst()
     return flux
   })
 
