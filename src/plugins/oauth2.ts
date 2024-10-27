@@ -1,6 +1,6 @@
-import fp from 'fastify-plugin'
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
 import fastifyOAuth2, { FastifyOAuth2Options, OAuth2Namespace } from '@fastify/oauth2'
+import fp from 'fastify-plugin'
 import jwt from 'jsonwebtoken'
 import { db } from '../db/Database'
 
@@ -149,12 +149,8 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     }
     const secretKey: string = fastify.config.JWT_SECRET_KEY || ''
     fastify.log.info(`found secretKey: ${secretKey}`)
-    const sessionToken = jwt.sign(sessionInfo, secretKey, { expiresIn: '1d' })
-    reply.setCookie('session-token', sessionToken, {
-      httpOnly: true,
-      secure: true
-    })
-    fastify.log.info(`set cookie session_token: ${sessionToken}`)
+    const sessionToken = jwt.sign(sessionInfo, secretKey, { expiresIn: '7d' })
+    fastify.setSessionToken(reply, sessionToken)
 
     const toUrl = `${fastify.config.APP_BASE_URL}/signin/confirm?token=${sessionToken}`
     fastify.log.info(`redirecting to ${toUrl}`)
