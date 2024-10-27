@@ -1,34 +1,34 @@
 import { FastifyPluginAsync } from 'fastify'
 import { db } from '../../../db/Database'
-import { getFluxes } from '../../../db/access/flux'
+import { getFluxes, getFlux, createFlux, getFluxUser } from '../../../db/access/flux'
 
 const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.get('/', async (request, reply) => {
-    // TODO: will need to make put back selection and sorting criteria; plus pagination
-
     return await getFluxes()
   })
 
   fastify.post('/', async (request, reply) => {
-    const body = request.body as { fluxUserId: number, parentFluxId: number | null, content: string }
-    fastify.log.info(`flux post body: ${JSON.stringify(body)}`)
-
-    const flux = await db
-      .insertInto('fluxes')
-      .values({
-        flux_user_id: body.fluxUserId,
-        parent_id: body.parentFluxId,
-        content: body.content,
-      })
-      .returning(['id', 'flux_user_id', 'parent_id', 'content', 'created_at'])
-      .executeTakeFirst()
-    return flux
+    if (!request.session?.userId) {
+      fastify.log.warn(`Only known users may post fluxes`)
+      return reply.status(401).send({ error: 'Unauthorized' })
+    }
+    const author = await getFluxUser(request.session.userId)
+    if (!author) {
+      fastify.log.warn(`Flux user not found for current user ${request.session.userId}`)
+      return reply.status(401).send({ error: 'Unauthorized' })
+    }
+    const { parentId, content } = request.body as { parentId: number | null, content: string }
+    const flux = await createFlux(author.id, parentId, content)
+    if (!flux) {
+      fastify.log.error(`Failed to create flux for user ${author.id}`)
+      return reply.status(400).send({ error: 'Failed to create flux' })
+    }
+    return await getFlux(flux.id)
   })
 
   fastify.get('/:fluxId', async (request, reply) => {
-    const { fluxId } = request.params as { fluxId: string }
-    const flux = await db.selectFrom('fluxes').selectAll().where('id', '=', Number(fluxId)).executeTakeFirst()
-    return flux
+    const { fluxId } = request.params as { fluxId: number }
+    return await getFlux(fluxId)
   })
 
   fastify.put('/:fluxId', async (request, reply) => {
