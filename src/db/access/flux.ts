@@ -40,7 +40,7 @@ export const getReplies = async (fluxId: number) => {
 
 // mutations
 export const createFlux = async (fluxUserId: number, parentId: number | null, content: string) => {
-  return await db
+  let freshFlux = await db
     .insertInto('fluxes')
     .values({
       flux_user_id: fluxUserId,
@@ -48,6 +48,23 @@ export const createFlux = async (fluxUserId: number, parentId: number | null, co
       content: content,
     })
     .returning(['id'])
+    .executeTakeFirst()
+  if (freshFlux && parentId) {
+    await recountReactions(parentId)
+  }
+  return freshFlux
+}
+
+export const recountReactions = async (fluxId: number) => {
+  const reactionCount = await db
+    .selectFrom('fluxes')
+    .select((eb) => eb.fn.count('id').as('count'))
+    .where('parent_id', '=', fluxId)
+    .executeTakeFirst()
+  await db
+    .updateTable('fluxes')
+    .set({ reply_count: Number(reactionCount?.count) })
+    .where('id', '=', fluxId)
     .executeTakeFirst()
 }
 
@@ -85,14 +102,20 @@ export const recountFluxBoosts = async (fluxId: number) => {
     .select((eb) => eb.fn.count('flux_id').as('count'))
     .where('flux_id', '=', fluxId)
     .executeTakeFirst()
-
-  console.log('boost count:', { boostCount })
-  await db.updateTable('fluxes').set({ boost_count: Number(boostCount?.count) }).where('id', '=', fluxId).executeTakeFirst()
+  await db
+    .updateTable('fluxes')
+    .set({ boost_count: Number(boostCount?.count) })
+    .where('id', '=', fluxId)
+    .executeTakeFirst()
 }
 
 // subscriptions
 
 // identity
 export const getFluxUser = async (userId: string) => {
-  return await db.selectFrom('flux_users').selectAll().where('user_id', '=', userId).executeTakeFirst()
+  return await db
+    .selectFrom('flux_users')
+    .selectAll()
+    .where('user_id', '=', userId)
+    .executeTakeFirst()
 }

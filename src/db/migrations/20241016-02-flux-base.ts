@@ -28,7 +28,8 @@ export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('flux_boosts')
     .addColumn('flux_id', 'integer', (col) => col.references('fluxes.id').notNull())
-    .addColumn('flux_user_id', 'integer', (col) => col.references('flux_users.id').notNull())
+    .addColumn('flux_user_id', 'integer', (col) =>
+      col.references('flux_users.id').onDelete('cascade').notNull())
     .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .addPrimaryKeyConstraint('flux_boosts_pkey', ['flux_id', 'flux_user_id'])
     .execute()
