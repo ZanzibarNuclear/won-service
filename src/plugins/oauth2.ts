@@ -147,9 +147,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       alias: user.alias,
       roles: ['member']
     }
-    const secretKey: string = fastify.config.JWT_SECRET_KEY || ''
-    fastify.log.info(`found secretKey: ${secretKey}`)
-    const sessionToken = jwt.sign(sessionInfo, secretKey, { expiresIn: '7d' })
+    const sessionToken = fastify.generateSessionToken(sessionInfo)
     fastify.setSessionToken(reply, sessionToken)
 
     const toUrl = `${fastify.config.APP_BASE_URL}/signin/confirm?token=${sessionToken}`

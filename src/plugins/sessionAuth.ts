@@ -1,8 +1,8 @@
-import fastify, { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
+import fp from 'fastify-plugin'
 import jwt from 'jsonwebtoken'
+import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
 import { db } from '../db/Database'
 import type { Session } from '../types/session'
-import fp from 'fastify-plugin'
 
 interface SessionAuthPluginOptions {
   sessionSecret: string
@@ -17,29 +17,27 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
       fastify.log.info(`no session token found`)
       return
     } else {
+      // TODO: remove once things are working
       fastify.log.info(`found session token: ${sessionToken}`)
     }
     try {
-      let session
-      try {
-        session = await verifySessionToken(sessionToken, fastify.config.JWT_SECRET_KEY)
-      } catch (error) {
-        if (error instanceof jwt.TokenExpiredError) {
-          throw new Error('Session token has expired; implement refresh logic', { cause: error })
-        } else {
-          throw new Error('Failed to verify session token', { cause: error })
-        }
-      }
-      fastify.log.info(`session verified: ${JSON.stringify(session)}`)
+      const session = await verifySessionToken(sessionToken, fastify.config.JWT_SECRET_KEY)
+      fastify.log.info(`stashing verified session on request: ${JSON.stringify(session)}`)
       request.session = session
     } catch (error) {
-      if (!fastify.config.JWT_SECRET_KEY) {
-        fastify.log.error('Cannot verify session tokens. JWT_SECRET_KEY is not set.')
-        reply.clearCookie('session_token')
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new Error('Session token has expired; please implement refresh logic', { cause: error })
+      } else {
+        if (!fastify.config.JWT_SECRET_KEY) {
+          fastify.log.error('Cannot verify session tokens. JWT_SECRET_KEY is not set.')
+        }
+        throw new Error('Failed to verify session token', { cause: error })
       }
-      fastify.log.error(`Failed to verify session token: ${error}`)
-      reply.clearCookie('session_token')
     }
+  })
+
+  fastify.decorate('generateSessionToken', (sessionData: Session) => {
+    return jwt.sign(sessionData, fastify.config.JWT_SECRET_KEY, { expiresIn: '7d' })
   })
 
   fastify.decorate('setSessionToken', (reply: FastifyReply, token: string) => {

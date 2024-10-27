@@ -5,6 +5,7 @@ declare module 'fastify' {
   interface FastifyInstance {
     session: Session | null
     setSessionToken: (reply: FastifyReply, token: string) => void
+    generateSessionToken: (sessionData: Session) => string
     googleOAuth2: FastifyPluginAsync
     githubOAuth2: FastifyPluginAsync
     xOAuth2: FastifyPluginAsync
