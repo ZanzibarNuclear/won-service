@@ -17,6 +17,8 @@ allows us to manage traffic, apply security policies, and support a highly avail
 We use nginx for SSL termination, as well as for load balancing and routing to separate instances:
 staging, production, etc.
 
-## Inventory
+## Plugins
+
+Some of the plugins are used as is: cookie, cors, env and sensible. OAuth2 and sessionAuth are customized to handle OAuth2 and session handling.
 
 ## Getting Started
