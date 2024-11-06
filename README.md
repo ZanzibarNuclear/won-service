@@ -22,3 +22,10 @@ staging, production, etc.
 Some of the plugins are used as is: cookie, cors, env and sensible. OAuth2 and sessionAuth are customized to handle OAuth2 and session handling.
 
 ## Getting Started
+
+When you are ready to test, be sure to try a local build.
+
+```
+npm run build
+node dist/index.js
+```
