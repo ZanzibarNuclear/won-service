@@ -29,3 +29,13 @@ When you are ready to test, be sure to try a local build.
 npm run build
 node dist/index.js
 ```
+
+## Branching Strategy
+
+- feature-branch - for working on changes; might be broken at any moment, needs to work to merge into staging branch
+- main - production ready code OR the latest code that runs - good for testing, staging
+- release branch - for production
+
+- dev/feature branches
+- staging - tag RCs (same as main?)
+- release - tag releases
