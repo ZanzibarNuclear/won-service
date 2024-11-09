@@ -1,7 +1,6 @@
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
 import fastifyOAuth2, { FastifyOAuth2Options, OAuth2Namespace } from '@fastify/oauth2'
 import fp from 'fastify-plugin'
-import jwt from 'jsonwebtoken'
 import { db } from '../db/Database'
 
 import type { Session } from '../types/session'
@@ -72,7 +71,16 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       case 'github':
         userInfo = await fetch('https://api.github.com/user', {
           headers: { Authorization: `Bearer ${accessToken}` }
-        }).then(res => res.json())
+        }).then(res => res.json());
+
+        // Fetch emails separately
+        const emails = await fetch('https://api.github.com/user/emails', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }).then(res => res.json());
+
+        // Find the primary email
+        const primaryEmail = emails.find((email: any) => email.primary && email.verified)
+        userInfo.email = primaryEmail ? primaryEmail.email : null // Set email if found
         break
       case 'google':
         userInfo = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
@@ -148,7 +156,9 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       roles: ['member']
     }
     const sessionToken = fastify.generateSessionToken(sessionInfo)
+    fastify.log.info(`Setting session token: ${sessionToken}`);
     fastify.setSessionToken(reply, sessionToken)
+    fastify.log.info(`Response headers: ${JSON.stringify(reply.getHeaders())}`);
 
     const toUrl = `${fastify.config.APP_BASE_URL}/signin/confirm?token=${sessionToken}`
     fastify.log.info(`redirecting to ${toUrl}`)

@@ -8,7 +8,8 @@ const cookiesPlugin: FastifyPluginAsync = async (fastify, options) => {
     parseOptions: {
       secure: true,
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: 'none',
+      domain: '.worldofnuclear.com'
     }
   })
   fastify.log.info('registered cookie plugin')

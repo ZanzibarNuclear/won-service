@@ -1,23 +1,41 @@
-# Getting Started with [Fastify-CLI](https://www.npmjs.com/package/fastify-cli)
-This project was bootstrapped with Fastify-CLI.
+# API for Auth Service and Flux Service
 
-## Available Scripts
+This is the backing API that supports user authentication and authorization, as well as the
+World of Nuclear Flux service.
 
-In the project directory, you can run:
+## Architecture
 
-### `npm run dev`
+These micro-services are built using Fastify, a web framework that is designed to be fast and efficient.
+If these work out, we can always separate them into their own endpoints and even projects. Until then,
+let's keep this simple and efficient.
 
-To start the app in dev mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Behind these services is a PostgreSQL database for data persistence. This project has code for database
+schema migrations, using Kysely, as well as code for setting up database instances and roles.
 
-### `npm start`
+For hosted environments (as opposed to local development), we front these services with nginx. This
+allows us to manage traffic, apply security policies, and support a highly available configuration.
+We use nginx for SSL termination, as well as for load balancing and routing to separate instances:
+staging, production, etc.
 
-For production mode
+## Plugins
 
-### `npm run test`
+Some of the plugins are used as is: cookie, cors, env and sensible. OAuth2 and sessionAuth are customized to handle OAuth2 and session handling.
 
-Run the test cases.
+## Getting Started
 
-## Learn More
+When you are ready to test, be sure to try a local build.
 
-To learn Fastify, check out the [Fastify documentation](https://fastify.dev/docs/latest/).
+```
+npm run build
+node dist/index.js
+```
+
+## Branching Strategy
+
+- feature-branch - for working on changes; might be broken at any moment, needs to work to merge into staging branch
+- main - production ready code OR the latest code that runs - good for testing, staging
+- release branch - for production
+
+- dev/feature branches
+- staging - tag RCs (same as main?)
+- release - tag releases
