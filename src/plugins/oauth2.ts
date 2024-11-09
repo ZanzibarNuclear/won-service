@@ -156,7 +156,9 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       roles: ['member']
     }
     const sessionToken = fastify.generateSessionToken(sessionInfo)
+    fastify.log.info(`Setting session token: ${sessionToken}`);
     fastify.setSessionToken(reply, sessionToken)
+    fastify.log.info(`Response headers: ${JSON.stringify(reply.getHeaders())}`);
 
     const toUrl = `${fastify.config.APP_BASE_URL}/signin/confirm?token=${sessionToken}`
     fastify.log.info(`redirecting to ${toUrl}`)
