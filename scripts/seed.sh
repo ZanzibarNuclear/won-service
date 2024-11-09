@@ -10,4 +10,4 @@ npx tsc --resolveJsonModule --esModuleInterop --outDir dist/db src/db/seeds/seed
 node dist/db/seeds/seed.js
 
 # Delete the dist directory and all of its contents
-rm -rf dist
+#rm -rf dist

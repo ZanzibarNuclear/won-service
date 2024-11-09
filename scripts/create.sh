@@ -34,6 +34,14 @@ psql -c "CREATE ROLE $APP_ROLE WITH LOGIN;"
 # Create the database with won_admin as owner
 psql -c "CREATE DATABASE $DB_NAME OWNER $ADMIN_ROLE;"
 
+# Grant permissions to won_app on the database
+psql -c "GRANT CONNECT ON DATABASE $DB_NAME TO $APP_ROLE;"
+psql -c "ALTER DATABASE $DB_NAME OWNER TO $ADMIN_ROLE;"
+
+# Grant usage on all current and future tables in the public schema
+psql -d $DB_NAME -c "GRANT USAGE ON SCHEMA public TO $APP_ROLE;"
+psql -d $DB_NAME -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO $APP_ROLE;"
+
 EOF
 
 echo "Database setup completed with roles: $ADMIN_ROLE and $APP_ROLE for database: $DB_NAME."

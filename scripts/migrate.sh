@@ -20,4 +20,4 @@ else
 fi
 
 # Delete the dist directory and all of its contents
-rm -rf dist
+# rm -rf dist
