@@ -8,10 +8,13 @@ interface SessionAuthPluginOptions {
   sessionSecret: string
 }
 
-const sessionCookieName = 'session_token'
-
 const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (fastify, options) => {
   fastify.decorateRequest('session', null)
+
+  let sessionCookieName = 'session_token'
+  if (fastify.config.NODE_ENV !== 'production') {
+    sessionCookieName += `_${fastify.config.NODE_ENV}`
+  }
 
   fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
     const sessionToken = request.cookies[sessionCookieName]
@@ -19,7 +22,6 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
       fastify.log.info(`no session token found`)
       return
     } else {
-      // TODO: remove once things are working
       fastify.log.info(`found session token: ${sessionToken}`)
     }
     try {
