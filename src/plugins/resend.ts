@@ -22,4 +22,4 @@ const resend: FastifyPluginAsync = async (fastify, options) => {
   fastify.log.info('registered resend plugin')
 }
 
-export default fp(resend, { name: 'resend', dependencies: ['env'] })
+export default fp(resend, { name: 'resend', dependencies: ['env', 'sensible'] })

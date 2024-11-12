@@ -5,13 +5,14 @@ import { genKey } from '../utils'
 const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 
   // Function to send a magic link to the user's email
-  async function sendMagicLink(email: string) {
+  async function sendMagicLink(email: string, alias: string) {
     const token = genKey(18)
     const expiresAt = new Date(Date.now() + 3600000)
 
     // Save the token and expiration to the database
     await fastify.db.insertInto('magic_auth').values({
       email,
+      alias,
       token,
       expires_at: expiresAt
     }).execute()
@@ -41,6 +42,17 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 
   fastify.decorate('sendMagicLink', sendMagicLink)
 
+  fastify.post('/login/magiclink', async (req, res) => {
+    const { email, alias } = req.body as { email: string, alias: string }
+    // validate email
+    if (!email || !email.includes('@')) {
+      res.status(400).send("Invalid email address.")
+      return
+    }
+    await sendMagicLink(email, alias)
+    res.send("Magic link sent successfully!")
+  })
+
   // Endpoint to handle the magic link verification
   fastify.get('/login/magiclink/verify', async (req, res) => {
     const { token } = req.query as { token: string }
@@ -52,7 +64,7 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     }
 
     // create session token, set cookie, redirect to login confirm page
-    const user = await findOrCreateUser(magicData.email)
+    const user = await findOrCreateUser(magicData.email, magicData.alias)
     const sessionToken = fastify.generateSessionToken({ userId: user.id, alias: user.alias, roles: ['member'] })
     fastify.setSessionToken(res, sessionToken)
 
@@ -77,10 +89,10 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     return magicData
   }
 
-  async function findOrCreateUser(email: string) {
+  async function findOrCreateUser(email: string, alias: string) {
     let user = await fastify.db.selectFrom('users').selectAll().where('email', '=', email).executeTakeFirst()
     if (!user) {
-      user = await fastify.db.insertInto('users').values({ email }).returningAll().executeTakeFirst()
+      user = await fastify.db.insertInto('users').values({ email, alias }).returningAll().executeTakeFirst()
     }
     return user
   }
@@ -88,4 +100,4 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
   fastify.log.info('registered magic link auth plugin')
 }
 
-export default fp(magicLinkAuth, { name: 'magicLinkAuth', dependencies: ['db', 'resend', 'sessionAuth'] })
+export default fp(magicLinkAuth, { name: 'magicLinkAuth', dependencies: ['db', 'resend', 'sessionAuth', 'sensible'] })

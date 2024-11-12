@@ -5,6 +5,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .createTable('magic_auth')
     .addColumn('id', 'serial', (col) => col.primaryKey())
     .addColumn('email', 'varchar', (col) => col.notNull())
+    .addColumn('alias', 'varchar')
     .addColumn('token', 'varchar', (col) => col.notNull())
     .addColumn('expires_at', 'timestamp', (col) => col.notNull())
     .addColumn('verified_at', 'timestamp')
