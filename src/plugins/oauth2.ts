@@ -101,11 +101,23 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   // Generic callback handler
   const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google') => {
 
-    const oauth2 = fastify[`${provider}OAuth2` as keyof SupportedProviders]
-    const { token } = await oauth2.getAccessTokenFromAuthorizationCodeFlow(request)
+    let access_token
+    let refresh_token
+    try {
+      const oauth2 = fastify[`${provider}OAuth2` as keyof SupportedProviders]
+      const { token } = await oauth2.getAccessTokenFromAuthorizationCodeFlow(request)
+      if (token) {
+        access_token = token.access_token
+        refresh_token = token.refresh_token
+      }
+    } catch (error) {
+      fastify.log.error(`error getting access token from authorization code flow: ${error}`)
+      reply.status(500).send({ error: 'Internal Server Error' })
+      return
+    }
 
     // 1. Get user info from provider
-    const userInfo = await getUserInfo(provider, token.access_token)
+    const userInfo = await getUserInfo(provider, access_token)
     fastify.log.info(`user info from ${provider}: ${JSON.stringify(userInfo)}`)
 
     const { id: socialId, email: socialEmail, name: socialName } = userInfo
@@ -139,8 +151,8 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
         user_id: user.id,
         provider_id: socialId,
         provider: provider,
-        access_token: token.access_token,
-        refresh_token: token.refresh_token,
+        access_token: access_token,
+        refresh_token: refresh_token,
         identity_data: userInfo,
         last_sign_in_at: new Date()
       }).returningAll().executeTakeFirst()
