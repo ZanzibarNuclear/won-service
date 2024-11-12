@@ -1,6 +1,7 @@
 import fp from 'fastify-plugin'
 import { FastifyPluginAsync } from "fastify"
 import { genKey } from '../utils'
+import { Session } from '../types/session'
 
 const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 
@@ -68,10 +69,16 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     // create session token, set cookie, redirect to login confirm page
     const user = await findOrCreateUser(magicData.email, magicData.alias)
     fastify.log.info(`User created or found: ${user.email} ${user.alias}`)
-    const sessionToken = fastify.generateSessionToken({ userId: user.id, alias: user.alias, roles: ['member'] })
+    const sessionInfo: Session = {
+      userId: user.id,
+      alias: user.alias,
+      roles: ['member']
+    }
+    const sessionToken = fastify.generateSessionToken(sessionInfo)
     fastify.setSessionToken(res, sessionToken)
+    res.redirect(`${fastify.config.APP_BASE_URL}/signin/confirm`)
 
-    res.redirect('/signin/confirm')
+    fastify.log.info(`response has cookies?: ${JSON.stringify(res.getHeaders())}`)
   })
 
   // Function to verify the token
