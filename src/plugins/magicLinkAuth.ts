@@ -61,10 +61,13 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     if (!magicData) {
       res.send("Invalid or expired token.")
       return
+    } else {
+      fastify.log.info(`Magic link verified for ${magicData.email} ${magicData.alias}`)
     }
 
     // create session token, set cookie, redirect to login confirm page
     const user = await findOrCreateUser(magicData.email, magicData.alias)
+    fastify.log.info(`User created or found: ${user.email} ${user.alias}`)
     const sessionToken = fastify.generateSessionToken({ userId: user.id, alias: user.alias, roles: ['member'] })
     fastify.setSessionToken(res, sessionToken)
 
@@ -85,15 +88,16 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     }
 
     // Mark the email as verified in the database
-    const magicData = await fastify.db.updateTable('magic_auth').set({ verified_at: new Date() }).where('token', '=', token).executeTakeFirst()
+    const magicData = await fastify.db.updateTable('magic_auth').set({ verified_at: new Date() }).where('token', '=', token).returningAll().executeTakeFirst()
     return magicData
   }
 
   async function findOrCreateUser(email: string, alias: string) {
     let user = await fastify.db.selectFrom('users').selectAll().where('email', '=', email).executeTakeFirst()
     if (!user) {
-      user = await fastify.db.insertInto('users').values({ email, alias }).returningAll().executeTakeFirst()
+      user = await fastify.db.insertInto('users').values({ email, alias, last_sign_in_at: new Date() }).returningAll().executeTakeFirst()
     }
+    fastify.log.info(`User found or created: ${user.email} ${user.alias}`)
     return user
   }
 
