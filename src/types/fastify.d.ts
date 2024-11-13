@@ -19,6 +19,7 @@ declare module 'fastify' {
       APP_BASE_URL: string
       API_BASE_URL: string
       JWT_SECRET_KEY: string
+      COOKIE_DOMAIN: string
       COOKIE_SECRET: string
       RESEND_API_KEY: string
       GITHUB_CLIENT_ID: string
@@ -27,8 +28,6 @@ declare module 'fastify' {
       GOOGLE_CLIENT_SECRET: string
       X_CLIENT_ID: string
       X_CLIENT_SECRET: string
-      APPLE_CLIENT_ID: string
-      APPLE_CLIENT_SECRET: string
     }
   }
   interface FastifyRequest {

@@ -14,6 +14,7 @@ const envSchema = {
     APP_BASE_URL: { type: 'string' },
     DATABASE_URL: { type: 'string' },
     JWT_SECRET_KEY: { type: 'string' },
+    COOKIE_DOMAIN: { type: 'string' },
     COOKIE_SECRET: { type: 'string' },
     GITHUB_CLIENT_ID: { type: 'string' },
     GITHUB_CLIENT_SECRET: { type: 'string' },
@@ -21,8 +22,6 @@ const envSchema = {
     GOOGLE_CLIENT_SECRET: { type: 'string' },
     X_CLIENT_ID: { type: 'string' },
     X_CLIENT_SECRET: { type: 'string' },
-    APPLE_CLIENT_ID: { type: 'string' },
-    APPLE_CLIENT_SECRET: { type: 'string' }
   }
 }
 
