@@ -37,6 +37,7 @@ const start = async () => {
     if (!host || !port) {
       throw new Error('API_HOST or API_PORT is not set')
     }
+    console.log('\n' + fastify.printRoutes())
     await fastify.listen({ host, port: Number(port) })
   } catch (err) {
     fastify.log.error(err)

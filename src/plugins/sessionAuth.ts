@@ -50,7 +50,16 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
       secure: true,
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 1 week, adjust as needed
+      domain: fastify.config.COOKIE_DOMAIN || 'localhost'
+    })
+  })
+
+  fastify.decorate('removeSessionToken', (reply: FastifyReply) => {
+    reply.clearCookie(sessionCookieName, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
       domain: fastify.config.COOKIE_DOMAIN || 'localhost'
     })
   })
