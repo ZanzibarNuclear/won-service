@@ -4,8 +4,9 @@ import { Session } from './session'
 declare module 'fastify' {
   interface FastifyInstance {
     session: Session | null
-    setSessionToken: (reply: FastifyReply, token: string) => void
     generateSessionToken: (sessionData: Session) => string
+    setSessionToken: (reply: FastifyReply, token: string) => void
+    removeSessionToken: (reply: FastifyReply) => void
     db: Kysely<DB>
     resend: Resend
     sendEmail: (from: string, to: string, subject: string, htmlBody: string) => Promise<EmailResponse>
