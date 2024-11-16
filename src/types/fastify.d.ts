@@ -3,13 +3,14 @@ import { Session } from './session'
 
 declare module 'fastify' {
   interface FastifyInstance {
+    db: Kysely<DB>
     session: Session | null
     generateSessionToken: (sessionData: Session) => string
     setSessionToken: (reply: FastifyReply, token: string) => void
     removeSessionToken: (reply: FastifyReply) => void
-    db: Kysely<DB>
     resend: Resend
     sendEmail: (from: string, to: string, subject: string, htmlBody: string) => Promise<EmailResponse>
+    validateTurnstile: (turnstileToken: string, ipAddress: string) => Promise<{ success: boolean }>
     googleOAuth2: FastifyPluginAsync
     githubOAuth2: FastifyPluginAsync
     xOAuth2: FastifyPluginAsync
@@ -23,6 +24,7 @@ declare module 'fastify' {
       COOKIE_DOMAIN: string
       COOKIE_SECRET: string
       RESEND_API_KEY: string
+      TURNSTILE_SECRET_KEY: string
       GITHUB_CLIENT_ID: string
       GITHUB_CLIENT_SECRET: string
       GOOGLE_CLIENT_ID: string

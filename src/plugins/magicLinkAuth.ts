@@ -49,12 +49,22 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
   fastify.decorate('sendMagicLink', sendMagicLink)
 
   fastify.post('/login/magiclink', async (req, res) => {
-    const { email, alias } = req.body as { email: string, alias: string }
+    const { email, alias, token } = req.body as { email: string, alias: string, token: string }
+    fastify.log.info(`sendMagicLink: email=${email} alias=${alias} turnstileToken=${token} ip=${req.ip}`)
+
+    // validate turnstile token
+    const turnstileResponse = await fastify.validateTurnstile(token, req.ip)
+    if (!turnstileResponse.success) {
+      res.status(400).send("Failed non-bot verification.")
+      return
+    }
+
     // validate email
     if (!email || !email.includes('@')) {
       res.status(400).send("Invalid email address.")
       return
     }
+
     await sendMagicLink(email, alias)
     res.send({ message: `A magic link sent to ${email} as you requested. Please check your email.`, status: "success" })
   })
@@ -130,4 +140,4 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
   fastify.log.info('registered magic link auth plugin')
 }
 
-export default fp(magicLinkAuth, { name: 'magicLinkAuth', dependencies: ['db', 'resend', 'sessionAuth', 'sensible'] })
+export default fp(magicLinkAuth, { name: 'magicLinkAuth', dependencies: ['db', 'resend', 'sessionAuth', 'turnstile', 'sensible'] })
