@@ -16,6 +16,8 @@ const envSchema = {
     JWT_SECRET_KEY: { type: 'string' },
     COOKIE_DOMAIN: { type: 'string' },
     COOKIE_SECRET: { type: 'string' },
+    RESEND_API_KEY: { type: 'string' },
+    TURNSTILE_SECRET_KEY: { type: 'string' },
     GITHUB_CLIENT_ID: { type: 'string' },
     GITHUB_CLIENT_SECRET: { type: 'string' },
     GOOGLE_CLIENT_ID: { type: 'string' },
