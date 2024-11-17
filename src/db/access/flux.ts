@@ -25,9 +25,13 @@ export const getFluxByAuthorId = async (fluxUserId: number) => {
     .orderBy('created_at', 'desc').execute()
 }
 
-export const getFluxes = async () => {
+export const getFluxes = async (filter: string, author: string, limit: number, offset: number) => {
+  // no more than 10 fluxes per request - guard against expensive requests
+  const guardedLimit = Math.min(limit, 10)
   return await selectFluxQuery
     .orderBy('fluxes.created_at', 'desc')
+    .limit(guardedLimit)
+    .offset(offset)
     .execute()
 }
 

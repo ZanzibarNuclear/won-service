@@ -12,11 +12,11 @@ import {
 
 const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.get('/', async (request, reply) => {
+    const { filter, author, limit, offset } = request.query as { filter: string; author: string; limit: number; offset: number }
 
-    // TODO: replace filtering logic
-    // TODO: add pagination
-
-    return await getFluxes()
+    fastify.log.info(`Fetching fluxes under constraints -- filter: ${filter}, author: ${author}, limit: ${limit}, offset: ${offset}`)
+    const results = await getFluxes(filter, author, limit, offset)
+    return { items: results, total: results.length, hasMore: results.length === limit }
   })
 
   fastify.post('/', async (request, reply) => {
