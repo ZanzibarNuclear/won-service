@@ -2,7 +2,7 @@ import fp from 'fastify-plugin'
 import jwt from 'jsonwebtoken'
 import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
 import { db } from '../db/Database'
-import type { Session } from '../types/session'
+import type { Session } from '../types/won-flux-types'
 
 interface SessionAuthPluginOptions {
   sessionSecret: string

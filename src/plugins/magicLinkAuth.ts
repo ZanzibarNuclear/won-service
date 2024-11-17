@@ -1,7 +1,7 @@
 import fp from 'fastify-plugin'
 import { FastifyPluginAsync } from "fastify"
 import { genKey } from '../utils'
-import { Session } from '../types/session'
+import { Session } from '../types/won-flux-types'
 
 const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 

@@ -3,7 +3,7 @@ import fastifyOAuth2, { FastifyOAuth2Options, OAuth2Namespace } from '@fastify/o
 import fp from 'fastify-plugin'
 import { db } from '../db/Database'
 
-import type { Session } from '../types/session'
+import type { Session } from '../types/won-flux-types'
 
 interface SupportedProviders {
   githubOAuth2: OAuth2Namespace
