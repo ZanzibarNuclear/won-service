@@ -7,16 +7,35 @@ import {
   updateFlux,
   boostFlux,
   deboostFlux,
-  getReplies,
 } from '../../../db/access/flux'
 
 const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
-  fastify.get('/', async (request, reply) => {
-    const { filter, author, limit, offset } = request.query as { filter: string; author: string; limit: number; offset: number }
 
-    fastify.log.info(`Fetching fluxes under constraints -- filter: ${filter}, author: ${author}, limit: ${limit}, offset: ${offset}`)
-    const results = await getFluxes(filter, author, limit, offset)
-    return { items: results, total: results.length, hasMore: results.length === limit }
+  const DEFAULT_FLUXES_LIMIT = 3
+  const MAX_FLUXES_LIMIT = 10
+
+  fastify.get<{
+    Querystring: {
+      limit?: number
+      offset?: number
+      order?: string
+      authorId?: number
+      fluxId?: number
+    }
+  }>('/', async (request, reply) => {
+    const { limit, offset, order, authorId, fluxId } = request.query
+
+    fastify.log.info(`Fetching fluxes under constraints -- filter: ${order}, author: ${authorId}, flux: ${fluxId}, limit: ${limit}, offset: ${offset}`)
+
+    // guard against returning too many
+    let guardedLimit = DEFAULT_FLUXES_LIMIT
+    if (limit && limit > 0) {
+      guardedLimit = Math.min(limit, MAX_FLUXES_LIMIT)
+      fastify.log.info(`Adjusting limit to ${guardedLimit}`)
+    }
+
+    const results = await getFluxes(guardedLimit, offset || 0, { order, authorId, fluxId })
+    return { items: results, total: results.length, hasMore: results.length === guardedLimit }
   })
 
   fastify.post('/', async (request, reply) => {
@@ -60,13 +79,11 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
     return flux
   })
 
-  fastify.get('/:fluxId/replies', async (request, reply) => {
-
-    // TODO: add pagination
-
-    const { fluxId } = request.params as { fluxId: number }
-    return await getReplies(fluxId)
-  })
+  // fastify.get('/:fluxId/replies', async (request, reply) => {
+  //   const { fluxId } = request.params as { fluxId: number }
+  //   const results = await getFluxes(5, 0, { fluxId })
+  //   return { items: results, total: results.length, hasMore: results.length === 5 }
+  // })
 
   fastify.post('/:fluxId/boost', async (request, reply) => {
     if (!request.session?.userId) {

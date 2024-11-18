@@ -19,28 +19,57 @@ export const getFlux = async (fluxId: number) => {
     .executeTakeFirst()
 }
 
-export const getFluxByAuthorId = async (fluxUserId: number) => {
-  return await selectFluxQuery
-    .where('flux_user_id', '=', fluxUserId)
-    .orderBy('created_at', 'desc').execute()
+export interface FluxFilter {
+  order?: string
+  authorId?: number
+  fluxId?: number
 }
 
-export const getFluxes = async (filter: string, author: string, limit: number, offset: number) => {
-  // no more than 10 fluxes per request - guard against expensive requests
-  const guardedLimit = Math.min(limit, 10)
-  return await selectFluxQuery
-    .orderBy('fluxes.created_at', 'desc')
-    .limit(guardedLimit)
+export const getFluxes = async (limit: number, offset: number, filter: FluxFilter) => {
+  let enhancedQuery = selectFluxQuery
+  if (filter.authorId) {
+    enhancedQuery = enhancedQuery.where('flux_user_id', '=', filter.authorId)
+  }
+  if (filter.fluxId) {
+    enhancedQuery = enhancedQuery.where('parent_id', '=', filter.fluxId)
+  }
+  if (filter.order) {
+    // TODO: probably not good to have a hidden magic words
+    if (filter.order === 'trending') {
+      enhancedQuery = enhancedQuery.orderBy('boost_count', 'desc')
+    }
+  } else {
+    enhancedQuery = enhancedQuery.orderBy('fluxes.created_at', 'desc')
+  }
+
+  return await enhancedQuery
+    .limit(limit)
     .offset(offset)
     .execute()
 }
 
-export const getReplies = async (fluxId: number) => {
-  return await selectFluxQuery
-    .where('parent_id', '=', fluxId)
-    .orderBy('created_at', 'desc')
-    .execute()
-}
+// export const getReplies = async (fluxId: number, limit: number, offset: number) => {
+//   // no more than 10 replies per request - guard against expensive requests
+//   const guardedLimit = Math.min(limit, 10)
+//   return await selectFluxQuery
+//     .where('parent_id', '=', fluxId)
+//     .orderBy('created_at', 'desc')
+//     .limit(guardedLimit)
+//     .offset(offset)
+//     .execute()
+// }
+
+// // TODO: maybe don't need if getFluxes is working
+// export const getFluxByAuthorId = async (fluxUserId: number, limit: number, offset: number) => {
+//   // no more than 10 fluxes per request - guard against expensive requests
+//   const guardedLimit = Math.min(limit, 10)
+//   return await selectFluxQuery
+//     .where('flux_user_id', '=', fluxUserId)
+//     .orderBy('created_at', 'desc')
+//     .limit(guardedLimit)
+//     .offset(offset)
+//     .execute()
+// }
 
 // mutations
 export const createFlux = async (fluxUserId: number, parentId: number | null, content: string) => {
