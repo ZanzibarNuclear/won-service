@@ -40,6 +40,7 @@ export interface Fluxes {
   parent_id: number | null;
   reply_count: Generated<number>;
   updated_at: Generated<Timestamp>;
+  view_count: Generated<number>;
 }
 
 export interface FluxUsers {
@@ -49,6 +50,12 @@ export interface FluxUsers {
   id: Generated<number>;
   updated_at: Generated<Timestamp>;
   user_id: string;
+}
+
+export interface FluxViews {
+  created_at: Generated<Timestamp>;
+  flux_id: number;
+  flux_user_id: number;
 }
 
 export interface Identities {
@@ -63,6 +70,16 @@ export interface Identities {
   refresh_token: string | null;
   updated_at: Generated<Timestamp>;
   user_id: string;
+}
+
+export interface MagicAuth {
+  alias: string | null;
+  email: string;
+  expires_at: Timestamp;
+  failed_validation_at: Timestamp | null;
+  id: Generated<number>;
+  token: string;
+  verified_at: Timestamp | null;
 }
 
 export interface Profiles {
@@ -93,8 +110,10 @@ export interface Users {
 export interface DB {
   flux_boosts: FluxBoosts;
   flux_users: FluxUsers;
+  flux_views: FluxViews;
   fluxes: Fluxes;
   identities: Identities;
+  magic_auth: MagicAuth;
   profiles: Profiles;
   users: Users;
 }

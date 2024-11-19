@@ -5,6 +5,7 @@ import {
   createFlux,
   getFluxUser,
   updateFlux,
+  countView,
   boostFlux,
   deboostFlux,
 } from '../../../db/access/flux'
@@ -39,7 +40,6 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
   })
 
   fastify.post('/', async (request, reply) => {
-    // TODO: check this in one place for all guarded routes -- need way to know which are guarded
     if (!request.session?.userId) {
       fastify.log.warn(`Only known users may post fluxes`)
       return reply.status(401).send({ error: 'Unauthorized' })
@@ -79,16 +79,27 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
     return flux
   })
 
-  // fastify.get('/:fluxId/replies', async (request, reply) => {
-  //   const { fluxId } = request.params as { fluxId: number }
-  //   const results = await getFluxes(5, 0, { fluxId })
-  //   return { items: results, total: results.length, hasMore: results.length === 5 }
-  // })
+  fastify.post('/:fluxId/view', async (request, reply) => {
+    let fluxUserId = -1
+    if (request.session?.userId) {
+      const fluxUser = await getFluxUser(request.session.userId)
+      if (fluxUser) {
+        fluxUserId = fluxUser.id
+      }
+    }
+    const { fluxId } = request.params as { fluxId: number }
+    try {
+      return await countView(fluxId, fluxUserId)
+    } catch (error) {
+      fastify.log.error(`Failed to record view for flux ${fluxId} by user ${fluxUserId}`)
+      return reply.status(500).send({ error: 'Failed to record view' })
+    }
+  })
 
   fastify.post('/:fluxId/boost', async (request, reply) => {
     if (!request.session?.userId) {
       fastify.log.warn(`Only known users may post fluxes`)
-      return reply.status(401).send({ error: 'Unauthorized' })
+      return reply.status(200)
     }
     const author = await getFluxUser(request.session.userId)
     if (!author) {
@@ -99,7 +110,7 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
     try {
       return await boostFlux(fluxId, author.id)
     } catch (error) {
-      console.error(error)
+      fastify.log.error(`Failed to boost flux ${fluxId} by user ${author.id}`)
       if ((error as any).code === '23505') {
         return reply.status(201).send({ message: 'Flux already boosted by user' })
       }
