@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import type { Session } from '../types/session'
+import type { Session } from '../types/won-flux-types'
 
 export function createSessionToken(user: any, secretKey: string): string {
   if (!secretKey) {
