@@ -1,5 +1,5 @@
 import 'fastify'
-import { Session } from './session'
+import { Session } from './won-flux-types'
 
 declare module 'fastify' {
   interface FastifyInstance {

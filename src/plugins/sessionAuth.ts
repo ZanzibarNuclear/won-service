@@ -2,7 +2,7 @@ import fp from 'fastify-plugin'
 import jwt from 'jsonwebtoken'
 import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
 import { db } from '../db/Database'
-import type { Session } from '../types/session'
+import type { Session } from '../types/won-flux-types'
 
 interface SessionAuthPluginOptions {
   sessionSecret: string
@@ -25,18 +25,14 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
       fastify.log.info(`found session token: ${sessionToken}`)
     }
     try {
+      if (!fastify.config.JWT_SECRET_KEY) {
+        throw new Error('JWT_SECRET_KEY is not set')
+      }
       const session = await verifySessionToken(sessionToken, fastify.config.JWT_SECRET_KEY)
-      fastify.log.info(`stashing verified session on request: ${JSON.stringify(session)}`)
       request.session = session
     } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        throw new Error('Session token has expired; please implement refresh logic', { cause: error })
-      } else {
-        if (!fastify.config.JWT_SECRET_KEY) {
-          fastify.log.error('Cannot verify session tokens. JWT_SECRET_KEY is not set.')
-        }
-        throw new Error('Failed to verify session token', { cause: error })
-      }
+      fastify.log.info('Removing session cookie due to verification failure:', { cause: error })
+      fastify.removeSessionToken(reply)
     }
   })
 
