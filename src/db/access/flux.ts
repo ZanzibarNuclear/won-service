@@ -48,29 +48,6 @@ export const getFluxes = async (limit: number, offset: number, filter: FluxFilte
     .execute()
 }
 
-// export const getReplies = async (fluxId: number, limit: number, offset: number) => {
-//   // no more than 10 replies per request - guard against expensive requests
-//   const guardedLimit = Math.min(limit, 10)
-//   return await selectFluxQuery
-//     .where('parent_id', '=', fluxId)
-//     .orderBy('created_at', 'desc')
-//     .limit(guardedLimit)
-//     .offset(offset)
-//     .execute()
-// }
-
-// // TODO: maybe don't need if getFluxes is working
-// export const getFluxByAuthorId = async (fluxUserId: number, limit: number, offset: number) => {
-//   // no more than 10 fluxes per request - guard against expensive requests
-//   const guardedLimit = Math.min(limit, 10)
-//   return await selectFluxQuery
-//     .where('flux_user_id', '=', fluxUserId)
-//     .orderBy('created_at', 'desc')
-//     .limit(guardedLimit)
-//     .offset(offset)
-//     .execute()
-// }
-
 // mutations
 export const createFlux = async (fluxUserId: number, parentId: number | null, content: string) => {
   let freshFlux = await db
@@ -110,6 +87,19 @@ export const updateFlux = async (fluxId: number, content: string, authorId: numb
     .executeTakeFirst()
 }
 
+export const recountFluxBoosts = async (fluxId: number) => {
+  const boostCount = await db
+    .selectFrom('flux_boosts')
+    .select((eb) => eb.fn.count('flux_id').as('count'))
+    .where('flux_id', '=', fluxId)
+    .executeTakeFirst()
+  await db
+    .updateTable('fluxes')
+    .set({ boost_count: Number(boostCount?.count) })
+    .where('id', '=', fluxId)
+    .executeTakeFirst()
+}
+
 export const boostFlux = async (fluxId: number, fluxUserId: number) => {
   await db
     .insertInto('flux_boosts')
@@ -129,17 +119,32 @@ export const deboostFlux = async (fluxId: number, fluxUserId: number) => {
   return await getFlux(fluxId)
 }
 
-export const recountFluxBoosts = async (fluxId: number) => {
-  const boostCount = await db
-    .selectFrom('flux_boosts')
+const retallyFluxViews = async (fluxId: number) => {
+  const viewCount = await db
+    .selectFrom('flux_views')
     .select((eb) => eb.fn.count('flux_id').as('count'))
     .where('flux_id', '=', fluxId)
     .executeTakeFirst()
   await db
     .updateTable('fluxes')
-    .set({ boost_count: Number(boostCount?.count) })
+    .set({ view_count: Number(viewCount?.count) })
     .where('id', '=', fluxId)
     .executeTakeFirst()
+}
+
+/**
+ * Count a view for a flux by a user.
+ * @param fluxId - The ID of the flux.
+ * @param fluxUserId - The ID of the user viewing the flux. Use -1 for anonymous views.
+ * @returns The updated flux.
+ */
+export const countView = async (fluxId: number, fluxUserId: number) => {
+  await db
+    .insertInto('flux_views')
+    .values({ flux_id: fluxId, flux_user_id: fluxUserId })
+    .execute()
+  await retallyFluxViews(fluxId)
+  return await getFlux(fluxId)
 }
 
 // subscriptions
