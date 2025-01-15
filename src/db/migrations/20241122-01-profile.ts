@@ -1,11 +1,29 @@
 import { Kysely, sql } from 'kysely'
 
 export async function up(db: Kysely<any>): Promise<void> {
+  await db.schema.dropTable('profiles').ifExists().execute()
+
   await db.schema
-    .alterTable('profiles')
-    .dropColumn('username')
-    .addColumn('email', 'varchar')
+    .createTable('profiles')
+    .addColumn('id', 'uuid', (col) => col.primaryKey().references('users.id').onDelete('cascade'))
+    .addColumn('screen_name', 'varchar')
+    .addColumn('avatar_url', 'text')
+    .addColumn('bio', 'text')
+    .addColumn('location', 'text')
+    .addColumn('website', 'text')
+    .addColumn('nuclear_likes', 'text')
+    .addColumn('join_reason', 'text')
+    .addColumn('x_username', 'text')
+    .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
+    .addColumn('updated_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
+    .execute()
+
+  await db.schema.alterTable('users')
     .addColumn('email_verified_at', 'timestamp')
+    .execute()
+
+  await db.schema.alterTable('flux_users')
+    .addUniqueConstraint('flux_users_handle_unique', ['handle'])
     .execute()
 
   await db.schema
