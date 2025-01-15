@@ -23,6 +23,13 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export interface Achievements {
+  description: string | null;
+  id: Generated<number>;
+  karma_value: Generated<number>;
+  name: string;
+}
+
 export interface FluxBoosts {
   created_at: Generated<Timestamp>;
   flux_id: number;
@@ -43,11 +50,20 @@ export interface Fluxes {
   view_count: Generated<number>;
 }
 
+export interface FluxFollowers {
+  created_at: Generated<Timestamp>;
+  follower_id: number;
+  following_id: number;
+}
+
 export interface FluxUsers {
   created_at: Generated<Timestamp>;
+  digest_frequency: string | null;
   display_name: string;
+  email_notifications: Timestamp | null;
   handle: string;
   id: Generated<number>;
+  text_notifications: Timestamp | null;
   updated_at: Generated<Timestamp>;
   user_id: string;
 }
@@ -55,7 +71,7 @@ export interface FluxUsers {
 export interface FluxViews {
   created_at: Generated<Timestamp>;
   flux_id: number;
-  flux_user_id: number;
+  flux_user_id: number | null;
 }
 
 export interface Identities {
@@ -72,6 +88,14 @@ export interface Identities {
   user_id: string;
 }
 
+export interface KarmaAwards {
+  achievement_id: number | null;
+  created_at: Generated<Timestamp>;
+  flux_user_id: number;
+  karma_awarded: Generated<number>;
+  name: string;
+}
+
 export interface MagicAuth {
   alias: string | null;
   email: string;
@@ -86,14 +110,16 @@ export interface Profiles {
   avatar_url: string | null;
   bio: string | null;
   created_at: Generated<Timestamp>;
+  email: string | null;
+  email_verified_at: Timestamp | null;
   full_name: string | null;
   id: Generated<string>;
   join_reason: string | null;
+  karma_score: Generated<number>;
   location: string | null;
   nuclear_likes: string | null;
   screen_name: string | null;
   updated_at: Generated<Timestamp>;
-  username: string;
   website: string | null;
   x_username: string | null;
 }
@@ -108,11 +134,14 @@ export interface Users {
 }
 
 export interface DB {
+  achievements: Achievements;
   flux_boosts: FluxBoosts;
+  flux_followers: FluxFollowers;
   flux_users: FluxUsers;
   flux_views: FluxViews;
   fluxes: Fluxes;
   identities: Identities;
+  karma_awards: KarmaAwards;
   magic_auth: MagicAuth;
   profiles: Profiles;
   users: Users;
