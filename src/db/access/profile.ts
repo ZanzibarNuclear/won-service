@@ -12,15 +12,15 @@ export const createUserProfile = async (id: string, screenName: string, email: s
     .where(eb => eb.fn('lower', ['email']), '=', email.toLowerCase())
     .executeTakeFirst()
   if (!user) {
-    user = await db
-      .insertInto('users')
-      .values({
-        id,
-        alias,
-        last_sign_in_at: new Date()
-      })
-      .returningAll()
-      .executeTakeFirst()
+    // user = await db
+    //   .insertInto('users')
+    //   .values({
+    //     id,
+    //     alias,
+    //     last_sign_in_at: new Date()
+    //   })
+    //   .returningAll()
+    //   .executeTakeFirst()
   }
   return user
 }
