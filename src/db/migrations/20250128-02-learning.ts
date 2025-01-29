@@ -72,6 +72,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
+  await db.schema.dropTable('learning_bookmarks').ifExists().execute()
   await db.schema.dropTable('lesson_steps').ifExists().execute()
   await db.schema.dropTable('lesson_paths').ifExists().execute()
   await db.schema.dropTable('lesson_content_parts').ifExists().execute()
