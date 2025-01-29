@@ -13,7 +13,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('created_at', 'timestamp', col => col.defaultTo(sql`now()`).notNull())
     .addColumn('published_at', 'timestamp')
     .addColumn('archived_at', 'timestamp')
-    .addColumn('text_only', 'boolean')
+    .addColumn('test_only', 'boolean')
     .execute()
 
   await db.schema

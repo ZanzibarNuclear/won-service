@@ -42,7 +42,7 @@ export interface Courses {
   published_at: Timestamp | null;
   syllabus: string | null;
   teaser: string | null;
-  text_only: boolean | null;
+  test_only: boolean | null;
   title: string | null;
 }
 

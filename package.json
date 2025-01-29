@@ -15,6 +15,7 @@
     "migrate:latest": "bash scripts/migrate.sh latest",
     "seed": "bash scripts/seed.sh",
     "generate": "kysely-codegen --dialect=postgres --out-file=./src/db/types.ts",
+    "generate-supa": "kysely-codegen --dialect=postgres --out-file=./src/db/supaTypes.ts",
     "generate-help": "kysely-codegen --help",
     "test": "node --test test/**/*.test.js"
   },
