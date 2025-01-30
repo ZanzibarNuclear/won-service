@@ -35,7 +35,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .createTable('lesson_content_parts')
     .addColumn('id', 'serial', col => col.primaryKey())
     .addColumn('public_key', 'text', col => col.unique().notNull())
-    .addColumn('lesson_id', 'bigint', col => col.notNull().references('lesson_plans.id'))
+    .addColumn('lesson_key', 'text', col => col.notNull().references('lesson_plans.public_key'))
     .addColumn('lesson_content_type', 'text', col => col.notNull())
     .addColumn('content', 'json', col => col.notNull())
     .addColumn('sequence', 'smallint')
