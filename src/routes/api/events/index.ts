@@ -3,18 +3,6 @@ import { createEvent, getEvents } from '../../../db/access/event'
 
 const eventsRoutes: FastifyPluginAsync = async (fastify, options) => {
 
-  type eventPayload = {
-    actor: string | undefined
-    details: string
-  }
-
-  fastify.post('/', async (request, reply) => {
-    const { details } = request.body as eventPayload
-    const actor = request.session?.userId
-    const event = await createEvent(actor, details)
-    return event
-  })
-
   const DEFAULT_LIMIT = 10
   const MAX_LIMIT = 50
 
@@ -41,9 +29,23 @@ const eventsRoutes: FastifyPluginAsync = async (fastify, options) => {
       fastify.log.info(`Adjusting limit to ${guardedLimit}`)
     }
 
-    const results = await getEvents(guardedLimit, offset || 0, { from, to, asc, actor })
+    const results = await getEvents(guardedLimit, offset, { from, to, asc, actor })
 
     return { items: results, total: results.length, hasMore: results.length === guardedLimit }
   })
 
+  type eventPayload = {
+    actor: string | undefined
+    details: string
+  }
+
+  fastify.post('/', async (request, reply) => {
+    const { details } = request.body as eventPayload
+    const actor = request.session?.userId
+    const event = await createEvent(actor, details)
+    return event
+  })
+
 }
+
+export default eventsRoutes

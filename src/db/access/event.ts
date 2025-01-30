@@ -1,5 +1,4 @@
 import { db } from "../Database"
-import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres'
 
 // queries
 export interface EventFilter {
@@ -12,26 +11,23 @@ export interface EventFilter {
 export const getEvents = async (limit: number = 0, offset: number = 0, filter: EventFilter) => {
 
   const { from, to, asc, actor } = filter
-  const query = db.selectFrom('events').selectAll()
+  let query = db.selectFrom('events').selectAll()
 
   if (actor) {
-    query.where('actor_id', '=', actor)
+    query = query.where('actor_id', '=', actor)
   }
   if (from) {
     const ts = new Date(from)
-    query.where('created_at', '>=', ts)
+    query = query.where('created_at', '>=', ts)
   }
   if (to) {
     const ts = new Date(to)
-    query.where('created_at', '<', ts)
+    query = query.where('created_at', '<', ts)
   }
-  if (limit) {
-    query.limit(limit)
+  if (limit > 0) {
+    query = query.limit(limit).offset(offset)
   }
-  if (offset) {
-    query.offset(offset)
-  }
-  query.orderBy('created_at', asc ? 'asc' : 'desc')
+  query = query.orderBy('created_at', asc ? 'asc' : 'desc')
 
   return await query.execute()
 }
