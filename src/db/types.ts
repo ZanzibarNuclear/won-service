@@ -9,8 +9,6 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
-
 export type Json = JsonValue;
 
 export type JsonArray = JsonValue[];
@@ -154,7 +152,7 @@ export interface LessonContentParts {
   content: Json;
   id: Generated<number>;
   lesson_content_type: string;
-  lesson_id: Int8;
+  lesson_key: string;
   public_key: string;
   sequence: number | null;
 }

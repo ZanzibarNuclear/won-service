@@ -19,14 +19,14 @@ const copyData = async () => {
   const transformed = sourceData.map((row) => ({
     content: row.content,
     lesson_content_type: row.content_type,
-    lesson_key: row.lesson_key,
+    lesson_key: row.lesson_key || '',
     public_key: row.public_key,
     sequence: row.sequence
   }))
 
-  // await targetDB.insertInto(tableName)
-  //   .values(transformed)
-  //   .execute()
+  await targetDB.insertInto(tableName)
+    .values(transformed)
+    .execute()
 }
 
 export default {
