@@ -53,6 +53,7 @@ export interface Events {
 
 export interface FeedbackMessages {
   context: Json;
+  created_at: Generated<Timestamp>;
   id: Generated<number>;
   message: string;
   user_id: string | null;

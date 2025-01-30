@@ -32,6 +32,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('user_id', 'uuid', (col) => col.references('users.id'))
     .addColumn('context', 'json', (col) => col.notNull())
     .addColumn('message', 'text', (col) => col.notNull())
+    .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .execute()
 
   await db.schema
