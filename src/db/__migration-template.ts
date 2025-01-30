@@ -1,12 +1,13 @@
-import { Kysely, sql } from 'kysely'
+import type { Kysely } from 'kysely'
 
 export async function up(db: Kysely<any>): Promise<void> {
-  await db.schema
-    .createTable('temp')
-    .addColumn('id', 'integer', (col) => col.primaryKey().generatedAlwaysAsIdentity())
-    .execute()
+  // up migration code goes here...
+  // note: up migrations are mandatory. you must implement this function.
+  // For more info, see: https://kysely.dev/docs/migrations
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
-  await db.schema.dropTable('temp').ifExists().execute()
+  // down migration code goes here...
+  // note: down migrations are optional. you can safely delete this function.
+  // For more info, see: https://kysely.dev/docs/migrations
 }

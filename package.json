@@ -1,6 +1,6 @@
 {
   "name": "flux-service",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Backend to support Flux, the social exchange for Zanzibar's World of Nuclear Energy.",
   "main": "index.js",
   "directories": {

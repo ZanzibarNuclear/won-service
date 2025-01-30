@@ -8,7 +8,7 @@ dotenv.config()
 export const db = new Kysely<DB>({
   dialect: new PostgresDialect({
     pool: new Pool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: process.env.DATABASE_URL
     }),
   }),
 });

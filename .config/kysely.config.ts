@@ -4,16 +4,15 @@ import {
 	PostgresIntrospector,
 	PostgresQueryCompiler,
 } from 'kysely'
-import { db } from '~/db/Database'
+import { db } from '../src/db/Database'
 import { defineConfig } from 'kysely-ctl'
 
 export default defineConfig({
 	kysely: db,
 	migrations: {
-		migrationFolder: 'db/migrations',
+		migrationFolder: 'src/db/migrations',
 	},
-	plugins: [],
 	seeds: {
-		seedFolder: 'db/seeds',
+		seedFolder: 'src/db/seeds',
 	},
 })
