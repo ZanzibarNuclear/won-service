@@ -4,6 +4,11 @@ import {
   getCourses,
   createCourse,
   updateCourse,
+  deleteCourse,
+  publish,
+  unpublish,
+  archive,
+  unarchive
 } from '../../../db/access/course'
 
 const verifyEditorRole = () => {
@@ -37,6 +42,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify, options) => {
       return
     }
     const course = await createCourse(title, description, syllabus, teaser, coverArt)
+    fastify.log.info(course)
     reply.code(201).send(course)
   })
 
@@ -56,6 +62,31 @@ const courseRoutes: FastifyPluginAsync = async (fastify, options) => {
     const { title, description, syllabus, teaser, coverArt } = request.body as CoursePayload
     const flux = await updateCourse(key, title, description, syllabus, teaser, coverArt)
     return flux
+  })
+
+  fastify.delete('/:key', async (request, reply) => {
+    const { key } = request.params as { key: string }
+    return await deleteCourse(key)
+  })
+
+  fastify.put('/:key/publish', async (request, reply) => {
+    const { key } = request.params as { key: string }
+    return await publish(key)
+  })
+
+  fastify.put('/:key/unpublish', async (request, reply) => {
+    const { key } = request.params as { key: string }
+    return await unpublish(key)
+  })
+
+  fastify.put('/:key/archive', async (request, reply) => {
+    const { key } = request.params as { key: string }
+    return await archive(key)
+  })
+
+  fastify.put('/:key/unarchive', async (request, reply) => {
+    const { key } = request.params as { key: string }
+    return await unarchive(key)
   })
 
 }
