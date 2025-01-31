@@ -6,8 +6,6 @@ const eventsRoutes: FastifyPluginAsync = async (fastify, options) => {
   const DEFAULT_LIMIT = 10
   const MAX_LIMIT = 50
 
-  // TODO: support date range
-
   fastify.get<{
     Querystring: {
       limit?: number
