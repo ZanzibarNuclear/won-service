@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from 'fastify'
-import { createLessonPlan, deleteLessonPlan, getLessonPlan, updateLessonPlan, publish, unpublish } from '../../../db/access/lessonPlans'
+import { createLessonPlan, deleteLessonPlan, getLessonPlan, updateLessonPlan, publish, unpublish } from '../../../db/access/lessonPlan'
 
 const lessonPlanRoutes: FastifyPluginAsync = async (fastify, options) => {
 

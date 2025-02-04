@@ -12,7 +12,8 @@ import {
 } from '../../../db/access/course'
 import {
   getLessonPlansForCourse
-} from '../../../db/access/lessonPlans'
+} from '../../../db/access/lessonPlan'
+import { getLessonPathsForCourse } from '../../../db/access/lessonPath'
 
 const verifyEditorRole = () => {
   return false
@@ -100,6 +101,12 @@ const courseRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.get('/:key/lesson-plans', async (request, reply) => {
     const { key } = request.params as { key: string }
     const plans = await getLessonPlansForCourse(key)
+    reply.send(plans)
+  })
+
+  fastify.get('/:key/lesson-paths', async (request, reply) => {
+    const { key } = request.params as { key: string }
+    const plans = await getLessonPathsForCourse(key)
     reply.send(plans)
   })
 
