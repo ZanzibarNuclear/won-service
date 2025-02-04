@@ -3,12 +3,14 @@ import { db } from "../Database"
 
 export const getLessonPathsForCourse = async (courseKey: string) => {
   return await db.selectFrom('lesson_paths')
+    .selectAll()
     .where('course_key', '=', courseKey)
     .execute()
 }
 
 export const getLessonPath = async (key: string) => {
   return await db.selectFrom('lesson_paths')
+    .selectAll()
     .where('public_key', '=', key)
     .execute()
 }

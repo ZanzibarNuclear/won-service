@@ -2,14 +2,18 @@ import { genKey } from "../../utils"
 import { db } from "../Database"
 
 export const getLessonPlansForCourse = async (courseKey: string) => {
-  return await db.selectFrom('lesson_plans')
+  const result = await db.selectFrom('lesson_plans')
+    .selectAll()
     .where('course_key', '=', courseKey)
     .orderBy('sequence', 'asc')
     .execute()
+
+  return result
 }
 
 export const getLessonPlan = async (key: string) => {
   return await db.selectFrom('lesson_plans')
+    .selectAll()
     .where('public_key', '=', key)
     .execute()
 }
@@ -73,6 +77,26 @@ export const unpublish = async (key: string) => {
   await db
     .updateTable('lesson_plans')
     .set({ published_at: null })
+    .where('public_key', '=', key)
+    .execute()
+
+  return getLessonPlan(key)
+}
+
+export const archive = async (key: string) => {
+  await db
+    .updateTable('lesson_plans')
+    .set({ archived_at: new Date() })
+    .where('public_key', '=', key)
+    .execute()
+
+  return getLessonPlan(key)
+}
+
+export const unarchive = async (key: string) => {
+  await db
+    .updateTable('lesson_plans')
+    .set({ archived_at: null })
     .where('public_key', '=', key)
     .execute()
 

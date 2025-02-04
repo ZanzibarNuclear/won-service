@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from 'fastify'
-import { createLessonPlan, deleteLessonPlan, getLessonPlan, updateLessonPlan, publish, unpublish } from '../../../db/access/lessonPlan'
+import { createLessonPlan, deleteLessonPlan, getLessonPlan, updateLessonPlan, publish, unpublish, archive, unarchive } from '../../../db/access/lessonPlan'
+import { getContentPartsForLessonPlan } from '../../../db/access/contentPart'
 
 const lessonPlanRoutes: FastifyPluginAsync = async (fastify, options) => {
 
@@ -57,6 +58,8 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify, options) => {
     return await deleteLessonPlan(key)
   })
 
+  // TODO: add error handling for 404 -- for all learning resources
+
   fastify.put('/:key/publish', async (request, reply) => {
     const { key } = request.params as { key: string }
     return await publish(key)
@@ -65,6 +68,22 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.put('/:key/unpublish', async (request, reply) => {
     const { key } = request.params as { key: string }
     return await unpublish(key)
+  })
+
+  fastify.put('/:key/archive', async (request, reply) => {
+    const { key } = request.params as { key: string }
+    return await archive(key)
+  })
+
+  fastify.put('/:key/unarchive', async (request, reply) => {
+    const { key } = request.params as { key: string }
+    return await unarchive(key)
+  })
+
+  fastify.get('/:key/content-parts', async (request, reply) => {
+    const { key } = request.params as { key: string }
+    const plans = await getContentPartsForLessonPlan(key)
+    reply.send(plans)
   })
 
 }

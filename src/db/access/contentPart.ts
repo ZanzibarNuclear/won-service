@@ -13,6 +13,7 @@ export enum ContentPartType {
 
 export const getContentPartsForLessonPlan = async (key: string) => {
   return await db.selectFrom('lesson_content_parts')
+    .selectAll()
     .where('lesson_key', '=', key)
     .orderBy('sequence', 'asc')
     .execute()
@@ -20,6 +21,7 @@ export const getContentPartsForLessonPlan = async (key: string) => {
 
 export const getContentPart = async (key: string) => {
   return await db.selectFrom('lesson_content_parts')
+    .selectAll()
     .where('public_key', '=', key)
     .execute()
 }
