@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from 'fastify'
+import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import {
   getCourse,
   getCourses,
@@ -19,7 +19,18 @@ const verifyEditorRole = () => {
   return false
 }
 
-const courseRoutes: FastifyPluginAsync = async (fastify, options) => {
+const courseBodySchema = {
+  type: 'object',
+  required: [],
+  properties: {
+    publicKey: {
+      type: "string"
+    },
+
+  }
+}
+
+const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
   fastify.get('/', async (request, reply) => {
     return await getCourses()

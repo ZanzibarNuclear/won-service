@@ -1,9 +1,13 @@
 import 'fastify'
 import { Session } from './won-flux-types'
+import { CourseRepository } from '../db/access/courseRepo'
 
 declare module 'fastify' {
   interface FastifyInstance {
     db: Kysely<DB>
+    data: {
+      courses: CourseRepository
+    }
     session: Session | null
     generateSessionToken: (sessionData: Session) => string
     setSessionToken: (reply: FastifyReply, token: string) => void
