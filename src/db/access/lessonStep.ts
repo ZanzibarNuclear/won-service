@@ -30,11 +30,13 @@ export const createLessonStep = async (pathKey: string, from: string, to: string
   return result
 }
 
-export const updateLessonStep = async (id: number, teaser?: string) => {
+export const updateLessonStep = async (id: number, from?: string, to?: string, teaser?: string) => {
 
   return await db
     .updateTable('lesson_steps')
     .set({
+      from,
+      to,
       teaser,
     })
     .where('id', '=', id)
