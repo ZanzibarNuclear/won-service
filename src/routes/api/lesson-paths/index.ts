@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from 'fastify'
 import { createLessonPath, deleteLessonPath, getLessonPath, updateLessonPath } from '../../../db/access/lessonPath'
+import { getStepsForPath } from '../../../db/access/lessonStep'
 
 const lessonPathRoutes: FastifyPluginAsync = async (fastify, options) => {
 
@@ -57,6 +58,12 @@ const lessonPathRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.delete('/:key', async (request, reply) => {
     const { key } = request.params as { key: string }
     return await deleteLessonPath(key)
+  })
+
+  fastify.get('/:key/lesson-steps', async (request, reply) => {
+    const { key } = request.params as { key: string }
+    const plans = await getStepsForPath(key)
+    reply.send(plans)
   })
 
 }

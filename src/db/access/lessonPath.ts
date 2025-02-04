@@ -55,3 +55,4 @@ export const updateLessonPath = async (key: string, name?: string, description?:
 export const deleteLessonPath = async (key: string) => {
   await db.deleteFrom('lesson_paths').where('public_key', '=', key).execute()
 }
+
