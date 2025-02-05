@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
-import { lessonContentSchema, lessonContentPayloadSchema } from '../../schema'
+import { LessonContentSchema, LessonContentType, LessonContentBodySchema, LessonContentBodyType } from '../schema'
 
 const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
@@ -8,7 +8,7 @@ const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance
       response: {
         200: {
           type: 'array',
-          items: lessonContentSchema,
+          items: LessonContentSchema,
         }
       }
     }
@@ -22,21 +22,20 @@ const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance
     reply.send(plan)
   })
 
-  type ContentPartPayload = {
-    lessonKey?: string
-    contentPartType?: string
-    content?: string
-    sequence?: number | undefined
-  }
-
-  fastify.post('/', async (request, reply) => {
+  fastify.post('/', {
+    schema: {
+      body: {
+        type: 'object',
+        properties: LessonContentBodySchema,
+        required: ['title'],
+      },
+      response: {
+        201: LessonContentSchema,
+      },
+    },
+  }, async (request, reply) => {
     // TODO: check role
-    // if (!request.session?.userId) {
-    //   fastify.log.warn(`Only content editors may create courses`)
-    //   return reply.status(401).send({ error: 'Unauthorized' })
-    // }
-
-    const { lessonKey, contentPartType, content, sequence } = request.body as ContentPartPayload
+    const { lessonKey, contentPartType, content, sequence } = request.body as LessonContentBodyType
     if (!lessonKey) {
       reply.code(400).send('Lesson key is required')
       return
@@ -52,13 +51,8 @@ const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance
 
   fastify.put('/:key', async (request, reply) => {
     // TODO: check role
-    // if (!request.session?.userId) {
-    //   fastify.log.warn(`Only content editors may create courses`)
-    //   return reply.status(401).send({ error: 'Unauthorized' })
-    // }
-
     const { key } = request.params as { key: string }
-    const { content, sequence } = request.body as ContentPartPayload
+    const { content, sequence } = request.body as LessonContentBodyType
     const contentPart = await fastify.data.lessonContents.update(key, content, sequence)
     return contentPart
   })

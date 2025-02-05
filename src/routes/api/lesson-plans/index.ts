@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from 'fastify'
-import { lessonContentSchema } from '../../schema'
+import { LessonContentSchema } from '../schema'
 
 const lessonPlanRoutes: FastifyPluginAsync = async (fastify) => {
 
@@ -151,8 +151,8 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify) => {
     schema: {
       response: {
         200: {
-          type: Array,
-          items: lessonContentSchema,
+          type: 'array',
+          items: LessonContentSchema,
         }
       }
     }
