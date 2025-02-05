@@ -1,51 +1,60 @@
-import { genKey } from "../../utils"
-import { db } from "../Database"
+import { Kysely } from "kysely"
+import { DB } from '../types'
 
-export const getStepsForPath = async (key: string) => {
-  return await db.selectFrom('lesson_steps')
-    .selectAll()
-    .where('lesson_path', '=', key)
-    .execute()
-}
+export class LessonStepRepository {
+  constructor(private db: Kysely<DB>) { }
 
-export const getLessonStep = async (id: number) => {
-  return await db.selectFrom('lesson_steps')
-    .selectAll()
-    .where('id', '=', id)
-    .execute()
-}
+  async findByPath(pathKey: string) {
+    return await this.db
+      .selectFrom('lesson_steps')
+      .selectAll()
+      .where('lesson_path', '=', pathKey)
+      .execute()
+  }
 
-export const createLessonStep = async (pathKey: string, from: string, to: string, teaser?: string) => {
+  async getLessonStep(id: number) {
+    return await this.db
+      .selectFrom('lesson_steps')
+      .selectAll()
+      .where('id', '=', id)
+      .execute()
+  }
 
-  const result = await db
-    .insertInto('lesson_steps')
-    .values({
-      lesson_path: pathKey,
-      from,
-      to,
-      teaser,
-    })
-    .returning(['id', 'lesson_path', 'from', 'to', 'teaser'])
-    .executeTakeFirst()
+  async createLessonStep(pathKey: string, from: string, to: string, teaser?: string) {
 
-  console.log(result)
-  return result
-}
+    const result = await this.db
+      .insertInto('lesson_steps')
+      .values({
+        lesson_path: pathKey,
+        from,
+        to,
+        teaser,
+      })
+      .returningAll()
+      .executeTakeFirst()
 
-export const updateLessonStep = async (id: number, from?: string, to?: string, teaser?: string) => {
+    console.log(result)
+    return result
+  }
 
-  return await db
-    .updateTable('lesson_steps')
-    .set({
-      from,
-      to,
-      teaser,
-    })
-    .where('id', '=', id)
-    .returning(['id', 'lesson_path', 'from', 'to', 'teaser'])
-    .executeTakeFirst()
-}
+  async updateLessonStep(id: number, from?: string, to?: string, teaser?: string) {
 
-export const deleteLessonStep = async (id: number) => {
-  await db.deleteFrom('lesson_steps').where('id', '=', id).execute()
+    return await this.db
+      .updateTable('lesson_steps')
+      .set({
+        from,
+        to,
+        teaser,
+      })
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
+  async deleteLessonStep(id: number) {
+    await this.db
+      .deleteFrom('lesson_steps')
+      .where('id', '=', id)
+      .execute()
+  }
 }

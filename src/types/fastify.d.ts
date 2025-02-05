@@ -1,7 +1,10 @@
+import { LessonContentPartRepository } from './../db/access/contentPartRepo';
 import 'fastify'
 import { Session } from './won-flux-types'
 import { CourseRepository } from '../db/access/courseRepo'
 import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
+import { LessonPathRepository } from '../db/access/lessonPathRepo'
+import { LessonStepRepository } from '../db/access/lessonStepRepo'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -9,6 +12,9 @@ declare module 'fastify' {
     data: {
       courses: CourseRepository
       lessonPlans: LessonPlanRepository
+      lessonContents: LessonContentPartRepository
+      lessonPaths: LessonPathRepository
+      lessonSteps: LessonStepRepository
     }
     session: Session | null
     generateSessionToken: (sessionData: Session) => string

@@ -2,11 +2,17 @@ import fp from 'fastify-plugin'
 import { FastifyPluginAsync } from "fastify"
 import { CourseRepository } from '../db/access/courseRepo'
 import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
+import { LessonPathRepository } from '../db/access/lessonPathRepo'
+import { LessonStepRepository } from '../db/access/lessonStepRepo'
+import { LessonContentPartRepository } from '../db/access/contentPartRepo'
 
 const dataAccessPlugin: FastifyPluginAsync = async (fastify, options) => {
   const data = {
     courses: new CourseRepository(fastify.db),
-    lessonPlans: new LessonPlanRepository(fastify.db)
+    lessonPlans: new LessonPlanRepository(fastify.db),
+    lessonContents: new LessonContentPartRepository(fastify.db),
+    lessonPaths: new LessonPathRepository(fastify.db),
+    lessonSteps: new LessonStepRepository(fastify.db)
   }
   fastify.decorate('data', data)
   fastify.log.info('registered dataAccess plugin')

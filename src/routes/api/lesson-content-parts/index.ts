@@ -1,11 +1,35 @@
-import { FastifyPluginAsync } from 'fastify'
-import { getContentPart, createContentPart, updateContentPart, deleteContentPart } from '../../../db/access/contentPart'
+import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 
-const lessonContentPartRoutes: FastifyPluginAsync = async (fastify, options) => {
+const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
-  fastify.get('/:key', async (request, reply) => {
+  const lessonContentPayloadSchema = {
+    lessonKey: { type: 'string' },
+    contentPartType: { type: 'string' },
+    content: { type: 'string' },
+    sequence: { type: 'number' },
+  }
+
+  const lessonContentSchema = {
+    id: { type: 'number' },
+    publicKey: { type: 'string' },
+    lessonKey: { type: 'string' },
+    contentPartType: { type: 'string' },
+    content: { type: 'string' },
+    sequence: { type: 'number' },
+  }
+
+  fastify.get('/:key', {
+    schema: {
+      response: {
+        200: {
+          type: 'array',
+          items: lessonContentSchema,
+        }
+      }
+    }
+  }, async (request, reply) => {
     const { key } = request.params as { key: string }
-    const plan = await getContentPart(key)
+    const plan = await fastify.data.lessonContents.getContentPart(key)
     if (!plan) {
       reply.code(404).send()
       return
@@ -36,7 +60,7 @@ const lessonContentPartRoutes: FastifyPluginAsync = async (fastify, options) => 
       reply.code(400).send('Type of content is required')
       return
     }
-    const contentPart = await createContentPart(lessonKey, contentPartType, content, sequence)
+    const contentPart = await fastify.data.lessonContents.createContentPart(lessonKey, contentPartType, content, sequence)
     fastify.log.info(contentPart)
     reply.code(201).send(contentPart)
   })
@@ -50,15 +74,15 @@ const lessonContentPartRoutes: FastifyPluginAsync = async (fastify, options) => 
 
     const { key } = request.params as { key: string }
     const { content, sequence } = request.body as ContentPartPayload
-    const contentPart = await updateContentPart(key, content, sequence)
+    const contentPart = await fastify.data.lessonContents.updateContentPart(key, content, sequence)
     return contentPart
   })
 
   fastify.delete('/:key', async (request, reply) => {
     const { key } = request.params as { key: string }
-    return await deleteContentPart(key)
+    return await fastify.data.lessonContents.deleteContentPart(key)
   })
 
 }
 
-export default lessonContentPartRoutes
+export default lessonContentsRoutes

@@ -82,8 +82,8 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify, options) => {
 
   fastify.get('/:key/content-parts', async (request, reply) => {
     const { key } = request.params as { key: string }
-    const plans = await getContentPartsForLessonPlan(key)
-    reply.send(plans)
+    const parts = await fastify.data.lessonContents.findByLessonPlan(key)
+    reply.send(parts)
   })
 
 }

@@ -162,13 +162,13 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     reply.send(course)
   })
 
-  fastify.get('/v1/:key/lesson-plans', async (request, reply) => {
+  fastify.get('/:key/lesson-plans', async (request, reply) => {
     const { key } = request.params as { key: string }
     const plans = await fastify.data.lessonPlans.findByCourse(key)
     reply.send(plans)
   })
 
-  fastify.get('/v1/:key/lesson-paths', async (request, reply) => {
+  fastify.get('/:key/lesson-paths', async (request, reply) => {
     const { key } = request.params as { key: string }
     const plans = await fastify.data.lessonPaths.findByCourse(key)
     reply.send(plans)
