@@ -12,7 +12,7 @@ export class LessonStepRepository {
       .execute()
   }
 
-  async getLessonStep(id: number) {
+  async get(id: number) {
     return await this.db
       .selectFrom('lesson_steps')
       .selectAll()
@@ -20,7 +20,7 @@ export class LessonStepRepository {
       .execute()
   }
 
-  async createLessonStep(pathKey: string, from: string, to: string, teaser?: string) {
+  async create(pathKey: string, from: string, to: string, teaser?: string) {
 
     const result = await this.db
       .insertInto('lesson_steps')
@@ -37,7 +37,7 @@ export class LessonStepRepository {
     return result
   }
 
-  async updateLessonStep(id: number, from?: string, to?: string, teaser?: string) {
+  async update(id: number, from?: string, to?: string, teaser?: string) {
 
     return await this.db
       .updateTable('lesson_steps')
@@ -51,7 +51,7 @@ export class LessonStepRepository {
       .executeTakeFirst()
   }
 
-  async deleteLessonStep(id: number) {
+  async delete(id: number) {
     await this.db
       .deleteFrom('lesson_steps')
       .where('id', '=', id)

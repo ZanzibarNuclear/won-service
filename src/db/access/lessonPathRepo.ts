@@ -13,7 +13,7 @@ export class LessonPathRepository {
       .execute()
   }
 
-  async getLessonPath(key: string) {
+  async get(key: string) {
     return await this.db
       .selectFrom('lesson_paths')
       .selectAll()
@@ -21,7 +21,7 @@ export class LessonPathRepository {
       .executeTakeFirst()
   }
 
-  async createLessonPath(courseKey: string, name: string, description?: string, trailhead?: string) {
+  async create(courseKey: string, name: string, description?: string, trailhead?: string) {
     return await this.db
       .insertInto('lesson_paths')
       .values({
@@ -35,7 +35,7 @@ export class LessonPathRepository {
       .executeTakeFirst()
   }
 
-  async updateLessonPath(key: string, name?: string, description?: string, trailhead?: string) {
+  async update(key: string, name?: string, description?: string, trailhead?: string) {
     return await this.db
       .updateTable('lesson_paths')
       .set({
@@ -48,7 +48,7 @@ export class LessonPathRepository {
       .executeTakeFirst()
   }
 
-  async deleteLessonPath(key: string) {
+  async delete(key: string) {
     await this.db
       .deleteFrom('lesson_paths')
       .where('public_key', '=', key)

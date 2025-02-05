@@ -38,7 +38,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       }
     }
   }, async (request, reply) => {
-    return await fastify.data.courses.getCourses()
+    return await fastify.data.courses.findAll()
   })
 
   fastify.get('/:key', {
@@ -49,7 +49,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     }
   }, async (request, reply) => {
     const { key } = request.params as { key: string }
-    const course = await fastify.data.courses.getCourse(key)
+    const course = await fastify.data.courses.get(key)
     if (!course) {
       return reply.code(404).send({ error: 'Course not found' })
     }
@@ -75,7 +75,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       reply.code(400).send('Title is required')
       return
     }
-    const course = await fastify.data.courses.createCourse(title, description, syllabus, teaser, coverArt)
+    const course = await fastify.data.courses.create(title, description, syllabus, teaser, coverArt)
 
     reply.code(201).send(course)
   })
@@ -95,7 +95,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
     const { key } = request.params as { key: string }
     const { title, description, syllabus, teaser, coverArt } = request.body as any
-    const course = await fastify.data.courses.updateCourse(key, title, description, syllabus, teaser, coverArt)
+    const course = await fastify.data.courses.update(key, title, description, syllabus, teaser, coverArt)
     if (!course) {
       return reply.code(404).send({ error: 'Course not found' })
     }
@@ -175,8 +175,10 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   })
 
   fastify.delete('/:key', async (request, reply) => {
+    // TODO: check role
+
     const { key } = request.params as { key: string }
-    await fastify.data.courses.deleteCourse(key)
+    await fastify.data.courses.delete(key)
     reply.code(204).send()
   })
 

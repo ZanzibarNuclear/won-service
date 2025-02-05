@@ -1,22 +1,7 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
+import { lessonContentSchema, lessonContentPayloadSchema } from '../../schema'
 
 const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
-
-  const lessonContentPayloadSchema = {
-    lessonKey: { type: 'string' },
-    contentPartType: { type: 'string' },
-    content: { type: 'string' },
-    sequence: { type: 'number' },
-  }
-
-  const lessonContentSchema = {
-    id: { type: 'number' },
-    publicKey: { type: 'string' },
-    lessonKey: { type: 'string' },
-    contentPartType: { type: 'string' },
-    content: { type: 'string' },
-    sequence: { type: 'number' },
-  }
 
   fastify.get('/:key', {
     schema: {
@@ -29,7 +14,7 @@ const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance
     }
   }, async (request, reply) => {
     const { key } = request.params as { key: string }
-    const plan = await fastify.data.lessonContents.getContentPart(key)
+    const plan = await fastify.data.lessonContents.get(key)
     if (!plan) {
       reply.code(404).send()
       return
@@ -60,7 +45,7 @@ const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance
       reply.code(400).send('Type of content is required')
       return
     }
-    const contentPart = await fastify.data.lessonContents.createContentPart(lessonKey, contentPartType, content, sequence)
+    const contentPart = await fastify.data.lessonContents.create(lessonKey, contentPartType, content, sequence)
     fastify.log.info(contentPart)
     reply.code(201).send(contentPart)
   })
@@ -74,13 +59,13 @@ const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance
 
     const { key } = request.params as { key: string }
     const { content, sequence } = request.body as ContentPartPayload
-    const contentPart = await fastify.data.lessonContents.updateContentPart(key, content, sequence)
+    const contentPart = await fastify.data.lessonContents.update(key, content, sequence)
     return contentPart
   })
 
   fastify.delete('/:key', async (request, reply) => {
     const { key } = request.params as { key: string }
-    return await fastify.data.lessonContents.deleteContentPart(key)
+    return await fastify.data.lessonContents.delete(key)
   })
 
 }

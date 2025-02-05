@@ -14,14 +14,14 @@ export class LessonPlanRepository {
       .execute()
   }
 
-  async getLessonPlan(key: string) {
+  async get(key: string) {
     return await this.db.selectFrom('lesson_plans')
       .selectAll()
       .where('public_key', '=', key)
       .executeTakeFirst()
   }
 
-  async createLessonPlan(courseKey: string, title: string, description?: string, objective?: string, sequence?: number, coverArt?: string) {
+  async create(courseKey: string, title: string, description?: string, objective?: string, sequence?: number, coverArt?: string) {
     return await this.db
       .insertInto('lesson_plans')
       .values({
@@ -37,7 +37,7 @@ export class LessonPlanRepository {
       .executeTakeFirst()
   }
 
-  async updateLessonPlan(key: string, title?: string, description?: string, objective?: string, sequence?: number, coverArt?: string) {
+  async update(key: string, title?: string, description?: string, objective?: string, sequence?: number, coverArt?: string) {
     return await this.db
       .updateTable('lesson_plans')
       .set({
@@ -52,7 +52,7 @@ export class LessonPlanRepository {
       .executeTakeFirst()
   }
 
-  async deleteLessonPlan(key: string) {
+  async delete(key: string) {
     return await this.db
       .deleteFrom('lesson_plans')
       .where('public_key', '=', key)

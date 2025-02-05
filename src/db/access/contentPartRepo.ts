@@ -23,7 +23,7 @@ export class LessonContentPartRepository {
       .execute()
   }
 
-  async getContentPart(key: string) {
+  async get(key: string) {
     return await this.db
       .selectFrom('lesson_content_parts')
       .selectAll()
@@ -31,7 +31,7 @@ export class LessonContentPartRepository {
       .executeTakeFirst()
   }
 
-  async createContentPart(lessonKey: string, lessonContentType: string, content?: JsonValue, sequence?: number, coverArt?: string) {
+  async create(lessonKey: string, lessonContentType: string, content?: JsonValue, sequence?: number, coverArt?: string) {
     return await this.db
       .insertInto('lesson_content_parts')
       .values({
@@ -45,7 +45,7 @@ export class LessonContentPartRepository {
       .executeTakeFirst()
   }
 
-  async updateContentPart(key: string, content?: JsonValue, sequence?: number) {
+  async update(key: string, content?: JsonValue, sequence?: number) {
     return await this.db
       .updateTable('lesson_content_parts')
       .set({
@@ -57,7 +57,7 @@ export class LessonContentPartRepository {
       .executeTakeFirst()
   }
 
-  async deleteContentPart(key: string) {
+  async delete(key: string) {
     return await this.db
       .deleteFrom('lesson_content_parts')
       .where('public_key', '=', key)

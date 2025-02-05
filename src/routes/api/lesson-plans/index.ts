@@ -1,12 +1,44 @@
 import { FastifyPluginAsync } from 'fastify'
-import { createLessonPlan, deleteLessonPlan, getLessonPlan, updateLessonPlan, publish, unpublish, archive, unarchive } from '../../../db/access/lessonPlan'
-import { getContentPartsForLessonPlan } from '../../../db/access/contentPart'
+import { lessonContentSchema } from '../../schema'
 
-const lessonPlanRoutes: FastifyPluginAsync = async (fastify, options) => {
+const lessonPlanRoutes: FastifyPluginAsync = async (fastify) => {
 
-  fastify.get('/:key', async (request, reply) => {
+  const lessonPlanPayloadSchema = {
+    courseKey: { type: 'string' },
+    title: { type: 'string' },
+    description: { type: 'string' },
+    objective: { type: 'string' },
+    sequence: { type: 'number' },
+    coverArt: { type: 'string' },
+  }
+
+  const lessonPlanSchema = {
+    type: 'object',
+    required: [],
+    properties: {
+      id: { type: 'number' },
+      publicKey: { type: 'string' },
+      courseKey: { type: 'string' },
+      title: { type: 'string' },
+      description: { type: 'string' },
+      objective: { type: 'string' },
+      sequence: { type: 'number' },
+      coverArt: { type: 'string' },
+      createdAt: { type: 'string' },
+      publishedAt: { type: 'string' },
+      archivedAt: { type: 'string' },
+    }
+  }
+
+  fastify.get('/:key', {
+    schema: {
+      response: {
+        200: lessonPlanSchema,
+      }
+    }
+  }, async (request, reply) => {
     const { key } = request.params as { key: string }
-    const plan = await getLessonPlan(key)
+    const plan = await fastify.data.lessonPlans.get(key)
     if (!plan) {
       reply.code(404).send()
       return
@@ -23,67 +55,111 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify, options) => {
     coverArt?: string | undefined
   }
 
-  fastify.post('/', async (request, reply) => {
+  fastify.post('/', {
+    schema: {
+      body: {
+        type: 'object',
+        properties: lessonPlanPayloadSchema,
+        required: ['courseKey', 'title'],
+      },
+      response: {
+        201: lessonPlanSchema,
+      },
+    },
+  }, async (request, reply) => {
     // TODO: check role
-    // if (!request.session?.userId) {
-    //   fastify.log.warn(`Only content editors may create courses`)
-    //   return reply.status(401).send({ error: 'Unauthorized' })
-    // }
 
-    const { courseKey, title, description, objective, sequence, coverArt } = request.body as LessonPlanPayload
+    const { courseKey, title, description, objective, sequence, coverArt } = request.body as any
     if (!title) {
       reply.code(400).send('Title is required')
       return
     }
-    const plan = await createLessonPlan(courseKey, title, description, objective, sequence, coverArt)
+    const plan = await fastify.data.lessonPlans.create(courseKey, title, description, objective, sequence, coverArt)
     fastify.log.info(plan)
     reply.code(201).send(plan)
   })
 
-  fastify.put('/:key', async (request, reply) => {
+  fastify.put('/:key', {
+    schema: {
+      response: {
+        200: lessonPlanSchema,
+      }
+    }
+  }, async (request, reply) => {
     // TODO: check role
-    // if (!request.session?.userId) {
-    //   fastify.log.warn(`Only content editors may create courses`)
-    //   return reply.status(401).send({ error: 'Unauthorized' })
-    // }
 
     const { key } = request.params as { key: string }
     const { title, description, objective, sequence, coverArt } = request.body as LessonPlanPayload
-    const plan = await updateLessonPlan(key, title, description, objective, sequence, coverArt)
+    const plan = await fastify.data.lessonPlans.update(key, title, description, objective, sequence, coverArt)
     return plan
   })
 
   fastify.delete('/:key', async (request, reply) => {
+    // TODO: check role
+
     const { key } = request.params as { key: string }
-    return await deleteLessonPlan(key)
+    return await fastify.data.lessonPlans.delete(key)
   })
 
   // TODO: add error handling for 404 -- for all learning resources
 
-  fastify.put('/:key/publish', async (request, reply) => {
+  fastify.put('/:key/publish', {
+    schema: {
+      response: {
+        200: lessonPlanSchema,
+      }
+    }
+  }, async (request, reply) => {
     const { key } = request.params as { key: string }
-    return await publish(key)
+    return await fastify.data.lessonPlans.publish(key)
   })
 
-  fastify.put('/:key/unpublish', async (request, reply) => {
+  fastify.put('/:key/unpublish', {
+    schema: {
+      response: {
+        200: lessonPlanSchema,
+      }
+    }
+  }, async (request, reply) => {
     const { key } = request.params as { key: string }
-    return await unpublish(key)
+    return await fastify.data.lessonPlans.unpublish(key)
   })
 
-  fastify.put('/:key/archive', async (request, reply) => {
+  fastify.put('/:key/archive', {
+    schema: {
+      response: {
+        200: lessonPlanSchema,
+      }
+    }
+  }, async (request, reply) => {
     const { key } = request.params as { key: string }
-    return await archive(key)
+    return await fastify.data.lessonPlans.archive(key)
   })
 
-  fastify.put('/:key/unarchive', async (request, reply) => {
+  fastify.put('/:key/unarchive', {
+    schema: {
+      response: {
+        200: lessonPlanSchema,
+      }
+    }
+  }, async (request, reply) => {
     const { key } = request.params as { key: string }
-    return await unarchive(key)
+    return await fastify.data.lessonPlans.unarchive(key)
   })
 
-  fastify.get('/:key/content-parts', async (request, reply) => {
+  fastify.get('/:key/content-parts', {
+    schema: {
+      response: {
+        200: {
+          type: Array,
+          items: lessonContentSchema,
+        }
+      }
+    }
+  }, async (request, reply) => {
     const { key } = request.params as { key: string }
-    const parts = await fastify.data.lessonContents.findByLessonPlan(key)
-    reply.send(parts)
+    const contents = await fastify.data.lessonContents.findByLessonPlan(key)
+    reply.send(contents)
   })
 
 }

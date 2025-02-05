@@ -5,11 +5,11 @@ import { genKey } from "../../utils"
 export class CourseRepository {
   constructor(private db: Kysely<DB>) { }
 
-  async getCourses() {
+  async findAll() {
     return await this.db.selectFrom('courses').selectAll().execute()
   }
 
-  async getCourse(key: string) {
+  async get(key: string) {
     return await this.db
       .selectFrom('courses')
       .selectAll()
@@ -17,7 +17,7 @@ export class CourseRepository {
       .executeTakeFirst()
   }
 
-  async createCourse(title: string, description?: string, syllabus?: string, teaser?: string, coverArt?: string) {
+  async create(title: string, description?: string, syllabus?: string, teaser?: string, coverArt?: string) {
     return await this.db
       .insertInto('courses')
       .values({
@@ -32,7 +32,7 @@ export class CourseRepository {
       .executeTakeFirst()
   }
 
-  async updateCourse(key: string, title?: string, description?: string, syllabus?: string, teaser?: string, coverArt?: string) {
+  async update(key: string, title?: string, description?: string, syllabus?: string, teaser?: string, coverArt?: string) {
     return await this.db
       .updateTable('courses')
       .set({
@@ -47,7 +47,7 @@ export class CourseRepository {
       .executeTakeFirst()
   }
 
-  async deleteCourse(key: string) {
+  async delete(key: string) {
     return await this.db
       .deleteFrom('courses')
       .where('public_key', '=', key)
