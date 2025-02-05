@@ -25,15 +25,15 @@ export interface FluxResponse {
 }
 
 export interface Course {
-  archived_at: string | null
-  cover_art: string | null
-  created_at: string | null
+  archivedAt: Date | null
+  coverArt: string | null
+  createdAt: Date | null
   description: string | null
   id: number
-  public_key: string
-  published_at: string | null
+  publicKey: string
+  publishedAt: Date | null
   syllabus: string | null
   teaser: string | null
-  test_only: boolean | null
+  testOnly: boolean | null
   title: string | null
 }

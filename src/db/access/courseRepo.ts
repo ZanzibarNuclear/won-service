@@ -1,47 +1,24 @@
 import { Kysely } from "kysely"
-import { DB, Courses } from '../types'
+import { DB } from '../types'
 import { genKey } from "../../utils"
-import { Course } from "../../types/won-flux-types"
-import { FastifyBaseLogger } from "fastify"
 
 export class CourseRepository {
-  constructor(private db: Kysely<DB>, private log: FastifyBaseLogger) { }
+  constructor(private db: Kysely<DB>) { }
 
-  private mapToCourse(record: Courses): Course {
-    return {
-      id: record.id,
-      publicKey: record.public_key,
-      title: record.title,
-      description: record.description,
-      syllabus: record.syllabus,
-      teaser: record.teaser,
-      coverArt: record.cover_art,
-      createdAt: record.created_at,
-      archivedAt: record.archived_at,
-      publishedAt: record.published_at,
-      testOnly: record.test_only
-    }
-  }
   async getCourses() {
-    const results = await this.db.selectFrom('courses').selectAll().execute()
-    return results.map(row => this.mapToCourse(row))
+    return await this.db.selectFrom('courses').selectAll().execute()
   }
 
   async getCourse(key: string) {
-    const result = await this.db
+    return await this.db
       .selectFrom('courses')
       .selectAll()
       .where('public_key', '=', key)
       .executeTakeFirst()
-
-    if (!result) return undefined
-
-    return this.mapToCourse(result)
   }
 
   async createCourse(title: string, description?: string, syllabus?: string, teaser?: string, coverArt?: string) {
-
-    const result = await this.db
+    return await this.db
       .insertInto('courses')
       .values({
         public_key: genKey(),
@@ -53,15 +30,10 @@ export class CourseRepository {
       })
       .returningAll()
       .executeTakeFirst()
-
-    if (!result) return undefined
-
-    return this.mapToCourse(result)
   }
 
   async updateCourse(key: string, title?: string, description?: string, syllabus?: string, teaser?: string, coverArt?: string) {
-
-    const result = await this.db
+    return await this.db
       .updateTable('courses')
       .set({
         title,
@@ -73,12 +45,6 @@ export class CourseRepository {
       .where('public_key', '=', key)
       .returningAll()
       .executeTakeFirst()
-
-    this.log.info('course update: ' + result)
-
-    if (!result) return undefined
-
-    return this.mapToCourse(result)
   }
 
   async deleteCourse(key: string) {
@@ -89,54 +55,38 @@ export class CourseRepository {
   }
 
   async publish(key: string) {
-    const result = await this.db
+    return await this.db
       .updateTable('courses')
       .set({ published_at: new Date() })
       .where('public_key', '=', key)
       .returningAll()
       .executeTakeFirst()
-
-    if (!result) return undefined
-
-    return this.mapToCourse(result)
   }
 
   async unpublish(key: string) {
-    const result = await this.db
+    return await this.db
       .updateTable('courses')
       .set({ published_at: null })
       .where('public_key', '=', key)
       .returningAll()
       .executeTakeFirst()
-
-    if (!result) return undefined
-
-    return this.mapToCourse(result)
   }
 
   async archive(key: string) {
-    const result = await this.db
+    return await this.db
       .updateTable('courses')
       .set({ archived_at: new Date() })
       .where('public_key', '=', key)
       .returningAll()
       .executeTakeFirst()
-
-    if (!result) return undefined
-
-    return this.mapToCourse(result)
   }
 
   async unarchive(key: string) {
-    const result = await this.db
+    return await this.db
       .updateTable('courses')
       .set({ archived_at: null })
       .where('public_key', '=', key)
       .returningAll()
       .executeTakeFirst()
-
-    if (!result) return undefined
-
-    return this.mapToCourse(result)
   }
 }

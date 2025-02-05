@@ -4,7 +4,7 @@ import { CourseRepository } from '../db/access/courseRepo'
 
 const dataAccessPlugin: FastifyPluginAsync = async (fastify, options) => {
   const data = {
-    courses: new CourseRepository(fastify.db, fastify.log)
+    courses: new CourseRepository(fastify.db)
   }
   fastify.decorate('data', data)
   fastify.log.info('registered dataAccess plugin')
