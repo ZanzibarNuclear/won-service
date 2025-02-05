@@ -1,36 +1,29 @@
 import { Kysely } from "kysely"
-import { DB } from '../types'
+import { DB, Courses } from '../types'
 import { genKey } from "../../utils"
-import { Static, Type } from '@sinclair/typebox'
-
-const Course = Type.Object({
-  publicKey: Type.String(),
-  title: Type.String(),
-  coverArt: Type.String(),
-  description: Type.String(),
-  syllabus: Type.String(),
-  teaser: Type.String(),
-  createdAt: Type.Date(),
-  publishedAt: Type.Date(),
-  archivedAt: Type.Date(),
-  testOnly: Type.Boolean(),
-})
-type CourseType = Static<typeof Course>
+import { Course } from "../../types/won-flux-types"
 
 export class CourseRepository {
   constructor(private db: Kysely<DB>) { }
 
-  // // Helper method to map database record to domain model
-  // private mapToCourse(record: Courses): CourseType {
-  //   return {
-  //     publicKey: record.public_key,
-  //     title: record.title,
-  //     coverArt: record.cover_art
-  //   }
-  // }
-
+  private mapToCourse(record: Courses): Course {
+    return {
+      id: record.id,
+      publicKey: record.public_key,
+      title: record.title,
+      description: record.description,
+      syllabus: record.syllabus,
+      teaser: record.teaser,
+      coverArt: record.cover_art,
+      createdAt: record.created_at,
+      archivedAt: record.archived_at,
+      publishedAt: record.published_at,
+      testOnly: record.test_only
+    }
+  }
   async getCourses() {
-    return await this.db.selectFrom('courses').selectAll().execute()
+    const results = await this.db.selectFrom('courses').selectAll().execute()
+    return results.map(row => this.mapToCourse(row))
   }
 
   async getCourse(key: string) {
@@ -42,12 +35,12 @@ export class CourseRepository {
 
     if (!result) return undefined
 
-    return result
+    return this.mapToCourse(result)
   }
 
   async createCourse(title: string, description?: string, syllabus?: string, teaser?: string, coverArt?: string) {
 
-    return await this.db
+    const result = await this.db
       .insertInto('courses')
       .values({
         public_key: genKey(),
@@ -59,11 +52,15 @@ export class CourseRepository {
       })
       .returningAll()
       .executeTakeFirst()
+
+    if (!result) return undefined
+
+    return this.mapToCourse(result)
   }
 
   async updateCourse(key: string, title?: string, description?: string, syllabus?: string, teaser?: string, coverArt?: string) {
 
-    return await this.db
+    const result = await this.db
       .updateTable('courses')
       .set({
         title,
@@ -75,6 +72,10 @@ export class CourseRepository {
       .where('public_key', '=', key)
       .returningAll()
       .executeTakeFirst()
+
+    if (!result) return undefined
+
+    return this.mapToCourse(result)
   }
 
   async deleteCourse(key: string) {
@@ -85,37 +86,54 @@ export class CourseRepository {
   }
 
   async publish(key: string) {
-
-    return await this.db
+    const result = await this.db
       .updateTable('courses')
       .set({ published_at: new Date() })
       .where('public_key', '=', key)
       .returningAll()
-      .execute()
+      .executeTakeFirst()
+
+    if (!result) return undefined
+
+    return this.mapToCourse(result)
   }
 
   async unpublish(key: string) {
-    return await this.db
+    const result = await this.db
       .updateTable('courses')
       .set({ published_at: null })
       .where('public_key', '=', key)
       .returningAll()
-      .execute()
+      .executeTakeFirst()
+
+    if (!result) return undefined
+
+    return this.mapToCourse(result)
   }
 
   async archive(key: string) {
-    return await this.db
+    const result = await this.db
       .updateTable('courses')
       .set({ archived_at: new Date() })
       .where('public_key', '=', key)
-      .execute()
+      .returningAll()
+      .executeTakeFirst()
+
+    if (!result) return undefined
+
+    return this.mapToCourse(result)
   }
 
   async unarchive(key: string) {
-    return await this.db
+    const result = await this.db
       .updateTable('courses')
       .set({ archived_at: null })
       .where('public_key', '=', key)
-      .execute()
+      .returningAll()
+      .executeTakeFirst()
+
+    if (!result) return undefined
+
+    return this.mapToCourse(result)
   }
 }

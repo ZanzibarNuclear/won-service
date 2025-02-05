@@ -1,124 +1,156 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
-import {
-  getCourse,
-  getCourses,
-  createCourse,
-  updateCourse,
-  deleteCourse,
-  publish,
-  unpublish,
-  archive,
-  unarchive
-} from '../../../db/access/course'
-import {
-  getLessonPlansForCourse
-} from '../../../db/access/lessonPlan'
-import { getLessonPathsForCourse } from '../../../db/access/lessonPath'
-
-const verifyEditorRole = () => {
-  return false
-}
-
-const courseBodySchema = {
-  type: 'object',
-  required: [],
-  properties: {
-    publicKey: {
-      type: "string"
-    },
-
-  }
-}
 
 const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
-  fastify.get('/', async (request, reply) => {
-    return await getCourses()
-  })
-
-  type CoursePayload = {
-    title?: string
-    description?: string
-    syllabus?: string | undefined
-    teaser?: string | undefined
-    coverArt?: string | undefined
+  const coursePayloadSchema = {
+    title: { type: 'string' },
+    description: { type: 'string' },
+    syllabus: { type: 'string' },
+    teaser: { type: 'string' },
+    coverArt: { type: 'string' },
   }
 
-  fastify.post('/', async (request, reply) => {
-    // TODO: check role
-    // if (!request.session?.userId) {
-    //   fastify.log.warn(`Only content editors may create courses`)
-    //   return reply.status(401).send({ error: 'Unauthorized' })
-    // }
-
-    const { title, description, syllabus, teaser, coverArt } = request.body as CoursePayload
-    if (!title) {
-      reply.code(400).send('Title is required')
-      return
+  const courseSchema = {
+    type: 'object',
+    required: [],
+    properties: {
+      id: { type: 'number' },
+      publicKey: { type: 'string' },
+      title: { type: 'string' },
+      description: { type: 'string' },
+      syllabus: { type: 'string' },
+      teaser: { type: 'string' },
+      coverArt: { type: 'string' },
+      createdAt: { type: 'string' },
+      publishedAt: { type: 'string' },
+      archivedAt: { type: 'string' },
+      testOnly: { type: 'boolean' }
     }
-    const course = await createCourse(title, description, syllabus, teaser, coverArt)
-    fastify.log.info(course)
-    reply.code(201).send(course)
+  }
+
+  fastify.get('/', {
+    schema: {
+      response: {
+        200: {
+          type: 'array',
+          items: courseSchema,
+        }
+      }
+    }
+  }, async (request, reply) => {
+    return await fastify.data.courses.getCourses()
   })
 
-  fastify.get('/:key', async (request, reply) => {
+  fastify.get('/:key', {
+    schema: {
+      response: {
+        200: courseSchema,
+      }
+    }
+  }, async (request, reply) => {
     const { key } = request.params as { key: string }
-    const course = await getCourse(key)
+    const course = await fastify.data.courses.getCourse(key)
     if (!course) {
-      reply.code(404).send()
-      return
+      return reply.code(404).send({ error: 'Course not found' })
     }
     reply.send(course)
   })
 
-  fastify.put('/:key', async (request, reply) => {
+  fastify.post('/', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['title'],
+        properties: coursePayloadSchema,
+      },
+      response: {
+        201: courseSchema,
+      },
+    },
+  }, async (request, reply) => {
+    // TODO: check role - only author role
+
+    const { title, description, syllabus, teaser, coverArt } = request.body as any
+    if (!title) {
+      reply.code(400).send('Title is required')
+      return
+    }
+    const course = await fastify.data.courses.createCourse(title, description, syllabus, teaser, coverArt)
+
+    reply.code(201).send(course)
+  })
+
+  fastify.put('/:key', {
+    schema: {
+      body: {
+        type: 'object',
+        properties: coursePayloadSchema,
+      },
+      response: {
+        200: courseSchema,
+      }
+    }
+  }, async (request, reply) => {
     // TODO: check role
-    // if (!request.session?.userId) {
-    //   fastify.log.warn(`Only content editors may create courses`)
-    //   return reply.status(401).send({ error: 'Unauthorized' })
-    // }
 
     const { key } = request.params as { key: string }
-    const { title, description, syllabus, teaser, coverArt } = request.body as CoursePayload
-    const course = await updateCourse(key, title, description, syllabus, teaser, coverArt)
-    return course
+    const { title, description, syllabus, teaser, coverArt } = request.body as any
+    const course = await fastify.data.courses.updateCourse(key, title, description, syllabus, teaser, coverArt)
+    reply.send(course)
+  })
+
+  fastify.put('/:key/publish', {
+    schema: {
+      response: {
+        200: courseSchema,
+      }
+    }
+  }, async (request, reply) => {
+    const { key } = request.params as { key: string }
+    const result = await fastify.data.courses.publish(key)
+    reply.send(result)
+  })
+
+  fastify.put('/:key/unpublish', {
+    schema: {
+      response: {
+        200: courseSchema,
+      }
+    }
+  }, async (request, reply) => {
+    const { key } = request.params as { key: string }
+    const result = await fastify.data.courses.unpublish(key)
+    reply.send(result)
+  })
+
+  fastify.put('/:key/archive', {
+    schema: {
+      response: {
+        200: courseSchema,
+      }
+    }
+  }, async (request, reply) => {
+    const { key } = request.params as { key: string }
+    const result = await fastify.data.courses.archive(key)
+    reply.send(result)
+  })
+
+  fastify.put('/:key/unarchive', {
+    schema: {
+      response: {
+        200: courseSchema,
+      }
+    }
+  }, async (request, reply) => {
+    const { key } = request.params as { key: string }
+    const result = await fastify.data.courses.unarchive(key)
+    reply.send(result)
   })
 
   fastify.delete('/:key', async (request, reply) => {
     const { key } = request.params as { key: string }
-    return await deleteCourse(key)
-  })
-
-  fastify.put('/:key/publish', async (request, reply) => {
-    const { key } = request.params as { key: string }
-    return await publish(key)
-  })
-
-  fastify.put('/:key/unpublish', async (request, reply) => {
-    const { key } = request.params as { key: string }
-    return await unpublish(key)
-  })
-
-  fastify.put('/:key/archive', async (request, reply) => {
-    const { key } = request.params as { key: string }
-    return await archive(key)
-  })
-
-  fastify.put('/:key/unarchive', async (request, reply) => {
-    const { key } = request.params as { key: string }
-    return await unarchive(key)
-  })
-
-  fastify.get('/:key/lesson-plans', async (request, reply) => {
-    const { key } = request.params as { key: string }
-    const plans = await getLessonPlansForCourse(key)
-    reply.send(plans)
-  })
-
-  fastify.get('/:key/lesson-paths', async (request, reply) => {
-    const { key } = request.params as { key: string }
-    const plans = await getLessonPathsForCourse(key)
-    reply.send(plans)
+    await fastify.data.courses.deleteCourse(key)
+    reply.code(204).send()
   })
 
 }
