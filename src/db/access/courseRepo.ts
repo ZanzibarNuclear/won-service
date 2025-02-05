@@ -2,9 +2,10 @@ import { Kysely } from "kysely"
 import { DB, Courses } from '../types'
 import { genKey } from "../../utils"
 import { Course } from "../../types/won-flux-types"
+import { FastifyBaseLogger } from "fastify"
 
 export class CourseRepository {
-  constructor(private db: Kysely<DB>) { }
+  constructor(private db: Kysely<DB>, private log: FastifyBaseLogger) { }
 
   private mapToCourse(record: Courses): Course {
     return {
@@ -72,6 +73,8 @@ export class CourseRepository {
       .where('public_key', '=', key)
       .returningAll()
       .executeTakeFirst()
+
+    this.log.info('course update: ' + result)
 
     if (!result) return undefined
 
