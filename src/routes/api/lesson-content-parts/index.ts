@@ -24,11 +24,7 @@ const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance
 
   fastify.post('/', {
     schema: {
-      body: {
-        type: 'object',
-        properties: LessonContentBodySchema,
-        required: ['title'],
-      },
+      body: LessonContentBodySchema,
       response: {
         201: LessonContentSchema,
       },

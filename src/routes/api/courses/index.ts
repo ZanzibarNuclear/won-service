@@ -1,39 +1,14 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
+import { CourseBodySchema, CourseBodyType, CourseSchema, LessonPlanSchema, LessonPathSchema } from '../schema'
 
 const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
-
-  const coursePayloadSchema = {
-    title: { type: 'string' },
-    description: { type: 'string' },
-    syllabus: { type: 'string' },
-    teaser: { type: 'string' },
-    coverArt: { type: 'string' },
-  }
-
-  const courseSchema = {
-    type: 'object',
-    required: [],
-    properties: {
-      id: { type: 'number' },
-      publicKey: { type: 'string' },
-      title: { type: 'string' },
-      description: { type: 'string' },
-      syllabus: { type: 'string' },
-      teaser: { type: 'string' },
-      coverArt: { type: 'string' },
-      createdAt: { type: 'string' },
-      publishedAt: { type: 'string' },
-      archivedAt: { type: 'string' },
-      testOnly: { type: 'boolean' }
-    }
-  }
 
   fastify.get('/', {
     schema: {
       response: {
         200: {
           type: 'array',
-          items: courseSchema,
+          items: CourseSchema,
         }
       }
     }
@@ -44,7 +19,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.get('/:key', {
     schema: {
       response: {
-        200: courseSchema,
+        200: CourseSchema,
       }
     }
   }, async (request, reply) => {
@@ -58,19 +33,15 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
   fastify.post('/', {
     schema: {
-      body: {
-        type: 'object',
-        properties: coursePayloadSchema,
-        required: ['title'],
-      },
+      body: CourseBodySchema,
       response: {
-        201: courseSchema,
+        201: CourseSchema,
       },
     },
   }, async (request, reply) => {
     // TODO: check role - only author role
 
-    const { title, description, syllabus, teaser, coverArt } = request.body as any
+    const { title, description, syllabus, teaser, coverArt } = request.body as CourseBodyType
     if (!title) {
       reply.code(400).send('Title is required')
       return
@@ -82,19 +53,16 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
   fastify.put('/:key', {
     schema: {
-      body: {
-        type: 'object',
-        properties: coursePayloadSchema,
-      },
+      body: CourseBodySchema,
       response: {
-        200: courseSchema,
+        200: CourseSchema,
       }
     }
   }, async (request, reply) => {
     // TODO: check role
 
     const { key } = request.params as { key: string }
-    const { title, description, syllabus, teaser, coverArt } = request.body as any
+    const { title, description, syllabus, teaser, coverArt } = request.body as CourseBodyType
     const course = await fastify.data.courses.update(key, title, description, syllabus, teaser, coverArt)
     if (!course) {
       return reply.code(404).send({ error: 'Course not found' })
@@ -105,7 +73,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.put('/:key/publish', {
     schema: {
       response: {
-        200: courseSchema,
+        200: CourseSchema,
       }
     }
   }, async (request, reply) => {
@@ -120,7 +88,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.put('/:key/unpublish', {
     schema: {
       response: {
-        200: courseSchema,
+        200: CourseSchema,
       }
     }
   }, async (request, reply) => {
@@ -135,7 +103,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.put('/:key/archive', {
     schema: {
       response: {
-        200: courseSchema,
+        200: CourseSchema,
       }
     }
   }, async (request, reply) => {
@@ -150,7 +118,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.put('/:key/unarchive', {
     schema: {
       response: {
-        200: courseSchema,
+        200: CourseSchema,
       }
     }
   }, async (request, reply) => {
@@ -162,13 +130,31 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     reply.send(course)
   })
 
-  fastify.get('/:key/lesson-plans', async (request, reply) => {
+  fastify.get('/:key/lesson-plans', {
+    schema: {
+      response: {
+        200: {
+          type: 'array',
+          items: LessonPlanSchema,
+        }
+      }
+    }
+  }, async (request, reply) => {
     const { key } = request.params as { key: string }
     const plans = await fastify.data.lessonPlans.findByCourse(key)
     reply.send(plans)
   })
 
-  fastify.get('/:key/lesson-paths', async (request, reply) => {
+  fastify.get('/:key/lesson-paths', {
+    schema: {
+      response: {
+        200: {
+          type: 'array',
+          items: LessonPathSchema,
+        }
+      }
+    }
+  }, async (request, reply) => {
     const { key } = request.params as { key: string }
     const plans = await fastify.data.lessonPaths.findByCourse(key)
     reply.send(plans)

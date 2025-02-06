@@ -26,7 +26,7 @@ export class CourseRepository {
         description,
         syllabus,
         teaser,
-        cover_art: coverArt
+        cover_art: coverArt,
       })
       .returningAll()
       .executeTakeFirst()
@@ -40,7 +40,7 @@ export class CourseRepository {
         description,
         syllabus,
         teaser,
-        cover_art: coverArt
+        cover_art: coverArt,
       })
       .where('public_key', '=', key)
       .returningAll()
