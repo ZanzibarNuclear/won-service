@@ -10,7 +10,6 @@ export const CourseBodySchema = Type.Object({
 export type CourseBodyType = Static<typeof CourseBodySchema>
 
 export const CourseSchema = Type.Object({
-  id: Type.Number(),
   publicKey: Type.String(),
   title: Type.String(),
   description: Type.String(),

@@ -33,9 +33,10 @@
     "@fastify/autoload": "^6.1.0",
     "@fastify/cors": "^10.0.2",
     "@fastify/env": "^5.0.2",
-    "@fastify/oauth2": "^8.1.1",
+    "@fastify/oauth2": "^8.1.2",
     "@fastify/sensible": "^6.0.3",
-    "@sinclair/typebox": "^0.34.15",
+    "@fastify/swagger": "^9.4.2",
+    "@sinclair/typebox": "^0.34.16",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",
@@ -43,7 +44,7 @@
     "fastify-plugin": "^5.0.1",
     "jsonwebtoken": "^9.0.2",
     "kysely": "^0.27.5",
-    "pg": "^8.13.1",
+    "pg": "^8.13.2",
     "resend": "^4.1.2",
     "zod": "^3.24.1"
   },
@@ -52,7 +53,7 @@
     "@types/node": "^22.13.1",
     "@types/pg": "^8.11.11",
     "kysely-codegen": "^0.17.0",
-    "kysely-ctl": "^0.10.1",
+    "kysely-ctl": "^0.11.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.3"
   }
