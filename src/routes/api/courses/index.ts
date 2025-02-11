@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
-import { CourseBodySchema, CourseBodyType, CourseSchema, LessonPlanSchema, LessonPathSchema } from '../schema'
+import { CourseBodySchema, CourseBodyType, CreateCourseSchema, CreateCourseType, CourseSchema, LessonPlanSchema, LessonPathSchema } from '../schema'
 
 const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
@@ -33,7 +33,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
   fastify.post('/', {
     schema: {
-      body: CourseBodySchema,
+      body: CreateCourseSchema,
       response: {
         201: CourseSchema,
       },
@@ -41,11 +41,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   }, async (request, reply) => {
     // TODO: check role - only author role
 
-    const { title, description, syllabus, teaser, coverArt } = request.body as CourseBodyType
-    if (!title) {
-      reply.code(400).send('Title is required')
-      return
-    }
+    const { title, description, syllabus, teaser, coverArt } = request.body as CreateCourseType
     const course = await fastify.data.courses.create(title, description, syllabus, teaser, coverArt)
 
     reply.code(201).send(course)

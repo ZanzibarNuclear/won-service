@@ -1,79 +1,35 @@
 import { FastifyPluginAsync } from 'fastify'
-import { LessonContentSchema } from '../schema'
+import { LessonPlanSchema, CreateLessonPlanSchema, CreateLessonPlanType, LessonPlanBodySchema, LessonPlanBodyType, LessonContentSchema } from '../schema'
 
 const lessonPlanRoutes: FastifyPluginAsync = async (fastify) => {
-
-  const lessonPlanPayloadSchema = {
-    courseKey: { type: 'string' },
-    title: { type: 'string' },
-    description: { type: 'string' },
-    objective: { type: 'string' },
-    sequence: { type: 'number' },
-    coverArt: { type: 'string' },
-  }
-
-  const lessonPlanSchema = {
-    type: 'object',
-    required: [],
-    properties: {
-      id: { type: 'number' },
-      publicKey: { type: 'string' },
-      courseKey: { type: 'string' },
-      title: { type: 'string' },
-      description: { type: 'string' },
-      objective: { type: 'string' },
-      sequence: { type: 'number' },
-      coverArt: { type: 'string' },
-      createdAt: { type: 'string' },
-      publishedAt: { type: 'string' },
-      archivedAt: { type: 'string' },
-    }
-  }
 
   fastify.get('/:key', {
     schema: {
       response: {
-        200: lessonPlanSchema,
+        200: LessonPlanSchema,
       }
     }
   }, async (request, reply) => {
     const { key } = request.params as { key: string }
     const plan = await fastify.data.lessonPlans.get(key)
     if (!plan) {
-      reply.code(404).send()
+      reply.code(404).send({ error: 'Lesson plan not found' })
       return
     }
     reply.send(plan)
   })
 
-  type LessonPlanPayload = {
-    courseKey: string
-    title?: string
-    description?: string
-    objective?: string | undefined
-    sequence?: number | undefined
-    coverArt?: string | undefined
-  }
-
   fastify.post('/', {
     schema: {
-      body: {
-        type: 'object',
-        properties: lessonPlanPayloadSchema,
-        required: ['courseKey', 'title'],
-      },
+      body: CreateLessonPlanSchema,
       response: {
-        201: lessonPlanSchema,
+        201: LessonPlanSchema,
       },
     },
   }, async (request, reply) => {
     // TODO: check role
 
-    const { courseKey, title, description, objective, sequence, coverArt } = request.body as any
-    if (!title) {
-      reply.code(400).send('Title is required')
-      return
-    }
+    const { courseKey, title, description, objective, sequence, coverArt } = request.body as CreateLessonPlanType
     const plan = await fastify.data.lessonPlans.create(courseKey, title, description, objective, sequence, coverArt)
     fastify.log.info(plan)
     reply.code(201).send(plan)
@@ -82,14 +38,14 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.put('/:key', {
     schema: {
       response: {
-        200: lessonPlanSchema,
+        200: LessonPlanBodySchema,
       }
     }
   }, async (request, reply) => {
     // TODO: check role
 
     const { key } = request.params as { key: string }
-    const { title, description, objective, sequence, coverArt } = request.body as LessonPlanPayload
+    const { title, description, objective, sequence, coverArt } = request.body as LessonPlanBodyType
     const plan = await fastify.data.lessonPlans.update(key, title, description, objective, sequence, coverArt)
     return plan
   })
@@ -106,7 +62,7 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.put('/:key/publish', {
     schema: {
       response: {
-        200: lessonPlanSchema,
+        200: LessonPlanSchema,
       }
     }
   }, async (request, reply) => {
@@ -117,7 +73,7 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.put('/:key/unpublish', {
     schema: {
       response: {
-        200: lessonPlanSchema,
+        200: LessonPlanSchema,
       }
     }
   }, async (request, reply) => {
@@ -128,7 +84,7 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.put('/:key/archive', {
     schema: {
       response: {
-        200: lessonPlanSchema,
+        200: LessonPlanSchema,
       }
     }
   }, async (request, reply) => {
@@ -139,7 +95,7 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.put('/:key/unarchive', {
     schema: {
       response: {
-        200: lessonPlanSchema,
+        200: LessonPlanSchema,
       }
     }
   }, async (request, reply) => {

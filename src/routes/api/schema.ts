@@ -9,6 +9,14 @@ export const CourseBodySchema = Type.Object({
 })
 export type CourseBodyType = Static<typeof CourseBodySchema>
 
+export const CreateCourseSchema = Type.Intersect([
+  CourseBodySchema,
+  Type.Object({
+    title: Type.String(),
+  })
+])
+export type CreateCourseType = Static<typeof CreateCourseSchema>
+
 export const CourseSchema = Type.Object({
   publicKey: Type.String(),
   title: Type.String(),
@@ -22,9 +30,50 @@ export const CourseSchema = Type.Object({
 })
 export type CourseType = Static<typeof CourseSchema>
 
-export const LessonPlanSchema = Type.Object({})
+export const LessonPlanBodySchema = Type.Object({
+  courseKey: Type.Optional(Type.String()),
+  title: Type.Optional(Type.String()),
+  description: Type.Optional(Type.String()),
+  objective: Type.Optional(Type.String()),
+  sequence: Type.Optional(Type.Number()),
+  coverArt: Type.Optional(Type.String()),
+})
+export type LessonPlanBodyType = Static<typeof LessonPlanBodySchema>
+
+export const CreateLessonPlanSchema = Type.Intersect([
+  LessonPlanBodySchema,
+  Type.Object({
+    courseKey: Type.String(),
+    title: Type.String()
+  })
+])
+export type CreateLessonPlanType = Static<typeof CreateLessonPlanSchema>
+
+Type.Object({
+  courseKey: Type.Optional(Type.String()),
+  title: Type.Optional(Type.String()),
+  description: Type.Optional(Type.String()),
+  objective: Type.Optional(Type.String()),
+  sequence: Type.Optional(Type.Number()),
+  coverArt: Type.Optional(Type.String()),
+})
+
+export const LessonPlanSchema = Type.Object({
+  publicKey: Type.String(),
+  courseKey: Type.String(),
+  title: Type.String(),
+  description: Type.String(),
+  objective: Type.String(),
+  sequence: Type.Number(),
+  coverArt: Type.String(),
+  createdAt: Type.String(),
+  publishedAt: Type.String(),
+  archivedAt: Type.String(),
+})
+export type LessonPlanType = Static<typeof LessonPlanSchema>
 
 export const LessonPathSchema = Type.Object({})
+export type LessonPathType = Static<typeof LessonPathSchema>
 
 
 export const LessonContentSchema = Type.Object({
