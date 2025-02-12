@@ -23,3 +23,17 @@ export interface FluxResponse {
   total: number
   hasMore: boolean
 }
+
+export interface Course {
+  archivedAt: Date | null
+  coverArt: string | null
+  createdAt: Date | null
+  description: string | null
+  id: number
+  publicKey: string
+  publishedAt: Date | null
+  syllabus: string | null
+  teaser: string | null
+  testOnly: boolean | null
+  title: string | null
+}
