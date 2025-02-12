@@ -17,7 +17,7 @@ export class LessonStepRepository {
       .selectFrom('lesson_steps')
       .selectAll()
       .where('id', '=', id)
-      .execute()
+      .executeTakeFirst()
   }
 
   async create(pathKey: string, from: string, to: string, teaser?: string) {
