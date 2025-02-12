@@ -1,7 +1,8 @@
 import { FastifyPluginAsync } from 'fastify'
-import { createEvent, getEvents } from '../../../db/access/event'
+import { registerFeedback, getFeedback } from '../../../db/access/feedback'
+import { JsonValue } from "../../../db/types"
 
-const eventsRoutes: FastifyPluginAsync = async (fastify, options) => {
+const feedbackRoutes: FastifyPluginAsync = async (fastify, options) => {
 
   const DEFAULT_LIMIT = 10
   const MAX_LIMIT = 50
@@ -13,12 +14,12 @@ const eventsRoutes: FastifyPluginAsync = async (fastify, options) => {
       from?: string
       to?: string
       asc?: boolean
-      actor?: string
+      user?: string
     }
   }>('/', async (request, reply) => {
-    const { limit, offset, asc, from, to, actor } = request.query
+    const { limit, offset, asc, from, to, user } = request.query
 
-    fastify.log.info(`Fetching events: limit=${limit}, offset=${offset}, asc=${asc}, from=${from}, to=${to}, actor=${actor}`)
+    fastify.log.info(`Fetching events: limit=${limit}, offset=${offset}, asc=${asc}, from=${from}, to=${to}, user=${user}`)
 
     // guard against returning too many
     let guardedLimit = DEFAULT_LIMIT
@@ -27,22 +28,22 @@ const eventsRoutes: FastifyPluginAsync = async (fastify, options) => {
       fastify.log.info(`Adjusting limit to ${guardedLimit}`)
     }
 
-    const results = await getEvents(guardedLimit, offset, { from, to, asc, actor })
+    const results = await getFeedback(guardedLimit, offset, { from, to, asc, user })
 
     return { items: results, total: results.length, hasMore: results.length === guardedLimit }
   })
 
   type eventPayload = {
-    actor: string | undefined
-    details: string
+    context: JsonValue
+    message: string
   }
 
   fastify.post('/', async (request, reply) => {
-    const { details } = request.body as eventPayload
-    const actor = request.session?.userId
+    const user_id = request.session?.userId
+    const { context, message } = request.body as eventPayload
 
     try {
-      await createEvent(actor, details)
+      await registerFeedback(user_id, context, message)
     } catch (err) {
       fastify.log.error(err)
       reply.status(500).send('Sorry, something went wrong.')
@@ -54,4 +55,4 @@ const eventsRoutes: FastifyPluginAsync = async (fastify, options) => {
 
 }
 
-export default eventsRoutes
+export default feedbackRoutes

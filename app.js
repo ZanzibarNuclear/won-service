@@ -8,6 +8,7 @@ const options = {}
 
 module.exports = async function (fastify, opts) {
   // Place here your custom code!
+  await fastify.register(require('@fastify/swagger'))
 
   // Do not touch the following lines
 

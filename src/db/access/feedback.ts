@@ -1,20 +1,21 @@
 import { db } from "../Database"
+import { JsonValue } from "../types"
 
 // queries
 export interface EventFilter {
   from?: string
   to?: string
   asc?: boolean
-  actor?: string
+  user?: string
 }
 
-export const getEvents = async (limit: number = 0, offset: number = 0, filter: EventFilter) => {
+export const getFeedback = async (limit: number = 0, offset: number = 0, filter: EventFilter) => {
 
-  const { from, to, asc, actor } = filter
-  let query = db.selectFrom('events').selectAll()
+  const { from, to, asc, user } = filter
+  let query = db.selectFrom('feedback_messages').selectAll()
 
-  if (actor) {
-    query = query.where('actor_id', '=', actor)
+  if (user) {
+    query = query.where('user_id', '=', user)
   }
   if (from) {
     const ts = new Date(from)
@@ -33,12 +34,11 @@ export const getEvents = async (limit: number = 0, offset: number = 0, filter: E
 }
 
 // mutations
-export const createEvent = async (actorId: string | undefined, details: string) => {
+export const registerFeedback = async (user_id: string | undefined, context: JsonValue, message: string) => {
   let event = await db
-    .insertInto('events')
+    .insertInto('feedback_messages')
     .values({
-      actor_id: actorId,
-      details: details
+      user_id, context, message
     })
     .returningAll()
     .execute()
