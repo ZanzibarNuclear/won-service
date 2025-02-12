@@ -1,46 +1,53 @@
+import { CreateLessonPathSchema, CreateLessonPathType, LessonPathBodyType, LessonPathBodySchema, LessonStepSchema } from './../schema';
 import { FastifyPluginAsync } from 'fastify'
+import { LessonPathSchema } from '../schema'
 
 const lessonPathRoutes: FastifyPluginAsync = async (fastify, options) => {
 
-  fastify.get('/:key', async (request, reply) => {
-    const { key } = request.params as { key: string }
-    const plan = await fastify.data.lessonPaths.get(key)
-    if (!plan) {
-      reply.code(404).send()
-      return
+  fastify.get('/:key', {
+    schema: {
+      response: {
+        200: LessonPathSchema,
+      }
     }
-    reply.send(plan)
+  }, async (request, reply) => {
+    const { key } = request.params as { key: string }
+    const path = await fastify.data.lessonPaths.get(key)
+    if (!path) {
+      return reply.code(404).send({ error: 'Lesson path not found' })
+    }
+    reply.send(path)
   })
 
-  type LessonPathPayload = {
-    courseKey?: string
-    name?: string
-    description?: string
-    trailhead?: string
-  }
-
-  fastify.post('/', async (request, reply) => {
+  fastify.post('/', {
+    schema: {
+      body: CreateLessonPathSchema,
+      response: {
+        201: LessonPathSchema,
+      },
+    },
+  }, async (request, reply) => {
     // TODO: check role
-    const { courseKey, name, description, trailhead } = request.body as LessonPathPayload
-    if (!courseKey) {
-      reply.code(400).send('Course key is required')
-      return
-    }
-    if (!name) {
-      reply.code(400).send('This lesson path needs a name')
-      return
-    }
+    const { courseKey, name, description, trailhead } = request.body as CreateLessonPathType
     const lessonPath = await fastify.data.lessonPaths.create(courseKey, name, description, trailhead)
-    fastify.log.info(lessonPath)
-    reply.code(201).send(lessonPath)
+
+    return reply.code(201).send(lessonPath)
   })
 
-  fastify.put('/:key', async (request, reply) => {
+  fastify.put('/:key', {
+    schema: {
+      body: LessonPathBodySchema,
+      response: {
+        200: LessonPathSchema,
+      }
+    }
+  }, async (request, reply) => {
     // TODO: check role
     const { key } = request.params as { key: string }
-    const { name, description, trailhead } = request.body as LessonPathPayload
+    const { name, description, trailhead } = request.body as LessonPathBodyType
     const lessonPath = await fastify.data.lessonPaths.update(key, name, description, trailhead)
-    return lessonPath
+
+    return reply.code(200).send(lessonPath)
   })
 
   fastify.delete('/:key', async (request, reply) => {
@@ -49,10 +56,19 @@ const lessonPathRoutes: FastifyPluginAsync = async (fastify, options) => {
     return await fastify.data.lessonPaths.delete(key)
   })
 
-  fastify.get('/:key/lesson-steps', async (request, reply) => {
+  fastify.get('/:key/lesson-steps', {
+    schema: {
+      response: {
+        200: {
+          type: 'array',
+          items: LessonStepSchema,
+        }
+      }
+    }
+  }, async (request, reply) => {
     const { key } = request.params as { key: string }
-    const plans = await fastify.data.lessonSteps.findByPath(key)
-    reply.send(plans)
+    const steps = await fastify.data.lessonSteps.findByPath(key)
+    reply.send(steps)
   })
 
 }

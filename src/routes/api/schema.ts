@@ -72,10 +72,6 @@ export const LessonPlanSchema = Type.Object({
 })
 export type LessonPlanType = Static<typeof LessonPlanSchema>
 
-export const LessonPathSchema = Type.Object({})
-export type LessonPathType = Static<typeof LessonPathSchema>
-
-
 export const LessonContentSchema = Type.Object({
   publicKey: Type.String(),
   lessonKey: Type.String(),
@@ -109,17 +105,54 @@ export const CreateLessonContentSchema = Type.Intersect([
 ])
 export type CreateLessonContentType = Static<typeof CreateLessonContentSchema>
 
-export const lessonStepPayloadSchema = {
-  lessonPath: { type: 'string' },
-  from: { type: 'string' },
-  to: { type: 'string' },
-  teaser: { type: 'string' },
-}
+export const LessonPathSchema = Type.Object({
+  publicKey: Type.Optional(Type.String()),
+  courseKey: Type.Optional(Type.String()),
+  name: Type.Optional(Type.String()),
+  description: Type.Optional(Type.String()),
+  trailhead: Type.Optional(Type.String()),
+})
+export type LessonPathType = Static<typeof LessonPathSchema>
 
-export const lessonStepSchema = {
-  id: { type: 'number' },
-  lessonPath: { type: 'string' },
-  from: { type: 'string' },
-  to: { type: 'string' },
-  teaser: { type: 'string' },
-}
+export const LessonPathBodySchema = Type.Object({
+  courseKey: Type.Optional(Type.String()),
+  name: Type.Optional(Type.String()),
+  description: Type.Optional(Type.String()),
+  trailhead: Type.Optional(Type.String()),
+})
+export type LessonPathBodyType = Static<typeof LessonPathBodySchema>
+
+export const CreateLessonPathSchema = Type.Intersect([
+  LessonPathBodySchema,
+  Type.Object({
+    courseKey: Type.String(),
+    name: Type.String(),
+  })
+])
+export type CreateLessonPathType = Static<typeof CreateLessonPathSchema>
+
+export const LessonStepSchema = Type.Object({
+  id: Type.Optional(Type.Number()),
+  lessonPath: Type.Optional(Type.String()),
+  from: Type.Optional(Type.String()),
+  to: Type.Optional(Type.String()),
+  teaser: Type.Optional(Type.String()),
+})
+export type LessonStepType = Static<typeof LessonStepSchema>
+
+export const LessonStepBodySchema = Type.Object({
+  from: Type.Optional(Type.String()),
+  to: Type.Optional(Type.String()),
+  teaser: Type.Optional(Type.String()),
+})
+export type LessonStepBodyType = Static<typeof LessonStepSchema>
+
+export const CreateLessonStepSchema = Type.Intersect([
+  LessonStepBodySchema,
+  Type.Object({
+    lessonPath: Type.String(),
+    from: Type.String(),
+    to: Type.String(),
+  })
+])
+export type CreateLessonStepType = Static<typeof CreateLessonStepSchema>
