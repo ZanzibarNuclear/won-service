@@ -1,18 +1,10 @@
 import { Kysely } from "kysely"
 import { DB, JsonValue } from '../types'
 import { genKey } from "../../utils"
+import type { ContentTypesType } from "../../routes/api/schema"
 
 export class LessonContentPartRepository {
   constructor(private db: Kysely<DB>) { }
-
-  // TODO: see if this is useful
-  // enum ContentPartType {
-  //   Html = 'html',
-  //   Image = 'image',
-  //   Figure = 'figure',
-  //   Formula = 'formula',
-  //   Video = 'video',
-  // }
 
   async findByLessonPlan(key: string) {
     return await this.db
@@ -31,13 +23,13 @@ export class LessonContentPartRepository {
       .executeTakeFirst()
   }
 
-  async create(lessonKey: string, lessonContentType: string, content?: JsonValue, sequence?: number, coverArt?: string) {
+  async create(lessonKey: string, contentPartType: ContentTypesType, content?: JsonValue, sequence?: number) {
     return await this.db
       .insertInto('lesson_content_parts')
       .values({
         public_key: genKey(),
         lesson_key: lessonKey,
-        lesson_content_type: lessonContentType,
+        lesson_content_type: contentPartType,
         content,
         sequence,
       })

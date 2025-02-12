@@ -31,7 +31,6 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify) => {
 
     const { courseKey, title, description, objective, sequence, coverArt } = request.body as CreateLessonPlanType
     const plan = await fastify.data.lessonPlans.create(courseKey, title, description, objective, sequence, coverArt)
-    fastify.log.info(plan)
     reply.code(201).send(plan)
   })
 
@@ -103,7 +102,7 @@ const lessonPlanRoutes: FastifyPluginAsync = async (fastify) => {
     return await fastify.data.lessonPlans.unarchive(key)
   })
 
-  fastify.get('/:key/content-parts', {
+  fastify.get('/:key/contents', {
     schema: {
       response: {
         200: {

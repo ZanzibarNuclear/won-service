@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
-import { LessonContentSchema, LessonContentType, LessonContentBodySchema, LessonContentBodyType } from '../schema'
+import { LessonContentSchema, CreateLessonContentSchema, CreateLessonContentType, LessonContentBodySchema, LessonContentBodyType } from '../schema'
 
 const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
@@ -24,29 +24,30 @@ const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance
 
   fastify.post('/', {
     schema: {
-      body: LessonContentBodySchema,
+      body: CreateLessonContentSchema,
       response: {
         201: LessonContentSchema,
       },
     },
   }, async (request, reply) => {
     // TODO: check role
-    const { lessonKey, contentPartType, content, sequence } = request.body as LessonContentBodyType
-    if (!lessonKey) {
-      reply.code(400).send('Lesson key is required')
-      return
-    }
-    if (!contentPartType) {
-      reply.code(400).send('Type of content is required')
-      return
-    }
-    const contentPart = await fastify.data.lessonContents.create(lessonKey, contentPartType, content, sequence)
-    fastify.log.info(contentPart)
+
+    const { lessonKey, lessonContentType, content, sequence } = request.body as CreateLessonContentType
+    const contentPart = await fastify.data.lessonContents.create(lessonKey, lessonContentType, content, sequence)
+
     reply.code(201).send(contentPart)
   })
 
-  fastify.put('/:key', async (request, reply) => {
+  fastify.put('/:key', {
+    schema: {
+      body: LessonContentBodySchema,
+      response: {
+        200: LessonContentSchema,
+      },
+    },
+  }, async (request, reply) => {
     // TODO: check role
+
     const { key } = request.params as { key: string }
     const { content, sequence } = request.body as LessonContentBodyType
     const contentPart = await fastify.data.lessonContents.update(key, content, sequence)
@@ -57,7 +58,6 @@ const lessonContentsRoutes: FastifyPluginAsync = async (fastify: FastifyInstance
     const { key } = request.params as { key: string }
     return await fastify.data.lessonContents.delete(key)
   })
-
 }
 
 export default lessonContentsRoutes

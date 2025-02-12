@@ -77,22 +77,37 @@ export type LessonPathType = Static<typeof LessonPathSchema>
 
 
 export const LessonContentSchema = Type.Object({
-  id: Type.Number(),
   publicKey: Type.String(),
   lessonKey: Type.String(),
-  contentPartType: Type.String(),
-  content: Type.String(),
+  lessonContentType: Type.String(),
+  content: Type.Any(),
   sequence: Type.Number(),
 })
 export type LessonContentType = Static<typeof LessonContentSchema>
 
+export const ContentTypes = Type.Union([
+  Type.Literal("html"),
+  Type.Literal("video"),
+  Type.Literal("image"),
+  Type.Literal("figure"),
+  Type.Literal("formula"),
+])
+export type ContentTypesType = Static<typeof ContentTypes>
+
 export const LessonContentBodySchema = Type.Object({
-  lessonKey: Type.String(),
-  contentPartType: Type.String(),
-  content: Type.String(),
-  sequence: Type.Number(),
+  content: Type.Optional(Type.String()),
+  sequence: Type.Optional(Type.Number()),
 })
 export type LessonContentBodyType = Static<typeof LessonContentSchema>
+
+export const CreateLessonContentSchema = Type.Intersect([
+  LessonContentBodySchema,
+  Type.Object({
+    lessonKey: Type.String(),
+    lessonContentType: ContentTypes,
+  })
+])
+export type CreateLessonContentType = Static<typeof CreateLessonContentSchema>
 
 export const lessonStepPayloadSchema = {
   lessonPath: { type: 'string' },
