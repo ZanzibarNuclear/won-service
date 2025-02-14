@@ -11,7 +11,6 @@ const corsPlugin: FastifyPluginAsync = async (fastify, options) => {
     preflightContinue: true,
     optionsSuccessStatus: 204
   })
-  fastify.log.info('cors origin:' + fastify.config.APP_BASE_URL)
   fastify.log.info('registered cors plugin')
 }
 

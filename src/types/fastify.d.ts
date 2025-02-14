@@ -1,5 +1,6 @@
 import 'fastify'
 import { Session } from './won-flux-types'
+import { AuthRepository } from '../db/access/authRepo'
 import { CourseRepository } from '../db/access/courseRepo'
 import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
 import { LessonContentPartRepository } from './../db/access/contentPartRepo';
@@ -10,6 +11,7 @@ declare module 'fastify' {
   interface FastifyInstance {
     db: Kysely<DB>
     data: {
+      auth: AuthRepository
       courses: CourseRepository
       lessonPlans: LessonPlanRepository
       lessonContents: LessonContentPartRepository
