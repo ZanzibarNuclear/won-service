@@ -59,26 +59,6 @@ export class AuthRepository {
       .executeTakeFirst()
   }
 
-  async findUserByEmail(email: string) {
-    return await this.db
-      .selectFrom('users')
-      .selectAll()
-      .where(eb => eb.fn('lower', ['email']), '=', email.toLowerCase())
-      .executeTakeFirst()
-  }
-
-  async createUser(email: string, alias: string) {
-    return await this.db
-      .insertInto('users')
-      .values({
-        email: email,
-        alias: alias,
-        last_sign_in_at: new Date()
-      })
-      .returningAll()
-      .executeTakeFirst()
-  }
-
   async createMagicLink(email: string, alias: string, token: string, minutesToLive: number) {
     const expiresAt = new Date(Date.now() + minutesToLive * 60 * 1000)
     const magicLink = await this.db

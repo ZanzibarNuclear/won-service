@@ -72,6 +72,9 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 
     // create session token, set cookie, redirect to login confirm page
     const user = await findOrCreateUser(magicData.email, magicData.alias || 'Gentle User')
+    if (!user) {
+      return res.code(500).send({ error: 'Unable to find or create user' })
+    }
     const sessionInfo: Session = {
       userId: user.id,
       alias: user.alias,
@@ -114,9 +117,9 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
   }
 
   async function findOrCreateUser(email: string, alias: string) {
-    let user = await fastify.data.auth.findUserByEmail(email)
+    let user = await fastify.data.users.findUserByEmail(email)
     if (!user) {
-      user = await fastify.data.auth.createUser(email, alias)
+      user = await fastify.data.users.createUser(email, alias)
       if (!user) {
         fastify.log.info(`User found or created: ${email} ${alias}`)
       }

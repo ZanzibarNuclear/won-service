@@ -2,6 +2,8 @@ import 'fastify'
 import { Session } from './won-flux-types'
 import { AuthRepository } from '../db/access/authRepo'
 import { CourseRepository } from '../db/access/courseRepo'
+import { EventRepository } from '../db/access/eventRepo'
+import { FeedbackRepository } from '../db/access/feedbackRepo'
 import { FluxRepository } from '../db/access/fluxRepo'
 import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
 import { LessonContentPartRepository } from './../db/access/contentPartRepo';
@@ -15,6 +17,8 @@ declare module 'fastify' {
     data: {
       auth: AuthRepository
       courses: CourseRepository
+      events: EventRepository
+      feedback: FeedbackRepository
       flux: FluxRepository
       lessonPlans: LessonPlanRepository
       lessonContents: LessonContentPartRepository

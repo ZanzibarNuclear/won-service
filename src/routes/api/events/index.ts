@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from 'fastify'
-import { createEvent, getEvents } from '../../../db/access/event'
 
 const eventsRoutes: FastifyPluginAsync = async (fastify, options) => {
 
@@ -27,7 +26,7 @@ const eventsRoutes: FastifyPluginAsync = async (fastify, options) => {
       fastify.log.info(`Adjusting limit to ${guardedLimit}`)
     }
 
-    const results = await getEvents(guardedLimit, offset, { from, to, asc, actor })
+    const results = await fastify.data.events.get(guardedLimit, offset, { from, to, asc, actor })
 
     return { items: results, total: results.length, hasMore: results.length === guardedLimit }
   })
@@ -41,15 +40,16 @@ const eventsRoutes: FastifyPluginAsync = async (fastify, options) => {
     const { details } = request.body as eventPayload
     const actor = request.session?.userId
 
+    let event
     try {
-      await createEvent(actor, details)
+      event = await fastify.data.events.create(actor, details)
     } catch (err) {
       fastify.log.error(err)
       reply.status(500).send('Sorry, something went wrong.')
       return
     }
 
-    reply.status(201).send()
+    reply.status(201).send(event)
   })
 
 }

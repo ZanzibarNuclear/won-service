@@ -120,10 +120,10 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     const { id: socialId, email: socialEmail, name: socialName } = userInfo
 
     // 2. Check if the user exists in your database
-    let user = await fastify.data.auth.findUserByEmail(socialEmail)
+    let user = await fastify.data.users.findUserByEmail(socialEmail)
 
     if (!user) {
-      user = await fastify.data.auth.createUser(socialEmail, socialName)
+      user = await fastify.data.users.createUser(socialEmail, socialName)
       if (!user) {
         throw new Error('Problem creating user record')
       }
