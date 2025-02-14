@@ -37,3 +37,9 @@ export interface Course {
   testOnly: boolean | null
   title: string | null
 }
+
+export interface FluxFilter {
+  order?: string
+  authorId?: number
+  fluxId?: number
+}

@@ -2,10 +2,12 @@ import 'fastify'
 import { Session } from './won-flux-types'
 import { AuthRepository } from '../db/access/authRepo'
 import { CourseRepository } from '../db/access/courseRepo'
+import { FluxRepository } from '../db/access/fluxRepo'
 import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
 import { LessonContentPartRepository } from './../db/access/contentPartRepo';
 import { LessonPathRepository } from '../db/access/lessonPathRepo'
 import { LessonStepRepository } from '../db/access/lessonStepRepo'
+import { UserRepository } from '../db/access/userRepo'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -13,10 +15,12 @@ declare module 'fastify' {
     data: {
       auth: AuthRepository
       courses: CourseRepository
+      flux: FluxRepository
       lessonPlans: LessonPlanRepository
       lessonContents: LessonContentPartRepository
       lessonPaths: LessonPathRepository
       lessonSteps: LessonStepRepository
+      users: UserRepository
     }
     session: Session | null
     generateSessionToken: (sessionData: Session) => string

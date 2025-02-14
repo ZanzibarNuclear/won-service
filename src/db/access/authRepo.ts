@@ -63,15 +63,15 @@ export class AuthRepository {
     return await this.db
       .selectFrom('users')
       .selectAll()
-      .where((eb: any) => eb.fn('lower', ['email']), '=', email.toLowerCase())
+      .where(eb => eb.fn('lower', ['email']), '=', email.toLowerCase())
       .executeTakeFirst()
   }
 
-  async createUser(emailAddress: string, alias: string) {
+  async createUser(email: string, alias: string) {
     return await this.db
       .insertInto('users')
       .values({
-        email: emailAddress,
+        email: email,
         alias: alias,
         last_sign_in_at: new Date()
       })
