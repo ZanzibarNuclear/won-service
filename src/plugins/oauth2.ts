@@ -165,4 +165,4 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   fastify.log.info(`registered oauth2 plugin`)
 }
 
-export default fp(oauth2Plugin, { name: 'oauth2', dependencies: ['sensible', 'sessionAuth', 'cookie'] })
+export default fp(oauth2Plugin, { name: 'oauth2', dependencies: ['sensible', 'sessionAuth', 'cookie', 'dataAccess'] })

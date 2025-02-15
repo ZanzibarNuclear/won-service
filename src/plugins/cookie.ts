@@ -9,8 +9,8 @@ const cookiesPlugin: FastifyPluginAsync = async (fastify, options) => {
       secure: true,
       httpOnly: true,
       sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      domain: '.worldofnuclear.com'
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      domain: fastify.config.COOKIE_DOMAIN
     }
   })
   fastify.log.info('registered cookie plugin')

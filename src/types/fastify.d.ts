@@ -5,9 +5,9 @@ import { CourseRepository } from '../db/access/courseRepo'
 import { EventRepository } from '../db/access/eventRepo'
 import { FeedbackRepository } from '../db/access/feedbackRepo'
 import { FluxRepository } from '../db/access/fluxRepo'
-import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
 import { LessonContentPartRepository } from './../db/access/contentPartRepo';
 import { LessonPathRepository } from '../db/access/lessonPathRepo'
+import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
 import { LessonStepRepository } from '../db/access/lessonStepRepo'
 import { UserRepository } from '../db/access/userRepo'
 
