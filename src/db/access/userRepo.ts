@@ -12,6 +12,21 @@ export class UserRepository {
       .executeTakeFirst()
   }
 
+  async signInUser(email: string) {
+    const user = await this.findUserByEmail(email)
+    if (!user) {
+      return null
+    }
+    return await this.db
+      .updateTable('users')
+      .set({
+        last_sign_in_at: new Date()
+      })
+      .where('id', '=', user.id)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
   async createUser(email: string, alias: string) {
     return await this.db
       .insertInto('users')

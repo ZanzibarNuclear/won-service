@@ -120,7 +120,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     const { id: socialId, email: socialEmail, name: socialName } = userInfo
 
     // 2. Check if the user exists in your database
-    let user = await fastify.data.users.findUserByEmail(socialEmail)
+    let user = await fastify.data.users.signInUser(socialEmail)
 
     if (!user) {
       user = await fastify.data.users.createUser(socialEmail, socialName)
@@ -130,7 +130,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     }
 
     // 3. Create a social identity record including user info and auth tokens from identity provider
-    let socialIdentity = await fastify.data.auth.findIdentity(user.id, provider)
+    let socialIdentity = await fastify.data.auth.signInWithIdentity(user.id, provider)
 
     if (!socialIdentity) {
       socialIdentity = await fastify.data.auth.createIdentity(user.id, socialId, provider, accessToken, refreshToken, userInfo)
@@ -149,7 +149,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     fastify.setSessionToken(reply, sessionToken)
 
     // 5. Redirect user to confirmation page
-    const toUrl = `${fastify.config.APP_BASE_URL}/signin/confirm?token=${sessionToken}`
+    const toUrl = `${fastify.config.APP_BASE_URL}/sign-in/confirm?token=${sessionToken}`
     reply.redirect(toUrl)
   }
 

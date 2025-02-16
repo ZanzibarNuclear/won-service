@@ -43,6 +43,29 @@ export class AuthRepository {
       .executeTakeFirst()
   }
 
+  async signInWithIdentity(userId: string, provider: string) {
+    const identity = await this.findIdentity(userId, provider)
+    if (!identity) {
+      return null
+    }
+    return await this.db
+      .updateTable('identities')
+      .set({
+        last_sign_in_at: new Date()
+      })
+      .where('id', '=', identity.id)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
+  async findIdentities(userId: string) {
+    return await this.db
+      .selectFrom('identities')
+      .where('user_id', '=', userId)
+      .selectAll()
+      .execute()
+  }
+
   async createIdentity(userId: string, socialId: string, provider: string, accessToken: string, refreshToken: string, identityData: any) {
     return await this.db
       .insertInto('identities')
@@ -55,6 +78,19 @@ export class AuthRepository {
         identity_data: identityData,
         last_sign_in_at: new Date()
       })
+      .returningAll()
+      .executeTakeFirst()
+  }
+
+  async refreshTokens(id: string, accessToken: string, refreshToken: string) {
+    return await this.db
+      .updateTable('identities')
+      .set({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        updated_at: new Date()
+      })
+      .where('id', '=', id)
       .returningAll()
       .executeTakeFirst()
   }
