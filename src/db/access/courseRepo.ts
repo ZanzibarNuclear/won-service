@@ -17,8 +17,7 @@ export class CourseRepository {
     if (flags.archived != undefined) {
       query = query.where('archived_at', flags.archived ? 'is not' : 'is', null)
     }
-
-    return await this.db.selectFrom('courses').selectAll().execute()
+    return await query.execute()
   }
 
   async get(key: string) {
