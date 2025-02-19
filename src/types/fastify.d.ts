@@ -46,6 +46,8 @@ declare module 'fastify' {
       COOKIE_DOMAIN: string
       COOKIE_SECRET: string
       RESEND_API_KEY: string
+      RESEND_FEEDBACK_KEY: string
+      ADMIN_EMAIL: string
       TURNSTILE_SECRET_KEY: string
       GITHUB_CLIENT_ID: string
       GITHUB_CLIENT_SECRET: string

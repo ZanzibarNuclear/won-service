@@ -9,6 +9,18 @@ export class CourseRepository {
     return await this.db.selectFrom('courses').selectAll().execute()
   }
 
+  async find(flags: { published?: boolean, archived?: boolean }) {
+    let query = this.db.selectFrom('courses').selectAll()
+    if (flags.published != undefined) {
+      query = query.where('published_at', flags.published ? 'is not' : 'is', null)
+    }
+    if (flags.archived != undefined) {
+      query = query.where('archived_at', flags.archived ? 'is not' : 'is', null)
+    }
+
+    return await this.db.selectFrom('courses').selectAll().execute()
+  }
+
   async get(key: string) {
     return await this.db
       .selectFrom('courses')

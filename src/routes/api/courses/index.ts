@@ -3,7 +3,12 @@ import { CourseBodySchema, CourseBodyType, CreateCourseSchema, CreateCourseType,
 
 const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
-  fastify.get('/', {
+  fastify.get<{
+    Querystring: {
+      published?: boolean,
+      archived?: boolean
+    }
+  }>('/', {
     schema: {
       response: {
         200: {
@@ -13,7 +18,8 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       }
     }
   }, async (request, reply) => {
-    return await fastify.data.courses.findAll()
+    const { published, archived } = request.query
+    return await fastify.data.courses.find({ published, archived })
   })
 
   fastify.get('/:key', {

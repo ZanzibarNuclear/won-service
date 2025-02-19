@@ -17,6 +17,8 @@ const envSchema = {
     COOKIE_DOMAIN: { type: 'string' },
     COOKIE_SECRET: { type: 'string' },
     RESEND_API_KEY: { type: 'string' },
+    RESEND_FEEDBACK_KEY: { type: 'string' },
+    ADMIN_EMAIL: { type: 'string' },
     TURNSTILE_SECRET_KEY: { type: 'string' },
     GITHUB_CLIENT_ID: { type: 'string' },
     GITHUB_CLIENT_SECRET: { type: 'string' },

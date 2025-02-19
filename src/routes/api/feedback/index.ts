@@ -43,6 +43,13 @@ const feedbackRoutes: FastifyPluginAsync = async (fastify, options) => {
 
     try {
       await fastify.data.feedback.register(user_id, context, message)
+
+      await fastify.sendEmail(
+        'World of Nuclear (system) <system@support.worldofnuclear.com>',
+        fastify.config.ADMIN_EMAIL,
+        `${context}: We got feedback. Hurray!!!`,
+        message
+      )
     } catch (err) {
       fastify.log.error(err)
       reply.status(500).send('Sorry, something went wrong.')
