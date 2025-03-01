@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
+import { FastifyRequest } from 'fastify/types/request'
 import { CourseBodySchema, CourseBodyType, CreateCourseSchema, CreateCourseType, CourseSchema, LessonPlanSchema, LessonPathSchema } from '../schema'
 
 const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
@@ -19,7 +20,8 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     }
   }, async (request, reply) => {
     const { published, archived } = request.query
-    return await fastify.data.courses.find({ published, archived })
+    const courses = await fastify.data.courses.find({ published, archived })
+    return courses
   })
 
   fastify.get('/:key', {
@@ -32,9 +34,9 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     const { key } = request.params as { key: string }
     const course = await fastify.data.courses.get(key)
     if (!course) {
-      return reply.code(404).send({ error: 'Course not found' })
+      throw fastify.httpErrors.notFound('Course not found')
     }
-    reply.send(course)
+    return course
   })
 
   fastify.post('/', {
@@ -72,20 +74,22 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     reply.send(course)
   })
 
+  const updateCourseState = async (request: FastifyRequest, stateChange: 'publish' | 'unpublish' | 'archive' | 'unarchive') => {
+    const { key } = request.params as { key: string }
+    const course = await fastify.data.courses[stateChange](key)
+    if (!course) {
+      throw fastify.httpErrors.notFound('Course not found')
+    }
+    return course
+  }
+
   fastify.put('/:key/publish', {
     schema: {
       response: {
         200: CourseSchema,
       }
     }
-  }, async (request, reply) => {
-    const { key } = request.params as { key: string }
-    const course = await fastify.data.courses.publish(key)
-    if (!course) {
-      return reply.code(404).send({ error: 'Course not found' })
-    }
-    reply.send(course)
-  })
+  }, async (request) => updateCourseState(request, 'publish'))
 
   fastify.put('/:key/unpublish', {
     schema: {
@@ -93,14 +97,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         200: CourseSchema,
       }
     }
-  }, async (request, reply) => {
-    const { key } = request.params as { key: string }
-    const course = await fastify.data.courses.unpublish(key)
-    if (!course) {
-      return reply.code(404).send({ error: 'Course not found' })
-    }
-    reply.send(course)
-  })
+  }, async (request) => updateCourseState(request, 'unpublish'))
 
   fastify.put('/:key/archive', {
     schema: {
@@ -108,14 +105,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         200: CourseSchema,
       }
     }
-  }, async (request, reply) => {
-    const { key } = request.params as { key: string }
-    const course = await fastify.data.courses.archive(key)
-    if (!course) {
-      return reply.code(404).send({ error: 'Course not found' })
-    }
-    reply.send(course)
-  })
+  }, async (request) => updateCourseState(request, 'archive'))
 
   fastify.put('/:key/unarchive', {
     schema: {
@@ -123,14 +113,7 @@ const courseRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         200: CourseSchema,
       }
     }
-  }, async (request, reply) => {
-    const { key } = request.params as { key: string }
-    const course = await fastify.data.courses.unarchive(key)
-    if (!course) {
-      return reply.code(404).send({ error: 'Course not found' })
-    }
-    reply.send(course)
-  })
+  }, async (request) => updateCourseState(request, 'unarchive'))
 
   fastify.get('/:key/lesson-plans', {
     schema: {
