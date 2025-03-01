@@ -4,14 +4,7 @@ import fp from 'fastify-plugin'
 
 const corsPlugin: FastifyPluginAsync = async (fastify, options) => {
   await fastify.register(fastifyCors, {
-    origin: (origin, cb) => {
-      const allowedOrigins = [/^https?:\/\/.*\.worldofnuclear\.com$/, /^https?:\/\/localhost(:\d+)?$/];
-      if (origin !== undefined && allowedOrigins.some(pattern => pattern.test(origin))) {
-        cb(null, true);
-      } else {
-        cb(new Error("Not allowed"), false);
-      }
-    },
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'Set-Cookie', 'X-Session-Token'],
     credentials: true,
