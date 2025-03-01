@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from 'fastify'
-import { registerFeedback, getFeedback } from '../../../db/access/feedback'
 import { JsonValue } from "../../../db/types"
 
 const feedbackRoutes: FastifyPluginAsync = async (fastify, options) => {
@@ -28,7 +27,7 @@ const feedbackRoutes: FastifyPluginAsync = async (fastify, options) => {
       fastify.log.info(`Adjusting limit to ${guardedLimit}`)
     }
 
-    const results = await getFeedback(guardedLimit, offset, { from, to, asc, user })
+    const results = await fastify.data.feedback.get(guardedLimit, offset, { from, to, asc, user })
 
     return { items: results, total: results.length, hasMore: results.length === guardedLimit }
   })
@@ -43,7 +42,14 @@ const feedbackRoutes: FastifyPluginAsync = async (fastify, options) => {
     const { context, message } = request.body as eventPayload
 
     try {
-      await registerFeedback(user_id, context, message)
+      await fastify.data.feedback.register(user_id, context, message)
+
+      await fastify.sendEmail(
+        'World of Nuclear (system) <system@support.worldofnuclear.com>',
+        fastify.config.ADMIN_EMAIL,
+        `${context}: We got feedback. Hurray!!!`,
+        message
+      )
     } catch (err) {
       fastify.log.error(err)
       reply.status(500).send('Sorry, something went wrong.')

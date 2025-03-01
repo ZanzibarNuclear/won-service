@@ -1,7 +1,6 @@
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
 import fastifyOAuth2, { FastifyOAuth2Options, OAuth2Namespace } from '@fastify/oauth2'
 import fp from 'fastify-plugin'
-import { db } from '../db/Database'
 
 import type { Session } from '../types/won-flux-types'
 
@@ -101,14 +100,14 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   // Generic callback handler
   const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google') => {
 
-    let access_token
-    let refresh_token
+    let accessToken
+    let refreshToken
     try {
       const oauth2 = fastify[`${provider}OAuth2` as keyof SupportedProviders]
       const { token } = await oauth2.getAccessTokenFromAuthorizationCodeFlow(request)
       if (token) {
-        access_token = token.access_token
-        refresh_token = token.refresh_token
+        accessToken = token.access_token
+        refreshToken = token.refresh_token
       }
     } catch (error) {
       fastify.log.error(`error getting access token from authorization code flow: ${error}`)
@@ -117,48 +116,27 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     }
 
     // 1. Get user info from provider
-    const userInfo = await getUserInfo(provider, access_token)
-    fastify.log.info(`user info from ${provider}: ${JSON.stringify(userInfo)}`)
-
+    const userInfo = await getUserInfo(provider, accessToken)
     const { id: socialId, email: socialEmail, name: socialName } = userInfo
 
     // 2. Check if the user exists in your database
-    let user = await db.selectFrom('users').selectAll().where('email', '=', socialEmail).executeTakeFirst()
-    if (user) {
-      fastify.log.info(`user: ${JSON.stringify(user)}`)
-    }
+    let user = await fastify.data.users.signInUser(socialEmail)
 
-    if (user === null || user === undefined || Object.keys(user).length === 0) {
-      fastify.log.info('Creating record for new user')
-      user = await db.insertInto('users').values({
-        email: socialEmail,
-        alias: socialName,
-        last_sign_in_at: new Date()
-      }).returningAll().executeTakeFirst()
-    }
     if (!user) {
-      throw new Error('Problem finding orcreating user record')
+      user = await fastify.data.users.createUser(socialEmail, socialName)
+      if (!user) {
+        throw new Error('Problem creating user record')
+      }
     }
 
     // 3. Create a social identity record including user info and auth tokens from identity provider
-    let socialIdentity = await db.selectFrom('identities').selectAll().where('user_id', '=', user.id).where('provider', '=', provider).executeTakeFirst()
-    if (socialIdentity) {
-      fastify.log.info(`social identity: ${JSON.stringify(socialIdentity)}`)
-    }
+    let socialIdentity = await fastify.data.auth.signInWithIdentity(user.id, provider)
 
     if (!socialIdentity) {
-      socialIdentity = await db.insertInto('identities').values({
-        user_id: user.id,
-        provider_id: socialId,
-        provider: provider,
-        access_token: access_token,
-        refresh_token: refresh_token,
-        identity_data: userInfo,
-        last_sign_in_at: new Date()
-      }).returningAll().executeTakeFirst()
-    }
-    if (!socialIdentity) {
-      throw new Error('Problem creating social identity record')
+      socialIdentity = await fastify.data.auth.createIdentity(user.id, socialId, provider, accessToken, refreshToken, userInfo)
+      if (!socialIdentity) {
+        throw new Error('Problem creating social identity record')
+      }
     }
 
     // 4. Create a session token
@@ -168,14 +146,11 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       roles: ['member']
     }
     const sessionToken = fastify.generateSessionToken(sessionInfo)
-    fastify.log.info(`Setting session token: ${sessionToken}`);
     fastify.setSessionToken(reply, sessionToken)
-    fastify.log.info(`Response headers: ${JSON.stringify(reply.getHeaders())}`);
 
-    const toUrl = `${fastify.config.APP_BASE_URL}/signin/confirm?token=${sessionToken}`
-    fastify.log.info(`redirecting to ${toUrl}`)
+    // 5. Redirect user to confirmation page
+    const toUrl = `${fastify.config.APP_BASE_URL}/sign-in/confirm?token=${sessionToken}`
     reply.redirect(toUrl)
-    fastify.log.info(`reply has cookies?: ${JSON.stringify(reply.getHeaders())}`)
   }
 
   // Register callback routes for each provider
@@ -190,4 +165,4 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   fastify.log.info(`registered oauth2 plugin`)
 }
 
-export default fp(oauth2Plugin, { name: 'oauth2', dependencies: ['sensible', 'sessionAuth', 'cookie'] })
+export default fp(oauth2Plugin, { name: 'oauth2', dependencies: ['sensible', 'sessionAuth', 'cookie', 'dataAccess'] })

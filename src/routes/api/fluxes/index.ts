@@ -1,14 +1,4 @@
 import { FastifyPluginAsync } from 'fastify'
-import {
-  getFluxes,
-  getFlux,
-  createFlux,
-  getFluxUser,
-  updateFlux,
-  countView,
-  boostFlux,
-  deboostFlux,
-} from '../../../db/access/flux'
 
 const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
 
@@ -35,7 +25,7 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
       fastify.log.info(`Adjusting limit to ${guardedLimit}`)
     }
 
-    const results = await getFluxes(guardedLimit, offset || 0, { order, authorId, fluxId })
+    const results = await fastify.data.flux.getFluxes(guardedLimit, offset || 0, { order, authorId, fluxId })
     return { items: results, total: results.length, hasMore: results.length === guardedLimit }
   })
 
@@ -44,23 +34,22 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
       fastify.log.warn(`Only known users may post fluxes`)
       return reply.status(401).send({ error: 'Unauthorized' })
     }
-    const author = await getFluxUser(request.session.userId)
+    const author = await fastify.data.flux.getFluxUser(request.session.userId)
     if (!author) {
       fastify.log.warn(`Flux user not found for current user ${request.session.userId}`)
       return reply.status(401).send({ error: 'Unauthorized' })
     }
     const { parentId, content } = request.body as { parentId: number | null; content: string }
-    const flux = await createFlux(author.id, parentId, content)
+    const flux = await fastify.data.flux.createFlux(author.id, parentId, content)
     if (!flux) {
-      fastify.log.error(`Failed to create flux for user ${author.id}`)
       return reply.status(400).send({ error: 'Failed to create flux' })
     }
-    return await getFlux(flux.id)
+    reply.send(flux)
   })
 
   fastify.get('/:fluxId', async (request, reply) => {
     const { fluxId } = request.params as { fluxId: number }
-    return await getFlux(fluxId)
+    return await fastify.data.flux.getFlux(fluxId)
   })
 
   fastify.put('/:fluxId', async (request, reply) => {
@@ -68,28 +57,27 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
       fastify.log.warn(`Only known users may post fluxes`)
       return reply.status(401).send({ error: 'Unauthorized' })
     }
-    const author = await getFluxUser(request.session.userId)
+    const author = await fastify.data.flux.getFluxUser(request.session.userId)
     if (!author) {
       fastify.log.warn(`Flux user not found for current user ${request.session.userId}`)
       return reply.status(401).send({ error: 'Unauthorized' })
     }
     const { fluxId } = request.params as { fluxId: number }
     const { content } = request.body as { content: string }
-    const flux = await updateFlux(fluxId, content, author.id)
-    return flux
+    return await fastify.data.flux.updateFlux(fluxId, content, author.id)
   })
 
   fastify.post('/:fluxId/view', async (request, reply) => {
     let fluxUserId = -1
     if (request.session?.userId) {
-      const fluxUser = await getFluxUser(request.session.userId)
+      const fluxUser = await fastify.data.flux.getFluxUser(request.session.userId)
       if (fluxUser) {
         fluxUserId = fluxUser.id
       }
     }
     const { fluxId } = request.params as { fluxId: number }
     try {
-      return await countView(fluxId, fluxUserId)
+      return await fastify.data.flux.countView(fluxId, fluxUserId)
     } catch (error) {
       fastify.log.error(`Failed to record view for flux ${fluxId} by user ${fluxUserId}`)
       return reply.status(500).send({ error: 'Failed to record view' })
@@ -101,14 +89,14 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
       fastify.log.warn(`Only known users may post fluxes`)
       return reply.status(200)
     }
-    const author = await getFluxUser(request.session.userId)
+    const author = await fastify.data.flux.getFluxUser(request.session.userId)
     if (!author) {
       fastify.log.warn(`Flux user not found for current user ${request.session.userId}`)
       return reply.status(401).send({ error: 'Unauthorized' })
     }
     const { fluxId } = request.params as { fluxId: number }
     try {
-      return await boostFlux(fluxId, author.id)
+      return await fastify.data.flux.boostFlux(fluxId, author.id)
     } catch (error) {
       fastify.log.error(`Failed to boost flux ${fluxId} by user ${author.id}`)
       if ((error as any).code === '23505') {
@@ -123,14 +111,14 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
       fastify.log.warn(`Only known users may post fluxes`)
       return reply.status(401).send({ error: 'Unauthorized' })
     }
-    const author = await getFluxUser(request.session.userId)
+    const author = await fastify.data.flux.getFluxUser(request.session.userId)
     if (!author) {
       fastify.log.warn(`Flux user not found for current user ${request.session.userId}`)
       return reply.status(401).send({ error: 'Unauthorized' })
     }
     const { fluxId } = request.params as { fluxId: number }
     try {
-      return await deboostFlux(fluxId, author.id)
+      return await fastify.data.flux.deboostFlux(fluxId, author.id)
     } catch (error) {
       console.error(error)
       return reply.status(500).send({ message: 'Failed to unboost flux' })

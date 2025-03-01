@@ -1,20 +1,30 @@
 import 'fastify'
 import { Session } from './won-flux-types'
+import { AuthRepository } from '../db/access/authRepo'
 import { CourseRepository } from '../db/access/courseRepo'
-import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
+import { EventRepository } from '../db/access/eventRepo'
+import { FeedbackRepository } from '../db/access/feedbackRepo'
+import { FluxRepository } from '../db/access/fluxRepo'
 import { LessonContentPartRepository } from './../db/access/contentPartRepo';
 import { LessonPathRepository } from '../db/access/lessonPathRepo'
+import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
 import { LessonStepRepository } from '../db/access/lessonStepRepo'
+import { UserRepository } from '../db/access/userRepo'
 
 declare module 'fastify' {
   interface FastifyInstance {
     db: Kysely<DB>
     data: {
+      auth: AuthRepository
       courses: CourseRepository
+      events: EventRepository
+      feedback: FeedbackRepository
+      flux: FluxRepository
       lessonPlans: LessonPlanRepository
       lessonContents: LessonContentPartRepository
       lessonPaths: LessonPathRepository
       lessonSteps: LessonStepRepository
+      users: UserRepository
     }
     session: Session | null
     generateSessionToken: (sessionData: Session) => string
@@ -36,6 +46,8 @@ declare module 'fastify' {
       COOKIE_DOMAIN: string
       COOKIE_SECRET: string
       RESEND_API_KEY: string
+      RESEND_FEEDBACK_KEY: string
+      ADMIN_EMAIL: string
       TURNSTILE_SECRET_KEY: string
       GITHUB_CLIENT_ID: string
       GITHUB_CLIENT_SECRET: string
