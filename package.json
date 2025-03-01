@@ -1,24 +1,8 @@
 {
-  "name": "flux-service",
-  "version": "0.2.0",
-  "description": "Backend to support Flux, the social exchange for Zanzibar's World of Nuclear Energy.",
+  "name": "won-service",
+  "version": "0.3.0",
+  "description": "Backing service supporting Zanzibar's World of Nuclear Energy.",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "migrate:up": "bash scripts/migrate.sh up",
-    "migrate:down": "bash scripts/migrate.sh down",
-    "migrate:latest": "bash scripts/migrate.sh latest",
-    "seed": "bash scripts/seed.sh",
-    "generate": "kysely-codegen --dialect=postgres --out-file=./src/db/types.ts",
-    "generate-supa": "kysely-codegen --dialect=postgres --out-file=./src/db/supaTypes.ts",
-    "generate-help": "kysely-codegen --help",
-    "test": "node --test test/**/*.test.js"
-  },
   "keywords": [
     "social",
     "exchange",
@@ -27,8 +11,21 @@
     "microservice",
     "fastify"
   ],
-  "author": "Nuclear Ambitions LLC",
+  "homepage": "https://github.com/ZanzibarNuclear/won-service",
   "license": "Apache-2.0",
+  "author": "Nuclear Ambitions LLC (https://nuclearambitions.com)",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "migrate:up": "bash scripts/migrate.sh up",
+    "migrate:down": "bash scripts/migrate.sh down",
+    "migrate:latest": "bash scripts/migrate.sh latest",
+    "generate": "kysely-codegen --dialect=postgres --out-file=./src/db/types.ts",
+    "generate-supa": "kysely-codegen --dialect=postgres --out-file=./src/db/supaTypes.ts",
+    "generate-help": "kysely-codegen --help",
+    "test": "node --test test/**/*.test.js"
+  },
   "dependencies": {
     "@fastify/autoload": "^6.1.0",
     "@fastify/cors": "^10.0.2",
@@ -41,6 +38,7 @@
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",
     "fastify-cli": "^7.3.0",
+    "fastify-favicon": "^5.0.0",
     "fastify-plugin": "^5.0.1",
     "jsonwebtoken": "^9.0.2",
     "kysely": "^0.27.5",
@@ -56,5 +54,8 @@
     "kysely-ctl": "^0.11.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=22.13.0"
   }
 }
