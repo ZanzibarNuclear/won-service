@@ -6,7 +6,7 @@ const corsPlugin: FastifyPluginAsync = async (fastify, options) => {
   await fastify.register(fastifyCors, {
     origin: (origin, cb) => {
       const allowedOrigins = [/^https?:\/\/.*\.worldofnuclear\.com$/, /^https?:\/\/localhost(:\d+)?$/];
-      if (allowedOrigins.some(pattern => pattern.test(origin))) {
+      if (origin !== undefined && allowedOrigins.some(pattern => pattern.test(origin))) {
         cb(null, true);
       } else {
         cb(new Error("Not allowed"), false);
