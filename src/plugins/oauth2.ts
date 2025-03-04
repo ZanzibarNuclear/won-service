@@ -7,14 +7,15 @@ import type { Session } from '../types/won-flux-types'
 interface SupportedProviders {
   githubOAuth2: OAuth2Namespace
   googleOAuth2: OAuth2Namespace
+  xOAuth2: OAuth2Namespace
 }
 
 const X_CONFIGURATION = {
   authorizeHost: 'https://x.com',
   authorizePath: 'i/oauth2/authorize',
-  tokenHost: 'https://x.com',
-  tokenPath: '/2/oauth2/token',
-  revokePath: '/2/oauth2/revoke'
+  tokenHost: 'https://api.x.com',
+  tokenPath: '2/oauth2/token',
+  revokePath: '2/oauth2/revoke'
 }
 
 const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
@@ -51,7 +52,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   // Register X OAuth2
   await fastify.register(fastifyOAuth2, {
     name: 'xOAuth2',
-    scope: ['tweet.read', 'users.read'], // Adjust scopes as needed
+    scope: ['users.read'], // Adjust scopes as needed
     credentials: {
       client: {
         id: fastify.config.X_CLIENT_ID,
@@ -98,7 +99,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   }
 
   // Generic callback handler
-  const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google') => {
+  const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google' | 'x') => {
 
     let accessToken
     let refreshToken
@@ -160,6 +161,10 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
 
   fastify.get('/login/google/callback', async (request, reply) => {
     return handleOAuthCallback(request, reply, 'google')
+  })
+
+  fastify.get('/login/x/callback', async (request, reply) => {
+    return handleOAuthCallback(request, reply, 'x')
   })
 
   fastify.log.info(`registered oauth2 plugin`)
