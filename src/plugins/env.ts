@@ -24,6 +24,8 @@ const envSchema = {
     GITHUB_CLIENT_SECRET: { type: 'string' },
     GOOGLE_CLIENT_ID: { type: 'string' },
     GOOGLE_CLIENT_SECRET: { type: 'string' },
+    DISCORD_CLIENT_ID: { type: 'string' },
+    DISCORD_CLIENT_SECRET: { type: 'string' },
     X_CLIENT_ID: { type: 'string' },
     X_CLIENT_SECRET: { type: 'string' },
   }

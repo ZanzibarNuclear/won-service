@@ -7,14 +7,16 @@ import type { Session } from '../types/won-flux-types'
 interface SupportedProviders {
   githubOAuth2: OAuth2Namespace
   googleOAuth2: OAuth2Namespace
+  discordOAuth2: OAuth2Namespace
+  xOAuth2: OAuth2Namespace
 }
 
 const X_CONFIGURATION = {
   authorizeHost: 'https://x.com',
   authorizePath: 'i/oauth2/authorize',
-  tokenHost: 'https://x.com',
-  tokenPath: '/2/oauth2/token',
-  revokePath: '/2/oauth2/revoke'
+  tokenHost: 'https://api.x.com',
+  tokenPath: '2/oauth2/token',
+  revokePath: '2/oauth2/revoke'
 }
 
 const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
@@ -48,10 +50,25 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     callbackUri: `${fastify.config.API_BASE_URL}/login/google/callback`
   } as FastifyOAuth2Options)
 
+  // Register Discord OAuth2
+  await fastify.register(fastifyOAuth2, {
+    name: 'discordOAuth2',
+    scope: ['identify', 'email', 'openid'],
+    credentials: {
+      client: {
+        id: fastify.config.DISCORD_CLIENT_ID,
+        secret: fastify.config.DISCORD_CLIENT_SECRET
+      },
+      auth: fastifyOAuth2.DISCORD_CONFIGURATION
+    },
+    startRedirectPath: '/login/discord',
+    callbackUri: `${fastify.config.API_BASE_URL}/login/discord/callback`
+  } as FastifyOAuth2Options)
+
   // Register X OAuth2
   await fastify.register(fastifyOAuth2, {
     name: 'xOAuth2',
-    scope: ['tweet.read', 'users.read'], // Adjust scopes as needed
+    scope: ['users.read'],
     credentials: {
       client: {
         id: fastify.config.X_CLIENT_ID,
@@ -64,7 +81,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   } as FastifyOAuth2Options)
 
   // Helper function to get user info based on provider
-  const getUserInfo = async (provider: 'github' | 'google' | 'x', accessToken: string) => {
+  const getUserInfo = async (provider: 'github' | 'google' | 'discord' | 'x', accessToken: string) => {
     let userInfo
     switch (provider) {
       case 'github':
@@ -86,6 +103,11 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
           headers: { Authorization: `Bearer ${accessToken}` }
         }).then(res => res.json())
         break
+      case 'discord':
+        userInfo = await fetch('https://discord.com/api/v10/users/@me', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }).then(res => res.json())
+        break
       case 'x':
         userInfo = await fetch('https://api.x.com/2/users/me', {
           headers: { Authorization: `Bearer ${accessToken}` }
@@ -98,7 +120,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   }
 
   // Generic callback handler
-  const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google') => {
+  const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google' | 'discord' | 'x') => {
 
     let accessToken
     let refreshToken
@@ -160,6 +182,14 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
 
   fastify.get('/login/google/callback', async (request, reply) => {
     return handleOAuthCallback(request, reply, 'google')
+  })
+
+  fastify.get('/login/discord/callback', async (request, reply) => {
+    return handleOAuthCallback(request, reply, 'discord')
+  })
+
+  fastify.get('/login/x/callback', async (request, reply) => {
+    return handleOAuthCallback(request, reply, 'x')
   })
 
   fastify.log.info(`registered oauth2 plugin`)

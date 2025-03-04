@@ -28,13 +28,15 @@
   },
   "dependencies": {
     "@fastify/autoload": "^6.1.0",
-    "@fastify/cors": "^10.0.2",
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^10.1.0",
     "@fastify/env": "^5.0.2",
     "@fastify/oauth2": "^8.1.2",
     "@fastify/sensible": "^6.0.3",
+    "@fastify/session": "^11.1.0",
     "@fastify/swagger": "^9.4.2",
-    "@sinclair/typebox": "^0.34.16",
-    "axios": "^1.7.9",
+    "@sinclair/typebox": "^0.34.28",
+    "axios": "^1.8.1",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",
     "fastify-cli": "^7.3.0",
@@ -42,18 +44,18 @@
     "fastify-plugin": "^5.0.1",
     "jsonwebtoken": "^9.0.2",
     "kysely": "^0.27.5",
-    "pg": "^8.13.2",
+    "pg": "^8.13.3",
     "resend": "^4.1.2",
-    "zod": "^3.24.1"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.8",
-    "@types/node": "^22.13.1",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.13.8",
     "@types/pg": "^8.11.11",
     "kysely-codegen": "^0.17.0",
-    "kysely-ctl": "^0.11.0",
+    "kysely-ctl": "^0.11.1",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "engines": {
     "node": ">=22.13.0"
