@@ -66,7 +66,7 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 
     const magicData = await verifyToken(token)
     if (!magicData) {
-      res.redirect(`${fastify.config.APP_BASE_URL}/signin/trouble?source=magiclink`)
+      res.redirect(`${fastify.config.APP_BASE_URL}/sign-in/trouble?source=magiclink`)
       return
     }
 
@@ -82,7 +82,7 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     }
     const sessionToken = fastify.generateSessionToken(sessionInfo)
     fastify.setSessionToken(res, sessionToken)
-    res.redirect(`${fastify.config.APP_BASE_URL}/signin/confirm`)
+    res.redirect(`${fastify.config.APP_BASE_URL}/sign-in/confirm`)
   })
 
   // Function to verify the token
