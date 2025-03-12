@@ -4,6 +4,10 @@ import fp from 'fastify-plugin'
 
 import type { Session } from '../types/won-flux-types'
 
+type providerCodes = 'github' | 'google' | 'discord' | 'x' | 'meta'
+interface ProviderParams {
+  provider: providerCodes
+}
 interface SupportedProviders {
   githubOAuth2: OAuth2Namespace
   googleOAuth2: OAuth2Namespace
@@ -146,7 +150,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   }
 
   // Generic callback handler
-  const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google' | 'discord' | 'x' | 'meta') => {
+  const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: providerCodes) => {
 
     let accessToken
     let refreshToken
@@ -207,7 +211,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   }
 
   // Register callback route
-  fastify.get('/login/:provider/callback', async (request, reply) => {
+  fastify.get<{ Params: ProviderParams }>('/login/:provider/callback', async (request, reply) => {
     const { provider } = request.params
     return handleOAuthCallback(request, reply, provider)
   })
