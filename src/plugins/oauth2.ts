@@ -165,10 +165,11 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
 
     // 1. Get user info from provider
     const userInfo = await getUserInfo(provider, accessToken)
+    fastify.log.info(`oauth2: userInfo: ${JSON.stringify(userInfo)}`)
     const { id: socialId, email: socialEmail, name: socialName } = userInfo
 
     // 2. Check if the user exists in your database
-    let user = await fastify.data.users.signInUser(socialEmail)
+    let user = await fastify.data.users.signInUser(socialEmail || '')
 
     if (!user) {
       user = await fastify.data.users.createUser(socialEmail, socialName)
@@ -177,6 +178,10 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       }
     }
 
+    // FIXME: This hack won't work the way this logic is written. email is an important key to identity.
+    if (!userInfo.email) {
+      userInfo.email = 'noone@worldofnuclear.com'
+    }
     // 3. Create a social identity record including user info and auth tokens from identity provider
     let socialIdentity = await fastify.data.auth.signInWithIdentity(user.id, provider)
 
@@ -201,25 +206,10 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     reply.redirect(toUrl)
   }
 
-  // Register callback routes for each provider
-  fastify.get('/login/github/callback', async (request, reply) => {
-    return handleOAuthCallback(request, reply, 'github')
-  })
-
-  fastify.get('/login/google/callback', async (request, reply) => {
-    return handleOAuthCallback(request, reply, 'google')
-  })
-
-  fastify.get('/login/discord/callback', async (request, reply) => {
-    return handleOAuthCallback(request, reply, 'discord')
-  })
-
-  fastify.get('/login/meta/callback', async (request, reply) => {
-    return handleOAuthCallback(request, reply, 'meta')
-  })
-
-  fastify.get('/login/x/callback', async (request, reply) => {
-    return handleOAuthCallback(request, reply, 'x')
+  // Register callback route
+  fastify.get('/login/:provider/callback', async (request, reply) => {
+    const { provider } = request.params
+    return handleOAuthCallback(request, reply, provider)
   })
 
   fastify.log.info(`registered oauth2 plugin`)
