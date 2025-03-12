@@ -36,6 +36,7 @@ declare module 'fastify' {
     googleOAuth2: FastifyPluginAsync
     githubOAuth2: FastifyPluginAsync
     discordOAuth2: FastifyPluginAsync
+    metaOAuth2: FastifyPluginAsync
     xOAuth2: FastifyPluginAsync
     config: {
       NODE_ENV: string
@@ -56,6 +57,8 @@ declare module 'fastify' {
       GOOGLE_CLIENT_SECRET: string
       DISCORD_CLIENT_ID: string
       DISCORD_CLIENT_SECRET: string
+      FACEBOOK_CLIENT_ID: string
+      FACEBOOK_CLIENT_SECRET: string
       X_CLIENT_ID: string
       X_CLIENT_SECRET: string
     }
