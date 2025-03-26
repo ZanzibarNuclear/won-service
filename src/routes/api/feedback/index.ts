@@ -49,16 +49,15 @@ const feedbackRoutes: FastifyPluginAsync = async (fastify, options) => {
       await fastify.data.feedback.register(user_id, context, message)
       const { sender, senderEmail, source } = context
 
-      // const contextAndMessage = `From: ${context.sender} <${context.senderEmail}>/nSource: ${context.source}/nKnown user: ${user_id}/n/n` + message
-
       const messageWithContext = `
-From: ${context.sender} <${context.senderEmail}>
-Source: ${context.source}
-User: ${user_id || 'anonymous'}
-
-${message}
+<p>From: ${sender || 'someone'} - ${senderEmail || 'somewhere'}</p>
+<p>Source: ${source || 'somehow'}</p>
+<p>User: ${user_id || 'anonymous'}</p>
+<br/>
+<br/>
+<p>${message}</p>
       `
-      await fastify.sendEmail(
+      await fastify.sendFeedbackEmail(
         'World of Nuclear (system) <system@support.worldofnuclear.com>',
         fastify.config.ADMIN_EMAIL,
         `We got feedback. Hurray!!!`,

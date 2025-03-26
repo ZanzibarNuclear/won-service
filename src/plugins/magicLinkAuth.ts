@@ -34,7 +34,7 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     <p>Zanzibar, Nuclear Hero</p>
     `
 
-    await fastify.sendEmail(from, email, subject, body)
+    await fastify.sendAuthEmail(from, email, subject, body)
   }
 
   fastify.decorate('sendMagicLink', sendMagicLink)
