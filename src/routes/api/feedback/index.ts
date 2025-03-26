@@ -33,7 +33,11 @@ const feedbackRoutes: FastifyPluginAsync = async (fastify, options) => {
   })
 
   type eventPayload = {
-    context: JsonValue
+    context: {
+      sender?: string
+      senderEmail?: string
+      source: string
+    }
     message: string
   }
 
@@ -43,12 +47,22 @@ const feedbackRoutes: FastifyPluginAsync = async (fastify, options) => {
 
     try {
       await fastify.data.feedback.register(user_id, context, message)
+      const { sender, senderEmail, source } = context
 
+      // const contextAndMessage = `From: ${context.sender} <${context.senderEmail}>/nSource: ${context.source}/nKnown user: ${user_id}/n/n` + message
+
+      const messageWithContext = `
+From: ${context.sender} <${context.senderEmail}>
+Source: ${context.source}
+User: ${user_id || 'anonymous'}
+
+${message}
+      `
       await fastify.sendEmail(
         'World of Nuclear (system) <system@support.worldofnuclear.com>',
         fastify.config.ADMIN_EMAIL,
-        `${context}: We got feedback. Hurray!!!`,
-        message
+        `We got feedback. Hurray!!!`,
+        messageWithContext
       )
     } catch (err) {
       fastify.log.error(err)
