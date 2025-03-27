@@ -4,11 +4,16 @@ import fp from 'fastify-plugin'
 
 import type { Session } from '../types/won-flux-types'
 
+type providerCodes = 'github' | 'google' | 'discord' | 'x' | 'meta'
+interface ProviderParams {
+  provider: providerCodes
+}
 interface SupportedProviders {
   githubOAuth2: OAuth2Namespace
   googleOAuth2: OAuth2Namespace
   discordOAuth2: OAuth2Namespace
   xOAuth2: OAuth2Namespace
+  metaOAuth2: OAuth2Namespace
 }
 
 const X_CONFIGURATION = {
@@ -34,6 +39,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     startRedirectPath: '/login/github',
     callbackUri: `${fastify.config.API_BASE_URL}/login/github/callback`
   } as FastifyOAuth2Options)
+  fastify.log.info(`oauth2: github`)
 
   // Google OAuth2
   await fastify.register(fastifyOAuth2, {
@@ -49,6 +55,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     startRedirectPath: '/login/google',
     callbackUri: `${fastify.config.API_BASE_URL}/login/google/callback`
   } as FastifyOAuth2Options)
+  fastify.log.info(`oauth2: google`)
 
   // Register Discord OAuth2
   await fastify.register(fastifyOAuth2, {
@@ -64,6 +71,23 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     startRedirectPath: '/login/discord',
     callbackUri: `${fastify.config.API_BASE_URL}/login/discord/callback`
   } as FastifyOAuth2Options)
+  fastify.log.info(`oauth2: discord`)
+
+  // Register Meta (Facebook, Instagram, etc.) OAuth2
+  await fastify.register(fastifyOAuth2, {
+    name: 'metaOAuth2',
+    scope: ['email', 'public_profile'],
+    credentials: {
+      client: {
+        id: fastify.config.FACEBOOK_CLIENT_ID,
+        secret: fastify.config.FACEBOOK_CLIENT_SECRET
+      },
+      auth: fastifyOAuth2.FACEBOOK_CONFIGURATION
+    },
+    startRedirectPath: '/login/meta',
+    callbackUri: `${fastify.config.API_BASE_URL}/login/meta/callback`
+  } as FastifyOAuth2Options)
+  fastify.log.info(`oauth2: meta`)
 
   // Register X OAuth2
   await fastify.register(fastifyOAuth2, {
@@ -79,9 +103,10 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     startRedirectPath: '/login/x',
     callbackUri: `${fastify.config.API_BASE_URL}/login/x/callback`
   } as FastifyOAuth2Options)
+  fastify.log.info(`oauth2: x`)
 
   // Helper function to get user info based on provider
-  const getUserInfo = async (provider: 'github' | 'google' | 'discord' | 'x', accessToken: string) => {
+  const getUserInfo = async (provider: 'github' | 'google' | 'discord' | 'x' | 'meta', accessToken: string) => {
     let userInfo
     switch (provider) {
       case 'github':
@@ -108,6 +133,11 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
           headers: { Authorization: `Bearer ${accessToken}` }
         }).then(res => res.json())
         break
+      case 'meta':
+        userInfo = await fetch('https://graph.facebook.com/v19.0/me', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }).then(res => res.json())
+        break
       case 'x':
         userInfo = await fetch('https://api.x.com/2/users/me', {
           headers: { Authorization: `Bearer ${accessToken}` }
@@ -120,7 +150,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   }
 
   // Generic callback handler
-  const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: 'github' | 'google' | 'discord' | 'x') => {
+  const handleOAuthCallback = async (request: FastifyRequest, reply: FastifyReply, provider: providerCodes) => {
 
     let accessToken
     let refreshToken
@@ -139,10 +169,11 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
 
     // 1. Get user info from provider
     const userInfo = await getUserInfo(provider, accessToken)
+    fastify.log.info(`oauth2: userInfo: ${JSON.stringify(userInfo)}`)
     const { id: socialId, email: socialEmail, name: socialName } = userInfo
 
     // 2. Check if the user exists in your database
-    let user = await fastify.data.users.signInUser(socialEmail)
+    let user = await fastify.data.users.signInUser(socialEmail || '')
 
     if (!user) {
       user = await fastify.data.users.createUser(socialEmail, socialName)
@@ -151,6 +182,10 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       }
     }
 
+    // FIXME: This hack won't work the way this logic is written. email is an important key to identity.
+    if (!userInfo.email) {
+      userInfo.email = 'noone@worldofnuclear.com'
+    }
     // 3. Create a social identity record including user info and auth tokens from identity provider
     let socialIdentity = await fastify.data.auth.signInWithIdentity(user.id, provider)
 
@@ -175,21 +210,10 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     reply.redirect(toUrl)
   }
 
-  // Register callback routes for each provider
-  fastify.get('/login/github/callback', async (request, reply) => {
-    return handleOAuthCallback(request, reply, 'github')
-  })
-
-  fastify.get('/login/google/callback', async (request, reply) => {
-    return handleOAuthCallback(request, reply, 'google')
-  })
-
-  fastify.get('/login/discord/callback', async (request, reply) => {
-    return handleOAuthCallback(request, reply, 'discord')
-  })
-
-  fastify.get('/login/x/callback', async (request, reply) => {
-    return handleOAuthCallback(request, reply, 'x')
+  // Register callback route
+  fastify.get<{ Params: ProviderParams }>('/login/:provider/callback', async (request, reply) => {
+    const { provider } = request.params
+    return handleOAuthCallback(request, reply, provider)
   })
 
   fastify.log.info(`registered oauth2 plugin`)

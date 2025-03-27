@@ -30,25 +30,32 @@ declare module 'fastify' {
     generateSessionToken: (sessionData: Session) => string
     setSessionToken: (reply: FastifyReply, token: string) => void
     removeSessionToken: (reply: FastifyReply) => void
-    resend: Resend
-    sendEmail: (from: string, to: string, subject: string, htmlBody: string) => Promise<EmailResponse>
+    resendAuth: Resend
+    resendFeedback: Resend
+    sendAuthEmail: (from: string, to: string, subject: string, htmlBody: string) => Promise<EmailResponse>
+    sendFeedbackEmail: (from: string, to: string, subject: string, htmlBody: string) => Promise<EmailResponse>
     validateTurnstile: (turnstileToken: string, ipAddress: string) => Promise<{ success: boolean }>
     googleOAuth2: FastifyPluginAsync
     githubOAuth2: FastifyPluginAsync
     discordOAuth2: FastifyPluginAsync
+    metaOAuth2: FastifyPluginAsync
     xOAuth2: FastifyPluginAsync
     config: {
+      PORT: number
       NODE_ENV: string
+      LOG_LEVEL: string
       API_HOST: string
       API_PORT: string
-      APP_BASE_URL: string
       API_BASE_URL: string
+      APP_BASE_URL: string
+      DATABASE_URL: string
       JWT_SECRET_KEY: string
       COOKIE_DOMAIN: string
       COOKIE_SECRET: string
-      RESEND_API_KEY: string
+      RESEND_AUTH_KEY: string
       RESEND_FEEDBACK_KEY: string
       ADMIN_EMAIL: string
+      TURNSTILE_SITE_KEY: string
       TURNSTILE_SECRET_KEY: string
       GITHUB_CLIENT_ID: string
       GITHUB_CLIENT_SECRET: string
@@ -56,6 +63,8 @@ declare module 'fastify' {
       GOOGLE_CLIENT_SECRET: string
       DISCORD_CLIENT_ID: string
       DISCORD_CLIENT_SECRET: string
+      FACEBOOK_CLIENT_ID: string
+      FACEBOOK_CLIENT_SECRET: string
       X_CLIENT_ID: string
       X_CLIENT_SECRET: string
     }
