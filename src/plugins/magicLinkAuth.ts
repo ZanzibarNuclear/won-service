@@ -22,7 +22,7 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 
     // Compose email with magic link, and send using Resend
     const magicLink = `${fastify.config.API_BASE_URL}/login/magiclink/verify?token=${token}`
-    const signInPage = `${fastify.config.API_BASE_URL}/sign-in`
+    const signInPage = `${fastify.config.APP_BASE_URL}/sign-in`
     const from = 'World of Nuclear <magiclink@support.worldofnuclear.com>'
     const subject = "Your Magic Link for Verification"
     const body = `
