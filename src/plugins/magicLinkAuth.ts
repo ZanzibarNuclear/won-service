@@ -45,6 +45,7 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     // validate turnstile token
     const turnstileResponse = await fastify.validateTurnstile(token, req.ip)
     if (!turnstileResponse.success) {
+      const errorCodes = turnstileResponse.error_codes
       res.status(400).send("Failed non-bot verification.")
       return
     }
@@ -55,7 +56,7 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
       return
     }
 
-    const success = await sendMagicLink(email, alias)
+    const success = await fastify.sendMagicLink(email, alias)
 
     res.send({ message: `A magic link sent to ${email} as you requested. Please check your email.`, status: "success" })
   })
