@@ -99,18 +99,16 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 
     fastify.log.info('Magic link record: ' + JSON.stringify(tokenData))
 
-    // already used?
-    if (tokenData.verified_at) {
-      // TODO: give user feedback that token was already used
-      fastify.log.info('Magic link already consumed' + JSON.stringify(tokenData))
+    // ensure single use
+    if (tokenData.verifiedAt || tokenData.failedValidationAt) {
+      fastify.log.info('Magic link already consumed: ' + token)
       return
     }
 
-    // expired?
-    if (tokenData.expires_at < new Date()) {
-      fastify.log.info('Magic link has expired' + JSON.stringify(tokenData))
+    // ensure not expired
+    if (tokenData.expiresAt < new Date()) {
+      fastify.log.info('Magic link has expired: ' + token)
       await fastify.data.auth.failMagicToken(token)
-      // TODO: give user feedback that token expired
       return
     }
 
