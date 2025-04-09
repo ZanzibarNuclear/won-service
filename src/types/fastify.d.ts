@@ -26,6 +26,7 @@ declare module 'fastify' {
       lessonSteps: LessonStepRepository
       users: UserRepository
     }
+    sendMagicLink: (email: string, alias: string) => void
     session: Session | null
     generateSessionToken: (sessionData: Session) => string
     setSessionToken: (reply: FastifyReply, token: string) => void
@@ -55,7 +56,6 @@ declare module 'fastify' {
       RESEND_AUTH_KEY: string
       RESEND_FEEDBACK_KEY: string
       ADMIN_EMAIL: string
-      TURNSTILE_SITE_KEY: string
       TURNSTILE_SECRET_KEY: string
       GITHUB_CLIENT_ID: string
       GITHUB_CLIENT_SECRET: string

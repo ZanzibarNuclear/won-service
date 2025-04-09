@@ -10,7 +10,6 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     const token = genKey(18)
     let adjustedAlias = alias
     if (!alias || alias === '') {
-      // TODO: use random display name generator - make it fun!!
       adjustedAlias = 'Gentle User'
     }
     const MINUTES_TIL_EXPIRES = 15
@@ -23,13 +22,14 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 
     // Compose email with magic link, and send using Resend
     const magicLink = `${fastify.config.API_BASE_URL}/login/magiclink/verify?token=${token}`
+    const signInPage = `${fastify.config.APP_BASE_URL}/sign-in`
     const from = 'World of Nuclear <magiclink@support.worldofnuclear.com>'
     const subject = "Your Magic Link for Verification"
     const body = `
     <p><strong>Zanzibar's World of Nuclear Energy - Magic Link</strong></p>
-    <p>Click the following link to verify your email and sign in to your account: ${magicLink}</p>
-    <p>This link will expire in ${MINUTES_TIL_EXPIRES} minutes. You can always request a new one.</p>
-    <p>If you did not request this, please accept our apologies and ignore this email.</p>
+    <p>Hello, ${adjustedAlias}. Here is your magic link to the World of Nuclear website. To sign in to your account, click this link: ${magicLink}</p>
+    <p>The link will expire in ${MINUTES_TIL_EXPIRES} minutes. You can always request a new one here: ${signInPage}</p>
+    <p>If you did not request a magic link, please ignore this email, and enjoy the rest of your day.</p>
     <p>Regards,</p>
     <p>Zanzibar, Nuclear Hero</p>
     `
@@ -45,17 +45,19 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     // validate turnstile token
     const turnstileResponse = await fastify.validateTurnstile(token, req.ip)
     if (!turnstileResponse.success) {
-      res.status(400).send("Failed non-bot verification.")
-      return
+      fastify.log.warn('Seems like we need to block a bot.')
+      return res.status(200).send({
+        status: 'failed',
+        message: 'Failed non-bot verification.'
+      })
     }
 
     // validate email
     if (!email || !email.includes('@')) {
-      res.status(400).send("Invalid email address.")
-      return
+      return res.status(400).send("Invalid email address.")
     }
 
-    const success = await sendMagicLink(email, alias)
+    const success = fastify.sendMagicLink(email, alias)
 
     res.send({ message: `A magic link sent to ${email} as you requested. Please check your email.`, status: "success" })
   })
@@ -97,18 +99,16 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 
     fastify.log.info('Magic link record: ' + JSON.stringify(tokenData))
 
-    // already used?
-    if (tokenData.verified_at) {
-      // TODO: give user feedback that token was already used
-      fastify.log.info('Magic link already consumed' + JSON.stringify(tokenData))
+    // ensure single use
+    if (tokenData.verifiedAt || tokenData.failedValidationAt) {
+      fastify.log.info('Magic link already consumed: ' + token)
       return
     }
 
-    // expired?
-    if (tokenData.expires_at < new Date()) {
-      fastify.log.info('Magic link has expired' + JSON.stringify(tokenData))
+    // ensure not expired
+    if (tokenData.expiresAt < new Date()) {
+      fastify.log.info('Magic link has expired: ' + token)
       await fastify.data.auth.failMagicToken(token)
-      // TODO: give user feedback that token expired
       return
     }
 

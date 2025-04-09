@@ -1,6 +1,19 @@
 import fp from 'fastify-plugin'
 import { FastifyPluginAsync } from 'fastify'
 
+type TurnstileErrorCodes = 'missing-input-secret' | 'invalid-input-secret' | 'missing-input-response' | 'invalid-input-response' | 'bad-request' | 'timeout-or-duplicate' | 'internal-error'
+type TurnstileResponse = {
+  success: boolean
+  challenge_ts: string
+  hostname: string
+  "error-codes": TurnstileErrorCodes[]
+  action: string
+  cdata: string
+  metadata: {
+    ephemeral_id: string
+  }
+}
+
 const turnstilePlugin: FastifyPluginAsync = async (fastify, options) => {
   const validateTurnstile = async (turnstileToken: string, ipAddress: string) => {
     fastify.log.info(`validateTurnstile: ${turnstileToken} ${ipAddress}`)
@@ -11,8 +24,14 @@ const turnstilePlugin: FastifyPluginAsync = async (fastify, options) => {
         'Content-Type': 'application/json'
       }
     })
+
+    // FIXME: this may be the wrong way to handle
     fastify.log.info(`validateTurnstile: response=${response}`)
-    return await response.json() as Promise<{ success: boolean }>
+    const responseDetails: TurnstileResponse = await response.json()
+    if (!responseDetails.success) {
+      fastify.log.info('Turnstile validation error: ' + responseDetails['error-codes'].join(', '))
+    }
+    return responseDetails
   }
 
   fastify.decorate('validateTurnstile', validateTurnstile)
