@@ -6,11 +6,11 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
     handler: async (request, reply) => {
       fastify.log.info('getting current user identity and roles')
       if (!request.session) {
-        return reply.notFound('Not authenticated')
+        return {}
       }
       const user = await db.selectFrom('users').select(['id', 'alias']).where('id', '=', request.session.userId).executeTakeFirst()
       if (!user) {
-        return reply.notFound('User not found')
+        return {}
       }
       fastify.log.info(`current user: ${JSON.stringify(user)}`)
       return {
