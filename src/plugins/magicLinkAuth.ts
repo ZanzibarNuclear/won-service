@@ -89,7 +89,7 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 
   // Function to verify the token
   async function verifyToken(token: string) {
-    let tokenData
+    let tokenData: any
     try {
       tokenData = await fastify.data.auth.findMagicToken(token)
     } catch (err) {
