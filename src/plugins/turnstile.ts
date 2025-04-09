@@ -29,8 +29,7 @@ const turnstilePlugin: FastifyPluginAsync = async (fastify, options) => {
     fastify.log.info(`validateTurnstile: response=${response}`)
     const responseDetails: TurnstileResponse = await response.json()
     if (!responseDetails.success) {
-      fastify.log.warn('Fastify error: ' + responseDetails['error-codes'].join(', '))
-      return responseDetails
+      fastify.log.info('Turnstile validation error: ' + responseDetails['error-codes'].join(', '))
     }
     return responseDetails
   }
