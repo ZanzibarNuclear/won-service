@@ -4,7 +4,7 @@ import fp from 'fastify-plugin'
 
 import type { Session } from '../types/won-flux-types'
 
-type providerCodes = 'github' | 'google' | 'discord' | 'x' | 'meta'
+type providerCodes = 'github' | 'google' | 'discord' | 'spotify'
 interface ProviderParams {
   provider: providerCodes
 }
@@ -12,17 +12,18 @@ interface SupportedProviders {
   githubOAuth2: OAuth2Namespace
   googleOAuth2: OAuth2Namespace
   discordOAuth2: OAuth2Namespace
-  xOAuth2: OAuth2Namespace
-  metaOAuth2: OAuth2Namespace
+  spotifyOAuth2: OAuth2Namespace
+  // xOAuth2: OAuth2Namespace
+  // metaOAuth2: OAuth2Namespace
 }
 
-const X_CONFIGURATION = {
-  authorizeHost: 'https://x.com',
-  authorizePath: 'i/oauth2/authorize',
-  tokenHost: 'https://api.x.com',
-  tokenPath: '2/oauth2/token',
-  revokePath: '2/oauth2/revoke'
-}
+// const X_CONFIGURATION = {
+//   authorizeHost: 'https://api.x.com',
+//   authorizePath: '2/oauth2/authorize',
+//   tokenHost: 'https://api.x.com',
+//   tokenPath: '2/oauth2/token',
+//   revokePath: '2/oauth2/revoke'
+// }
 
 const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   // GitHub OAuth2
@@ -73,40 +74,73 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   } as FastifyOAuth2Options)
   fastify.log.info(`oauth2: discord`)
 
-  // Register Meta (Facebook, Instagram, etc.) OAuth2
-  await fastify.register(fastifyOAuth2, {
-    name: 'metaOAuth2',
-    scope: ['email', 'public_profile'],
-    credentials: {
-      client: {
-        id: fastify.config.FACEBOOK_CLIENT_ID,
-        secret: fastify.config.FACEBOOK_CLIENT_SECRET
-      },
-      auth: fastifyOAuth2.FACEBOOK_CONFIGURATION
-    },
-    startRedirectPath: '/login/meta',
-    callbackUri: `${fastify.config.API_BASE_URL}/login/meta/callback`
-  } as FastifyOAuth2Options)
-  fastify.log.info(`oauth2: meta`)
+  // Register Spotify OAuth2
+  // await fastify.register(fastifyOAuth2, {
+  //   name: 'spotifyOAuth2',
+  //   scope: ['user-read-email', 'user-read-private'],
+  //   credentials: {
+  //     client: {
+  //       id: fastify.config.SPOTIFY_CLIENT_ID,
+  //       secret: fastify.config.SPOTIFY_CLIENT_SECRET
+  //     },
+  //     auth: fastifyOAuth2.SPOTIFY_CONFIGURATION,
+  //   },
+  //   startRedirectPath: '/login/spotify',
+  //   callbackUri: `${fastify.config.ALT_BASE_URL}/login/spotify/callback`
+  // } as FastifyOAuth2Options)
+  // fastify.log.info(`oauth2: discord`)
+
+  // Register Apple OAuth2
+  // await fastify.register(fastifyOAuth2, {
+  //   name: 'appleOAuth2',
+  //   credentials: {
+  //     client: {
+  //       id: fastify.config.APPLE_CLIENT_ID,
+  //       secret: fastify.config.APPLE_CLIENT_SECRET
+  //     },
+  //     auth: fastifyOAuth2.APPLE_CONFIGURATION,
+  //     options: {
+  //       authorizationMethod: 'body'
+  //     }
+  //   },
+  //   startRedirectPath: '/login/apple',
+  //   callbackUri: `${fastify.config.ALT_BASE_URL}/login/apple/callback`
+  // })
 
   // Register X OAuth2
-  await fastify.register(fastifyOAuth2, {
-    name: 'xOAuth2',
-    scope: ['users.read'],
-    credentials: {
-      client: {
-        id: fastify.config.X_CLIENT_ID,
-        secret: fastify.config.X_CLIENT_SECRET
-      },
-      auth: X_CONFIGURATION
-    },
-    startRedirectPath: '/login/x',
-    callbackUri: `${fastify.config.API_BASE_URL}/login/x/callback`
-  } as FastifyOAuth2Options)
-  fastify.log.info(`oauth2: x`)
+  // await fastify.register(fastifyOAuth2, {
+  //   name: 'xOAuth2',
+  //   scope: ['users.read', 'offline.access'],
+  //   credentials: {
+  //     client: {
+  //       id: fastify.config.X_CLIENT_ID,
+  //       secret: fastify.config.X_CLIENT_SECRET
+  //     },
+  //     auth: X_CONFIGURATION
+  //   },
+  //   startRedirectPath: '/login/x',
+  //   callbackUri: `${fastify.config.API_BASE_URL}/login/x/callback`
+  // } as FastifyOAuth2Options)
+  // fastify.log.info(`oauth2: x`)
+
+  // Register Meta (Facebook, Instagram, etc.) OAuth2
+  // await fastify.register(fastifyOAuth2, {
+  //   name: 'metaOAuth2',
+  //   scope: ['email', 'public_profile'],
+  //   credentials: {
+  //     client: {
+  //       id: fastify.config.FACEBOOK_CLIENT_ID,
+  //       secret: fastify.config.FACEBOOK_CLIENT_SECRET
+  //     },
+  //     auth: fastifyOAuth2.FACEBOOK_CONFIGURATION
+  //   },
+  //   startRedirectPath: '/login/meta',
+  //   callbackUri: `${fastify.config.API_BASE_URL}/login/meta/callback`
+  // } as FastifyOAuth2Options)
+  // fastify.log.info(`oauth2: meta`)
 
   // Helper function to get user info based on provider
-  const getUserInfo = async (provider: 'github' | 'google' | 'discord' | 'x' | 'meta', accessToken: string) => {
+  const getUserInfo = async (provider: providerCodes, accessToken: string) => {
     let userInfo
     switch (provider) {
       case 'github':
@@ -133,16 +167,27 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
           headers: { Authorization: `Bearer ${accessToken}` }
         }).then(res => res.json())
         break
-      case 'meta':
-        userInfo = await fetch('https://graph.facebook.com/v19.0/me', {
-          headers: { Authorization: `Bearer ${accessToken}` }
-        }).then(res => res.json())
-        break
-      case 'x':
-        userInfo = await fetch('https://api.x.com/2/users/me', {
-          headers: { Authorization: `Bearer ${accessToken}` }
-        }).then(res => res.json())
-        break
+      // case 'spotify':
+      //   userInfo = await fetch('', {
+      //     headers: { Authorization: `Bearer ${accessToken}` }
+      //   }).then(res => res.json())
+      //   break
+      // case 'meta':
+      //   userInfo = await fetch('https://graph.facebook.com/v19.0/me', {
+      //     headers: { Authorization: `Bearer ${accessToken}` },
+      //   }).then(res => res.json())
+      //   break
+      // case 'x':
+      //   const sourceUserInfo = await fetch('https://api.x.com/2/users/me?user.fields=id,username,email', {
+      //     headers: { Authorization: `Bearer ${accessToken}` }
+      //   }).then(res => res.json())
+      //   // map fields to required
+      //   userInfo = {
+      //     id: sourceUserInfo.id,
+      //     email: sourceUserInfo.email,
+      //     name: sourceUserInfo.username
+      //   }
+      //   break
       default:
         throw new Error(`Unsupported provider: ${provider}`)
     }
@@ -170,9 +215,13 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     // 1. Get user info from provider
     const userInfo = await getUserInfo(provider, accessToken)
     fastify.log.info(`oauth2: userInfo: ${JSON.stringify(userInfo)}`)
+    if (!userInfo.email) {
+      reply.status(401).send({ error: 'User email not found. Cannot authenticate user.' })
+    }
+
     const { id: socialId, email: socialEmail, name: socialName } = userInfo
 
-    // 2. Check if the user exists in your database
+    // 2. Check if the user exists in database
     let user = await fastify.data.users.signInUser(socialEmail || '')
 
     if (!user) {
@@ -182,10 +231,6 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       }
     }
 
-    // FIXME: This hack won't work the way this logic is written. email is an important key to identity.
-    if (!userInfo.email) {
-      userInfo.email = 'noone@worldofnuclear.com'
-    }
     // 3. Create a social identity record including user info and auth tokens from identity provider
     let socialIdentity = await fastify.data.auth.signInWithIdentity(user.id, provider)
 
@@ -206,7 +251,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     fastify.setSessionToken(reply, sessionToken)
 
     // 5. Redirect user to confirmation page
-    const toUrl = `${fastify.config.APP_BASE_URL}/sign-in/confirm?token=${sessionToken}`
+    const toUrl = `${fastify.config.APP_BASE_URL}/sign-in/confirm`
     reply.redirect(toUrl)
   }
 
