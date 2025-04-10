@@ -4,7 +4,7 @@ import fp from 'fastify-plugin'
 
 import type { Session } from '../types/won-flux-types'
 
-type providerCodes = 'github' | 'google' | 'discord' | 'x' | 'meta'
+type providerCodes = 'github' | 'google' | 'discord' | 'spotify'
 interface ProviderParams {
   provider: providerCodes
 }
@@ -17,8 +17,8 @@ interface SupportedProviders {
 }
 
 const X_CONFIGURATION = {
-  authorizeHost: 'https://x.com',
-  authorizePath: 'i/oauth2/authorize',
+  authorizeHost: 'https://api.x.com',
+  authorizePath: '2/oauth2/authorize',
   tokenHost: 'https://api.x.com',
   tokenPath: '2/oauth2/token',
   revokePath: '2/oauth2/revoke'
@@ -73,6 +73,22 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
   } as FastifyOAuth2Options)
   fastify.log.info(`oauth2: discord`)
 
+  // Register X OAuth2
+  await fastify.register(fastifyOAuth2, {
+    name: 'xOAuth2',
+    scope: ['users.read', 'offline.access'],
+    credentials: {
+      client: {
+        id: fastify.config.X_CLIENT_ID,
+        secret: fastify.config.X_CLIENT_SECRET
+      },
+      auth: X_CONFIGURATION
+    },
+    startRedirectPath: '/login/x',
+    callbackUri: `${fastify.config.API_BASE_URL}/login/x/callback`
+  } as FastifyOAuth2Options)
+  fastify.log.info(`oauth2: x`)
+
   // Register Meta (Facebook, Instagram, etc.) OAuth2
   await fastify.register(fastifyOAuth2, {
     name: 'metaOAuth2',
@@ -88,22 +104,6 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     callbackUri: `${fastify.config.API_BASE_URL}/login/meta/callback`
   } as FastifyOAuth2Options)
   fastify.log.info(`oauth2: meta`)
-
-  // Register X OAuth2
-  await fastify.register(fastifyOAuth2, {
-    name: 'xOAuth2',
-    scope: ['users.read'],
-    credentials: {
-      client: {
-        id: fastify.config.X_CLIENT_ID,
-        secret: fastify.config.X_CLIENT_SECRET
-      },
-      auth: X_CONFIGURATION
-    },
-    startRedirectPath: '/login/x',
-    callbackUri: `${fastify.config.API_BASE_URL}/login/x/callback`
-  } as FastifyOAuth2Options)
-  fastify.log.info(`oauth2: x`)
 
   // Helper function to get user info based on provider
   const getUserInfo = async (provider: 'github' | 'google' | 'discord' | 'x' | 'meta', accessToken: string) => {
@@ -135,13 +135,19 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
         break
       case 'meta':
         userInfo = await fetch('https://graph.facebook.com/v19.0/me', {
-          headers: { Authorization: `Bearer ${accessToken}` }
+          headers: { Authorization: `Bearer ${accessToken}` },
         }).then(res => res.json())
         break
       case 'x':
-        userInfo = await fetch('https://api.x.com/2/users/me', {
+        const sourceUserInfo = await fetch('https://api.x.com/2/users/me?user.fields=id,username,email', {
           headers: { Authorization: `Bearer ${accessToken}` }
         }).then(res => res.json())
+        // map fields to required
+        userInfo = {
+          id: sourceUserInfo.id,
+          email: sourceUserInfo.email,
+          name: sourceUserInfo.username
+        }
         break
       default:
         throw new Error(`Unsupported provider: ${provider}`)
@@ -170,9 +176,13 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     // 1. Get user info from provider
     const userInfo = await getUserInfo(provider, accessToken)
     fastify.log.info(`oauth2: userInfo: ${JSON.stringify(userInfo)}`)
+    if (!userInfo.email) {
+      reply.status(401).send({ error: 'User email not found. Cannot authenticate user.' })
+    }
+
     const { id: socialId, email: socialEmail, name: socialName } = userInfo
 
-    // 2. Check if the user exists in your database
+    // 2. Check if the user exists in database
     let user = await fastify.data.users.signInUser(socialEmail || '')
 
     if (!user) {
@@ -182,10 +192,6 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       }
     }
 
-    // FIXME: This hack won't work the way this logic is written. email is an important key to identity.
-    if (!userInfo.email) {
-      userInfo.email = 'noone@worldofnuclear.com'
-    }
     // 3. Create a social identity record including user info and auth tokens from identity provider
     let socialIdentity = await fastify.data.auth.signInWithIdentity(user.id, provider)
 
@@ -206,7 +212,7 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     fastify.setSessionToken(reply, sessionToken)
 
     // 5. Redirect user to confirmation page
-    const toUrl = `${fastify.config.APP_BASE_URL}/sign-in/confirm?token=${sessionToken}`
+    const toUrl = `${fastify.config.APP_BASE_URL}/sign-in/confirm`
     reply.redirect(toUrl)
   }
 
