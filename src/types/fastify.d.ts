@@ -39,8 +39,10 @@ declare module 'fastify' {
     googleOAuth2: FastifyPluginAsync
     githubOAuth2: FastifyPluginAsync
     discordOAuth2: FastifyPluginAsync
-    metaOAuth2: FastifyPluginAsync
     xOAuth2: FastifyPluginAsync
+    appleOAuth2: FastifyPluginAsync
+    spotifyOAuth2: FastifyPluginAsync
+    metaOAuth2: FastifyPluginAsync
     config: {
       PORT: number
       NODE_ENV: string
@@ -48,6 +50,7 @@ declare module 'fastify' {
       API_HOST: string
       API_PORT: string
       API_BASE_URL: string
+      ALT_BASE_URL: string
       APP_BASE_URL: string
       DATABASE_URL: string
       JWT_SECRET_KEY: string
@@ -67,6 +70,10 @@ declare module 'fastify' {
       FACEBOOK_CLIENT_SECRET: string
       X_CLIENT_ID: string
       X_CLIENT_SECRET: string
+      APPLE_CLIENT_ID: string
+      APPLE_CLIENT_SECRET: string
+      SPOTIFY_CLIENT_ID: string
+      SPOTIFY_CLIENT_SECRET: string
     }
   }
   interface FastifyRequest {

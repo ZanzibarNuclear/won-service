@@ -12,6 +12,7 @@ const envSchema = {
     API_HOST: { type: 'string' },
     API_PORT: { type: 'number' },
     API_BASE_URL: { type: 'string' },
+    ALT_BASE_URL: { type: 'string' },
     APP_BASE_URL: { type: 'string' },
     DATABASE_URL: { type: 'string' },
     JWT_SECRET_KEY: { type: 'string' },
@@ -31,6 +32,10 @@ const envSchema = {
     FACEBOOK_CLIENT_SECRET: { type: 'string' },
     X_CLIENT_ID: { type: 'string' },
     X_CLIENT_SECRET: { type: 'string' },
+    APPLE_CLIENT_ID: { type: 'string' },
+    APPLE_CLIENT_SECRET: { type: 'string' },
+    SPOTIFY_CLIENT_ID: { type: 'string' },
+    SPOTIFY_CLIENT_SECRET: { type: 'string' },
   }
 }
 
