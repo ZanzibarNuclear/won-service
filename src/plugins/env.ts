@@ -28,14 +28,14 @@ const envSchema = {
     GOOGLE_CLIENT_SECRET: { type: 'string' },
     DISCORD_CLIENT_ID: { type: 'string' },
     DISCORD_CLIENT_SECRET: { type: 'string' },
-    FACEBOOK_CLIENT_ID: { type: 'string' },
-    FACEBOOK_CLIENT_SECRET: { type: 'string' },
-    X_CLIENT_ID: { type: 'string' },
-    X_CLIENT_SECRET: { type: 'string' },
-    APPLE_CLIENT_ID: { type: 'string' },
-    APPLE_CLIENT_SECRET: { type: 'string' },
-    SPOTIFY_CLIENT_ID: { type: 'string' },
-    SPOTIFY_CLIENT_SECRET: { type: 'string' },
+    // FACEBOOK_CLIENT_ID: { type: 'string' },
+    // FACEBOOK_CLIENT_SECRET: { type: 'string' },
+    // X_CLIENT_ID: { type: 'string' },
+    // X_CLIENT_SECRET: { type: 'string' },
+    // APPLE_CLIENT_ID: { type: 'string' },
+    // APPLE_CLIENT_SECRET: { type: 'string' },
+    // SPOTIFY_CLIENT_ID: { type: 'string' },
+    // SPOTIFY_CLIENT_SECRET: { type: 'string' },
   }
 }
 

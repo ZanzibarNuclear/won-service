@@ -66,14 +66,14 @@ declare module 'fastify' {
       GOOGLE_CLIENT_SECRET: string
       DISCORD_CLIENT_ID: string
       DISCORD_CLIENT_SECRET: string
-      FACEBOOK_CLIENT_ID: string
-      FACEBOOK_CLIENT_SECRET: string
-      X_CLIENT_ID: string
-      X_CLIENT_SECRET: string
-      APPLE_CLIENT_ID: string
-      APPLE_CLIENT_SECRET: string
-      SPOTIFY_CLIENT_ID: string
-      SPOTIFY_CLIENT_SECRET: string
+      // FACEBOOK_CLIENT_ID: string
+      // FACEBOOK_CLIENT_SECRET: string
+      // X_CLIENT_ID: string
+      // X_CLIENT_SECRET: string
+      // APPLE_CLIENT_ID: string
+      // APPLE_CLIENT_SECRET: string
+      // SPOTIFY_CLIENT_ID: string
+      // SPOTIFY_CLIENT_SECRET: string
     }
   }
   interface FastifyRequest {
