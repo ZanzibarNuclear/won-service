@@ -43,3 +43,35 @@ export interface FluxFilter {
   authorId?: number
   fluxId?: number
 }
+
+export interface Profile {
+  avatarUrl: string | null
+  bio: string | null
+  createdAt: Date
+  email: string | null
+  emailVerifiedAt: Date | null
+  fullName: string | null
+  id: string
+  joinReason: string | null
+  karmaScore: number
+  location: string | null
+  nuclearLikes: string | null
+  screenName: string | null
+  updatedAt: Date | null
+  website: string | null
+  xUsername: string | null
+}
+
+export interface ProfileUpdate {
+  id: string
+  email: string | null
+  screenName: string | null
+  fullName: string | null
+  avatarUrl: string | null
+  website: string | null
+  bio: string | null
+  location: string | null
+  joinReason: string | null
+  nuclearLikes: string | null
+  xUsername: string | null
+}

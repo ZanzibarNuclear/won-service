@@ -24,6 +24,7 @@ declare module 'fastify' {
       lessonContents: LessonContentPartRepository
       lessonPaths: LessonPathRepository
       lessonSteps: LessonStepRepository
+      userProfiles: UserProfileRepository
       users: UserRepository
     }
     sendMagicLink: (email: string, alias: string) => void

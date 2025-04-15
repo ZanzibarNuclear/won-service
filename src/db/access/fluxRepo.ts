@@ -164,4 +164,16 @@ export class FluxRepository {
       .where('user_id', '=', userId)
       .executeTakeFirst()
   }
+
+  async createFluxUser(userId: string, handle: string, displayName: string) {
+    return await this.db
+      .insertInto('flux_users')
+      .values({
+        user_id: userId,
+        handle: handle,
+        display_name: displayName
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+  }
 }

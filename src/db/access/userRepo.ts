@@ -47,47 +47,10 @@ export class UserRepository {
       .executeTakeFirst()
   }
 
-  async getUsers() {
-    return []
-  }
-
-  async getProfile(userId: string) {
-    return await this.db
-      .selectFrom('profiles')
+  async getUsers(limit: number, offset: number) {
+    return await this.db.selectFrom('users')
       .selectAll()
-      .where('id', '=', userId)
-      .executeTakeFirst()
+      .limit(10)
+      .execute()
   }
-
-  async createProfile(id: string, screenName: string) {
-    return await this.db
-      .insertInto('profiles')
-      .values({
-        id,
-        screen_name: screenName,
-      })
-      .returningAll()
-      .executeTakeFirst()
-  }
-
-  async updateProfile(id: string, screenName: string, fullName: string, avatarUrl: string, bio: string, location: string, joinReason: string, nuclearLikes: string, xUsername: string, website: string) {
-    return await this.db
-      .updateTable('profiles')
-      .set({
-        id,
-        screen_name: screenName,
-        full_name: fullName,
-        avatar_url: avatarUrl,
-        bio,
-        location,
-        join_reason: joinReason,
-        nuclear_likes: nuclearLikes,
-        x_username: xUsername,
-        website
-      })
-      .where('id', '=', id)
-      .returningAll()
-      .executeTakeFirst()
-  }
-
 }
