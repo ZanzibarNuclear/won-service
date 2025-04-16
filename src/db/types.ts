@@ -236,6 +236,23 @@ export interface Unsubscribes {
   id: Generated<number>;
 }
 
+export interface UserProfiles {
+  alias: string | null;
+  avatar: string | null;
+  bio: string | null;
+  created_at: Generated<Timestamp>;
+  full_name: string | null;
+  glam_shot: string | null;
+  handle: string | null;
+  id: string;
+  karma_score: Generated<number | null>;
+  location: string | null;
+  updated_at: Generated<Timestamp>;
+  website: string | null;
+  why_joined: string | null;
+  why_nuclear: string | null;
+}
+
 export interface UserRoles {
   granted_at: Generated<Timestamp>;
   id: Generated<string>;
@@ -285,6 +302,7 @@ export interface DB {
   profiles: Profiles;
   roles: Roles;
   unsubscribes: Unsubscribes;
+  user_profiles: UserProfiles;
   user_roles: UserRoles;
   users: Users;
   violation_reports: ViolationReports;
