@@ -13,10 +13,12 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
       if (!user) {
         return {}
       }
+      const profile = await fastify.data.userProfiles.get(request.session.userId)
       return {
         id: user.id,
         alias: user.alias,
-        roles: request.session.roles
+        roles: request.session.roles,
+        profile
       }
     }
   })

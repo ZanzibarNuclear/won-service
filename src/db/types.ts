@@ -222,10 +222,25 @@ export interface Profiles {
   x_username: string | null;
 }
 
+export interface Roles {
+  created_at: Generated<Timestamp>;
+  description: string | null;
+  key: string;
+  label: string;
+  updated_at: Generated<Timestamp>;
+}
+
 export interface Unsubscribes {
   created_at: Generated<Timestamp>;
   email: string;
   id: Generated<number>;
+}
+
+export interface UserRoles {
+  granted_at: Generated<Timestamp>;
+  id: Generated<string>;
+  role_id: string;
+  user_id: string;
 }
 
 export interface Users {
@@ -268,7 +283,9 @@ export interface DB {
   magic_auth: MagicAuth;
   objection_reasons: ObjectionReasons;
   profiles: Profiles;
+  roles: Roles;
   unsubscribes: Unsubscribes;
+  user_roles: UserRoles;
   users: Users;
   violation_reports: ViolationReports;
 }
