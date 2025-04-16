@@ -1,8 +1,7 @@
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
 import fastifyOAuth2, { FastifyOAuth2Options, OAuth2Namespace } from '@fastify/oauth2'
 import fp from 'fastify-plugin'
-
-import type { Session } from '../types/won-flux-types'
+import type { UserCredentials } from '../types/won-flux-types'
 
 type providerCodes = 'github' | 'google' | 'discord' | 'spotify'
 interface ProviderParams {
@@ -242,12 +241,8 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
     }
 
     // 4. Create a session token
-    const sessionInfo: Session = {
-      userId: user.id,
-      alias: user.alias,
-      roles: ['member']
-    }
-    const sessionToken = fastify.generateSessionToken(sessionInfo)
+    const credentials: UserCredentials = await fastify.data.users.getCreds(user.id)
+    const sessionToken = fastify.generateSessionToken(credentials)
     fastify.setSessionToken(reply, sessionToken)
 
     // 5. Redirect user to confirmation page

@@ -1,5 +1,6 @@
 import { Kysely } from "kysely"
 import { DB } from '../types'
+import { UserCredentials } from '../../types/won-flux-types'
 
 export class UserRepository {
   constructor(private db: Kysely<DB>) { }
@@ -48,9 +49,50 @@ export class UserRepository {
   }
 
   async getUsers(limit: number, offset: number) {
-    return await this.db.selectFrom('users')
+    return await this.db
+      .selectFrom('users')
       .selectAll()
       .limit(10)
       .execute()
+  }
+
+  async grantRole(userId: string, role: string) {
+    // TODO: handle error cases: 1) user not found, 2) role not found, 3) already granted
+    return await this.db
+      .insertInto('user_roles')
+      .values({
+        user_id: userId,
+        role_id: role,
+      })
+      .execute()
+  }
+
+  async revokeRole(userId: string, role: string) {
+    // TODO: handle error cases: 1) user not found, 2) role not found
+    return await this.db
+      .deleteFrom('user_roles')
+      .where('user_id', '=', userId)
+      .where('role_id', '=', role)
+      .execute()
+  }
+
+  async getUserRoles(userId: string) {
+    return await this.db
+      .selectFrom('user_roles')
+      .selectAll()
+      .where('user_id', '=', userId)
+      .execute()
+  }
+
+  async getCreds(userId: string): Promise<UserCredentials> {
+    const profile = await this.db.selectFrom('user_profiles').select(['alias']).where('id', '=', userId).executeTakeFirst()
+    const result = await this.getUserRoles(userId)
+    const alias = profile?.alias || null
+    const roles = result.map((row: any) => row.roleId)
+    return {
+      userId,
+      alias,
+      roles
+    }
   }
 }

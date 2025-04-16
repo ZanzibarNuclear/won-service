@@ -1,8 +1,7 @@
 import fp from 'fastify-plugin'
 import jwt from 'jsonwebtoken'
 import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
-import { db } from '../db/Database'
-import type { Session } from '../types/won-flux-types'
+import type { UserCredentials } from '../types/won-flux-types'
 
 interface SessionAuthPluginOptions {
   sessionSecret: string
@@ -36,8 +35,8 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
     }
   })
 
-  fastify.decorate('generateSessionToken', (sessionData: Session) => {
-    return jwt.sign(sessionData, fastify.config.JWT_SECRET_KEY, { expiresIn: '7d' })
+  fastify.decorate('generateSessionToken', (credentials: UserCredentials) => {
+    return jwt.sign(credentials, fastify.config.JWT_SECRET_KEY, { expiresIn: '7d' })
   })
 
   fastify.decorate('setSessionToken', (reply: FastifyReply, token: string) => {
@@ -60,40 +59,34 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
     })
   })
 
-  fastify.log.info('registered sessionAuth plugin')
-}
-
-async function verifySessionToken(token: string, secret: string): Promise<Session> {
-  if (!token) {
-    throw new Error('No session token provided')
-  }
-  if (!secret) {
-    throw new Error('No JWT secret provided')
-  }
-  let decoded
-  try {
-    decoded = jwt.verify(token, secret)
-  } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      throw new Error('Session token has expired')
-    } else {
-      throw new Error('Failed to verify session token')
+  async function verifySessionToken(token: string, secret: string): Promise<UserCredentials> {
+    if (!token) {
+      throw new Error('No session token provided')
     }
-  }
-  const { userId } = decoded as Session
+    if (!secret) {
+      throw new Error('No JWT secret provided')
+    }
+    let decoded
+    try {
+      decoded = jwt.verify(token, secret)
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new Error('Session token has expired')
+      } else {
+        throw new Error('Failed to verify session token')
+      }
+    }
+    const creds = decoded as UserCredentials
+    // TODO: store session token; look up session during verify
+    const user = await fastify.data.userProfiles.get(creds.userId)
+    if (!user) {
+      throw new Error('User not found')
+    }
 
-  // TODO: look up session in database; need to store it somewhere
-
-  const user = await db.selectFrom('users').select(['id', 'alias']).where('id', '=', userId).executeTakeFirst()
-  if (!user) {
-    throw new Error('User not found')
+    return creds
   }
 
-  return {
-    userId,
-    alias: user.alias,
-    roles: ['user']
-  }
+  fastify.log.info('registered sessionAuth plugin')
 }
 
 export default fp(sessionAuthPlugin, { name: 'sessionAuth', dependencies: ['env', 'cookie'] })

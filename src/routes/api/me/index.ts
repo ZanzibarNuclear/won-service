@@ -23,6 +23,18 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
     }
   })
 
+  fastify.get('/creds', {
+    handler: async (request, reply) => {
+      if (!request.session?.userId) {
+        return reply.notFound
+      }
+      fastify.log.info('finding cred for ' + request.session.userId)
+      const creds = await fastify.data.users.getCreds(request.session.userId)
+      fastify.log.info(creds)
+      return creds
+    }
+  })
+
   fastify.get('/profile', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {

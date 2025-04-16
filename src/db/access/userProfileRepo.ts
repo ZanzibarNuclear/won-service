@@ -2,6 +2,8 @@ import { Kysely } from "kysely"
 import { DB } from '../types'
 import { ProfileUpdate } from "../../types/won-flux-types"
 
+// FIXME: rewrite using new user_profiles table
+
 export class UserProfileRepository {
   constructor(private db: Kysely<DB>) { }
 

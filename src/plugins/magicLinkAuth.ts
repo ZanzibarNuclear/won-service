@@ -1,7 +1,7 @@
 import fp from 'fastify-plugin'
 import { FastifyPluginAsync } from "fastify"
 import { genKey } from '../utils'
-import { Session } from '../types/won-flux-types'
+import { UserCredentials } from '../types/won-flux-types'
 
 const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
 
@@ -77,12 +77,8 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     if (!user) {
       return res.code(500).send({ error: 'Unable to find or create user' })
     }
-    const sessionInfo: Session = {
-      userId: user.id,
-      alias: user.alias,
-      roles: ['member']
-    }
-    const sessionToken = fastify.generateSessionToken(sessionInfo)
+    const credentials: UserCredentials = await fastify.data.users.getCreds(user.id)
+    const sessionToken = fastify.generateSessionToken(credentials)
     fastify.setSessionToken(res, sessionToken)
     res.redirect(`${fastify.config.APP_BASE_URL}/sign-in/confirm`)
   })
