@@ -9,18 +9,18 @@ export class UserProfileRepository {
 
   async get(userId: string) {
     return await this.db
-      .selectFrom('profiles')
+      .selectFrom('user_profiles')
       .selectAll()
       .where('id', '=', userId)
       .executeTakeFirst()
   }
 
-  async create(id: string, screenName: string) {
+  async create(id: string, alias: string) {
     return await this.db
-      .insertInto('profiles')
+      .insertInto('user_profiles')
       .values({
         id,
-        screen_name: screenName,
+        alias,
       })
       .returningAll()
       .executeTakeFirst()

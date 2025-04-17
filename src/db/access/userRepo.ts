@@ -28,16 +28,27 @@ export class UserRepository {
       .executeTakeFirst()
   }
 
-  async createUser(email: string, alias: string) {
-    return await this.db
+  async createUser(email: string) {
+    const user = await this.db
       .insertInto('users')
       .values({
         email: email,
-        alias: alias,
         last_sign_in_at: new Date()
       })
       .returningAll()
       .executeTakeFirst()
+
+    // create an empty profile for new user
+    if (user) {
+      await this.db
+        .insertInto('user_profiles')
+        .values({
+          id: user.id
+        })
+        .executeTakeFirst()
+    }
+
+    return user
   }
 
   async getUser(id: string) {
@@ -89,10 +100,12 @@ export class UserRepository {
     const result = await this.getUserRoles(userId)
     const alias = profile?.alias || null
     const roles = result.map((row: any) => row.roleId)
-    return {
+    const creds = {
       userId,
       alias,
       roles
     }
+    console.log('creds: ' + JSON.stringify(creds))
+    return creds
   }
 }

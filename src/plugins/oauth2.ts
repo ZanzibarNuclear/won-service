@@ -218,13 +218,13 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
       reply.status(401).send({ error: 'User email not found. Cannot authenticate user.' })
     }
 
-    const { id: socialId, email: socialEmail, name: socialName } = userInfo
+    const { id: socialId, email: socialEmail } = userInfo
 
     // 2. Check if the user exists in database
     let user = await fastify.data.users.signInUser(socialEmail || '')
 
     if (!user) {
-      user = await fastify.data.users.createUser(socialEmail, socialName)
+      user = await fastify.data.users.createUser(socialEmail)
       if (!user) {
         throw new Error('Problem creating user record')
       }

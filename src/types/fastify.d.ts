@@ -27,7 +27,7 @@ declare module 'fastify' {
       userProfiles: UserProfileRepository
       users: UserRepository
     }
-    sendMagicLink: (email: string, alias: string) => void
+    sendMagicLink: (email: string) => void
     session: Session | null
     generateSessionToken: (sessionData: Session) => string
     setSessionToken: (reply: FastifyReply, token: string) => void
