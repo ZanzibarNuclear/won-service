@@ -78,7 +78,7 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
     }
     const creds = decoded as UserCredentials
     // TODO: store session token; look up session during verify
-    const user = await fastify.data.users.getUser(creds.userId)
+    const user = await fastify.data.users.getUser(creds.sub)
     if (!user) {
       throw new Error('User not found')
     }
@@ -86,7 +86,7 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
     return creds
   }
 
-  fastify.log.info('registered sessionAuth plugin')
+  fastify.log.info('registered session plugin')
 }
 
 export default fp(sessionAuthPlugin, { name: 'sessionAuth', dependencies: ['env', 'cookie'] })

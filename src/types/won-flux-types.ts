@@ -1,7 +1,7 @@
 export interface UserCredentials {
-  userId: string
-  alias: string | null
-  roles: string[] | null
+  sub: string
+  name: string | null
+  role: string[] | null
 }
 
 export interface Flux {

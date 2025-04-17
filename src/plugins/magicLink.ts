@@ -119,7 +119,7 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     return user
   }
 
-  fastify.log.info('registered magic link auth plugin')
+  fastify.log.info('registered magic link plugin')
 }
 
 export default fp(magicLinkAuth, { name: 'magicLinkAuth', dependencies: ['db', 'resend', 'sessionAuth', 'turnstile', 'sensible', 'dataAccess'] })

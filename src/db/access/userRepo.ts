@@ -101,9 +101,9 @@ export class UserRepository {
     const alias = profile?.alias || null
     const roles = result.map((row: any) => row.roleId)
     const creds = {
-      userId,
-      alias,
-      roles
+      sub: userId,
+      name: alias,
+      role: roles
     }
     console.log('creds: ' + JSON.stringify(creds))
     return creds
