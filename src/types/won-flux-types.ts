@@ -4,6 +4,37 @@ export interface UserCredentials {
   role: string[] | null
 }
 
+export interface Profile {
+  id: string
+  alias: string | null
+  handle: string | null
+  fullName: string | null
+  avatar: string | null
+  glamShot: string | null
+  bio: string | null
+  location: string | null
+  website: string | null
+  whyJoined: string | null
+  whyNuclear: string | null
+  karmaScore: number
+  createdAt: Date
+  updatedAt: Date | null
+}
+
+export interface ProfileUpdate {
+  id: string
+  alias: string | null
+  handle: string | null
+  fullName: string | null
+  avatar: string | null
+  glamShot: string | null
+  bio: string | null
+  location: string | null
+  website: string | null
+  whyJoined: string | null
+  whyNuclear: string | null
+}
+
 export interface Flux {
   id: number
   author: string
@@ -42,36 +73,4 @@ export interface FluxFilter {
   order?: string
   authorId?: number
   fluxId?: number
-}
-
-export interface Profile {
-  avatarUrl: string | null
-  bio: string | null
-  createdAt: Date
-  email: string | null
-  emailVerifiedAt: Date | null
-  fullName: string | null
-  id: string
-  joinReason: string | null
-  karmaScore: number
-  location: string | null
-  nuclearLikes: string | null
-  screenName: string | null
-  updatedAt: Date | null
-  website: string | null
-  xUsername: string | null
-}
-
-export interface ProfileUpdate {
-  id: string
-  email: string | null
-  screenName: string | null
-  fullName: string | null
-  avatarUrl: string | null
-  website: string | null
-  bio: string | null
-  location: string | null
-  joinReason: string | null
-  nuclearLikes: string | null
-  xUsername: string | null
 }

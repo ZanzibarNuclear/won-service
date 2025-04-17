@@ -27,8 +27,13 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
       if (!fastify.config.JWT_SECRET_KEY) {
         throw new Error('JWT_SECRET_KEY is not set')
       }
-      const session = await verifySessionToken(sessionToken, fastify.config.JWT_SECRET_KEY)
-      request.session = session
+      const creds = await verifySessionToken(sessionToken, fastify.config.JWT_SECRET_KEY)
+      const sessionData = {
+        userId: creds.sub,
+        alias: creds.name,
+        roles: creds.role
+      }
+      request.session = sessionData
     } catch (error) {
       fastify.log.info('Removing session cookie due to verification failure:', { cause: error })
       fastify.removeSessionToken(reply)

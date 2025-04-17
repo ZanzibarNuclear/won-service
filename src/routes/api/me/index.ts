@@ -16,22 +16,10 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
       const profile = await fastify.data.userProfiles.get(request.session.userId)
       return {
         id: user.id,
-        alias: user.alias,
+        alias: profile.alias,
         roles: request.session.roles,
         profile
       }
-    }
-  })
-
-  fastify.get('/creds', {
-    handler: async (request, reply) => {
-      if (!request.session?.userId) {
-        return reply.notFound
-      }
-      fastify.log.info('finding cred for ' + request.session.userId)
-      const creds = await fastify.data.users.getCreds(request.session.userId)
-      fastify.log.info(creds)
-      return creds
     }
   })
 
@@ -52,8 +40,8 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
     handler: async (request, reply) => {
       fastify.log.info('create profile for current user')
       const userId = request.session?.userId
-      const body = request.body as { screenName: string }
-      return await fastify.data.userProfiles.create(userId, body.screenName)
+      const body = request.body as { alias: string }
+      return await fastify.data.userProfiles.create(userId, body.alias)
     }
   })
 
@@ -63,7 +51,7 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
       fastify.log.info('update profile for current user')
       const userId = request.session?.userId
       const body = request.body as ProfileUpdate
-      return await fastify.data.userProfiles.update(userId, body.screenName)
+      return await fastify.data.userProfiles.update(userId, body)
     }
   })
 

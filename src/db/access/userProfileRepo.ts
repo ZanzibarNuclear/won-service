@@ -28,29 +28,54 @@ export class UserProfileRepository {
 
   async update(id: string, deltas: ProfileUpdate) {
     return await this.db
-      .updateTable('profiles')
+      .updateTable('user_profiles')
       .set({
-        screen_name: deltas.screenName,
+        alias: deltas.alias,
+        handle: deltas.handle,
         full_name: deltas.fullName,
-        avatar_url: deltas.avatarUrl,
+        avatar: deltas.avatar,
+        glam_shot: deltas.glamShot,
         bio: deltas.bio,
         location: deltas.location,
-        join_reason: deltas.joinReason,
-        nuclear_likes: deltas.nuclearLikes,
-        x_username: deltas.xUsername,
-        website: deltas.website
+        website: deltas.website,
+        why_joined: deltas.whyJoined,
+        why_nuclear: deltas.whyNuclear,
       })
       .where('id', '=', id)
       .returningAll()
       .executeTakeFirst()
   }
 
-  async updateAvatar(id: string, avatarUrl: string) {
+  async updateHandle(id: string, handle: string) {
     return await this.db
-      .updateTable('profiles')
+      .updateTable('user_profiles')
       .set({
         id,
-        avatar_url: avatarUrl,
+        handle: handle,
+      })
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
+  async updateAvatar(id: string, avatar: string) {
+    return await this.db
+      .updateTable('user_profiles')
+      .set({
+        id,
+        avatar: avatar,
+      })
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
+  async updateGlamShot(id: string, glamShot: string) {
+    return await this.db
+      .updateTable('user_profiles')
+      .set({
+        id,
+        glam_shot: glamShot,
       })
       .where('id', '=', id)
       .returningAll()
