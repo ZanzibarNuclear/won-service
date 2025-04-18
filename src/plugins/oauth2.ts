@@ -225,7 +225,10 @@ const oauth2Plugin: FastifyPluginAsync = async (fastify, options) => {
 
     if (!user) {
       user = await fastify.data.users.createUser(socialEmail)
-      if (!user) {
+      if (user) {
+        await fastify.data.users.grantRole(user.id, 'user')
+        await fastify.data.users.grantRole(user.id, 'member')
+      } else {
         throw new Error('Problem creating user record')
       }
     }

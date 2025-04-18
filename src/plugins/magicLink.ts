@@ -112,7 +112,10 @@ const magicLinkAuth: FastifyPluginAsync = async (fastify, options) => {
     let user = await fastify.data.users.findUserByEmail(email)
     if (!user) {
       user = await fastify.data.users.createUser(email)
-      if (!user) {
+      if (user) {
+        await fastify.data.users.grantRole(user.id, 'user')
+        await fastify.data.users.grantRole(user.id, 'member')
+      } else {
         fastify.log.info(`User not found or created: ${email}`)
       }
     }
