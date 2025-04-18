@@ -40,6 +40,7 @@ export class UserProfileRepository {
         website: deltas.website,
         why_joined: deltas.whyJoined,
         why_nuclear: deltas.whyNuclear,
+        updated_at: new Date()
       })
       .where('id', '=', id)
       .returningAll()
