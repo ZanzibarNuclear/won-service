@@ -1,7 +1,38 @@
-export interface Session {
-  userId: string
+export interface UserCredentials {
+  sub: string
+  name: string | null
+  role: string[] | null
+}
+
+export interface Profile {
+  id: string
   alias: string | null
-  roles: string[] | null
+  handle: string | null
+  fullName: string | null
+  avatar: string | null
+  glamShot: string | null
+  bio: string | null
+  location: string | null
+  website: string | null
+  whyJoined: string | null
+  whyNuclear: string | null
+  karmaScore: number
+  createdAt: Date
+  updatedAt: Date | null
+}
+
+export interface ProfileUpdate {
+  id: string
+  alias: string | null
+  handle: string | null
+  fullName: string | null
+  avatar: string | null
+  glamShot: string | null
+  bio: string | null
+  location: string | null
+  website: string | null
+  whyJoined: string | null
+  whyNuclear: string | null
 }
 
 export interface Flux {

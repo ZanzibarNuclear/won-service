@@ -222,10 +222,42 @@ export interface Profiles {
   x_username: string | null;
 }
 
+export interface Roles {
+  created_at: Generated<Timestamp>;
+  description: string | null;
+  key: string;
+  label: string;
+  updated_at: Generated<Timestamp>;
+}
+
 export interface Unsubscribes {
   created_at: Generated<Timestamp>;
   email: string;
   id: Generated<number>;
+}
+
+export interface UserProfiles {
+  alias: string | null;
+  avatar: string | null;
+  bio: string | null;
+  created_at: Generated<Timestamp>;
+  full_name: string | null;
+  glam_shot: string | null;
+  handle: string | null;
+  id: string;
+  karma_score: Generated<number | null>;
+  location: string | null;
+  updated_at: Generated<Timestamp>;
+  website: string | null;
+  why_joined: string | null;
+  why_nuclear: string | null;
+}
+
+export interface UserRoles {
+  granted_at: Generated<Timestamp>;
+  id: Generated<string>;
+  role_id: string;
+  user_id: string;
 }
 
 export interface Users {
@@ -268,7 +300,10 @@ export interface DB {
   magic_auth: MagicAuth;
   objection_reasons: ObjectionReasons;
   profiles: Profiles;
+  roles: Roles;
   unsubscribes: Unsubscribes;
+  user_profiles: UserProfiles;
+  user_roles: UserRoles;
   users: Users;
   violation_reports: ViolationReports;
 }
