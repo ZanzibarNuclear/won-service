@@ -1,5 +1,5 @@
 import 'fastify'
-import { Session } from './won-flux-types'
+import { UserCredentials } from './won-flux-types'
 import { AuthRepository } from '../db/access/authRepo'
 import { CourseRepository } from '../db/access/courseRepo'
 import { EventRepository } from '../db/access/eventRepo'
@@ -24,11 +24,12 @@ declare module 'fastify' {
       lessonContents: LessonContentPartRepository
       lessonPaths: LessonPathRepository
       lessonSteps: LessonStepRepository
+      userProfiles: UserProfileRepository
       users: UserRepository
     }
-    sendMagicLink: (email: string, alias: string) => void
-    session: Session | null
-    generateSessionToken: (sessionData: Session) => string
+    sendMagicLink: (email: string) => void
+    session: UserCredentials | null
+    generateSessionToken: (sessionData: UserCredentials) => string
     setSessionToken: (reply: FastifyReply, token: string) => void
     removeSessionToken: (reply: FastifyReply) => void
     resendAuth: Resend

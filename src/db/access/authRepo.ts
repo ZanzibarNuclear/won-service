@@ -95,12 +95,12 @@ export class AuthRepository {
       .executeTakeFirst()
   }
 
-  async createMagicLink(email: string, alias: string, token: string, minutesToLive: number) {
+  async createMagicLink(email: string, token: string, minutesToLive: number) {
     const expiresAt = new Date(Date.now() + minutesToLive * 60 * 1000)
     const magicLink = await this.db
       .insertInto('magic_auth')
       .values({
-        email, alias, token, expires_at: expiresAt
+        email, token, expires_at: expiresAt
       })
       .execute()
 

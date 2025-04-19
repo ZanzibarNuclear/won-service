@@ -1,5 +1,6 @@
 import { Kysely } from "kysely"
 import { DB } from '../types'
+import { UserCredentials } from '../../types/won-flux-types'
 
 export class UserRepository {
   constructor(private db: Kysely<DB>) { }
@@ -27,16 +28,27 @@ export class UserRepository {
       .executeTakeFirst()
   }
 
-  async createUser(email: string, alias: string) {
-    return await this.db
+  async createUser(email: string) {
+    const user = await this.db
       .insertInto('users')
       .values({
         email: email,
-        alias: alias,
         last_sign_in_at: new Date()
       })
       .returningAll()
       .executeTakeFirst()
+
+    // create an empty profile for new user
+    if (user) {
+      await this.db
+        .insertInto('user_profiles')
+        .values({
+          id: user.id
+        })
+        .executeTakeFirst()
+    }
+
+    return user
   }
 
   async getUser(id: string) {
@@ -47,47 +59,53 @@ export class UserRepository {
       .executeTakeFirst()
   }
 
-  async getUsers() {
-    return []
-  }
-
-  async getProfile(userId: string) {
+  async getUsers(limit: number, offset: number) {
     return await this.db
-      .selectFrom('profiles')
+      .selectFrom('users')
       .selectAll()
-      .where('id', '=', userId)
-      .executeTakeFirst()
+      .limit(10)
+      .execute()
   }
 
-  async createProfile(id: string, screenName: string) {
+  async grantRole(userId: string, role: string) {
+    // TODO: handle error cases: 1) user not found, 2) role not found, 3) already granted
     return await this.db
-      .insertInto('profiles')
+      .insertInto('user_roles')
       .values({
-        id,
-        screen_name: screenName,
+        user_id: userId,
+        role_id: role,
       })
-      .returningAll()
-      .executeTakeFirst()
+      .execute()
   }
 
-  async updateProfile(id: string, screenName: string, fullName: string, avatarUrl: string, bio: string, location: string, joinReason: string, nuclearLikes: string, xUsername: string, website: string) {
+  async revokeRole(userId: string, role: string) {
+    // TODO: handle error cases: 1) user not found, 2) role not found
     return await this.db
-      .updateTable('profiles')
-      .set({
-        id,
-        screen_name: screenName,
-        full_name: fullName,
-        avatar_url: avatarUrl,
-        bio,
-        location,
-        join_reason: joinReason,
-        nuclear_likes: nuclearLikes,
-        x_username: xUsername,
-        website
-      })
-      .where('id', '=', id)
-      .returningAll()
-      .executeTakeFirst()
+      .deleteFrom('user_roles')
+      .where('user_id', '=', userId)
+      .where('role_id', '=', role)
+      .execute()
   }
 
+  async getUserRoles(userId: string) {
+    return await this.db
+      .selectFrom('user_roles')
+      .selectAll()
+      .where('user_id', '=', userId)
+      .execute()
+  }
+
+  async getCreds(userId: string): Promise<UserCredentials> {
+    const profile = await this.db.selectFrom('user_profiles').select(['alias']).where('id', '=', userId).executeTakeFirst()
+    const result = await this.getUserRoles(userId)
+    const alias = profile?.alias || null
+    const roles = result.map((row: any) => row.roleId)
+    const creds = {
+      sub: userId,
+      name: alias,
+      role: roles
+    }
+    console.log('creds: ' + JSON.stringify(creds))
+    return creds
+  }
 }
