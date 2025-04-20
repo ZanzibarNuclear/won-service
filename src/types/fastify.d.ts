@@ -62,6 +62,7 @@ declare module 'fastify' {
       RESEND_FEEDBACK_KEY: string
       ADMIN_EMAIL: string
       IMAGE_STORAGE_PATH: string
+      IMAGE_ACCESS_ROOT: string
       TURNSTILE_SECRET_KEY: string
       GITHUB_CLIENT_ID: string
       GITHUB_CLIENT_SECRET: string

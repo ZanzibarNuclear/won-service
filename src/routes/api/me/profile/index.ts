@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify'
-import { ProfileUpdate } from './../../../types/won-flux-types';
-import { roleGuard } from '../../../utils/roleGuard'
+import { ProfileUpdate } from '../../../../types/won-flux-types';
+import { roleGuard } from '../../../../utils/roleGuard'
 import { pipeline } from 'stream'
 import { promisify } from 'util'
 import '@fastify/static'
@@ -25,10 +25,11 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
     await pump(file, fs.createWriteStream(imagePath))
 
     // Update the database with the file name
+    const relativePath = path.join(userId, fileName)
     if (imageType === 'avatar') {
-      await fastify.data.userProfiles.updateAvatar(userId, fileName)
+      await fastify.data.userProfiles.updateAvatar(userId, relativePath)
     } else if (imageType === 'glamShot') {
-      await fastify.data.userProfiles.updateGlamShot(userId, fileName)
+      await fastify.data.userProfiles.updateGlamShot(userId, relativePath)
     }
 
     return fileName
