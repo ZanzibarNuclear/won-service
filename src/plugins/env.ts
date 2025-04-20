@@ -21,6 +21,7 @@ const envSchema = {
     RESEND_AUTH_KEY: { type: 'string' },
     RESEND_FEEDBACK_KEY: { type: 'string' },
     ADMIN_EMAIL: { type: 'string' },
+    IMAGE_STORAGE_PATH: { type: 'string' },
     TURNSTILE_SECRET_KEY: { type: 'string' },
     GITHUB_CLIENT_ID: { type: 'string' },
     GITHUB_CLIENT_SECRET: { type: 'string' },

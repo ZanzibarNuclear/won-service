@@ -59,12 +59,17 @@ export class UserProfileRepository {
       .executeTakeFirst()
   }
 
+  async getAvatar(id: string) {
+    return await this.db.selectFrom('user_profiles').select(['avatar']).executeTakeFirst()
+  }
+
   async updateAvatar(id: string, avatar: string) {
     return await this.db
       .updateTable('user_profiles')
       .set({
         id,
         avatar: avatar,
+        updated_at: new Date()
       })
       .where('id', '=', id)
       .returningAll()
@@ -77,6 +82,7 @@ export class UserProfileRepository {
       .set({
         id,
         glam_shot: glamShot,
+        updated_at: new Date()
       })
       .where('id', '=', id)
       .returningAll()
