@@ -3,12 +3,48 @@ import { ProfileUpdate } from './../../../types/won-flux-types';
 import { roleGuard } from '../../../utils/roleGuard'
 import { pipeline } from 'stream'
 import { promisify } from 'util'
+import '@fastify/static'
 import fs from 'fs'
 import path from 'path'
 
 const pump = promisify(pipeline)
 
 const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
+  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/gif', 'image/webp']
+
+  const saveImage = async (userId: string, imageType: 'avatar' | 'glamShot', file: any, mimetype: string) => {
+    const userDir = path.join(fastify.profileImagePath, userId)
+    if (!fs.existsSync(userDir)) {
+      fs.mkdirSync(userDir, { recursive: true })
+    }
+
+    const extension = mimetype.split('/')[1] // Extract file extension from mimetype
+    const fileName = `${imageType}.${extension}`
+    const imagePath = path.join(userDir, fileName)
+
+    await pump(file, fs.createWriteStream(imagePath))
+
+    // Update the database with the file name
+    if (imageType === 'avatar') {
+      await fastify.data.userProfiles.updateAvatar(userId, fileName)
+    } else if (imageType === 'glamShot') {
+      await fastify.data.userProfiles.updateGlamShot(userId, fileName)
+    }
+
+    return fileName
+  }
+
+  const getImagePath = async (userId: string, imageType: 'avatar' | 'glamShot') => {
+    const profile = await fastify.data.userProfiles.get(userId)
+    const fileName = imageType === 'avatar' ? profile?.avatar : profile?.glam_shot
+
+    if (!fileName) {
+      return null
+    }
+
+    return path.join(fastify.profileImagePath, userId, fileName)
+  }
+
   fastify.get('/', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
@@ -41,43 +77,63 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
     }
   })
 
+  fastify.post('/avatar', {
+    preHandler: roleGuard(['member']),
+    handler: async (request, reply) => {
+      const userId = request.session?.userId
+      const data = await request.file()
+
+      if (!data || !allowedMimeTypes.includes(data.mimetype)) {
+        return reply.status(400).send({ error: 'Invalid file type' })
+      }
+
+      const fileName = await saveImage(userId, 'avatar', data.file, data.mimetype)
+      reply.send({ message: 'Avatar uploaded successfully', fileName })
+    }
+  })
+
   fastify.get('/avatar', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
       const userId = request.session?.userId
-      const avatar = fastify.data.userProfiles
-      const avatarPath = path.join(fastify.profileImagePath, userId, 'avatar.png')
+      const avatarPath = await getImagePath(userId, 'avatar')
 
-      if (!fs.existsSync(avatarPath)) {
+      if (!avatarPath || !fs.existsSync(avatarPath)) {
         return reply.status(404).send({ error: 'Avatar not found' })
       }
 
-      return reply.sendFile(avatarPath) // Use fastify-static if configured
+      return reply.sendFile(avatarPath) // Requires fastify-static
     }
   })
 
-  fastify.post('/avatar', {
+  fastify.post('/glam-shot', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
+      const userId = request.session?.userId
       const data = await request.file()
-      if (!data || !['image/jpeg', 'image/png'].includes(data.mimetype)) {
+
+      if (!data || !allowedMimeTypes.includes(data.mimetype)) {
         return reply.status(400).send({ error: 'Invalid file type' })
       }
 
-      // Generate a unique filename (e.g., using UUID or user ID)
-      const filepath = `${fastify.profileImagePath}/${request.session.userId}`
-      const filename = `${Date.now()}-${data.filename}`
-
-      const filePath = `${filepath}/${filename}`
-
-      // Save file to disk (or process for S3 upload)
-      await pump(data.file, fs.createWriteStream(filePath))
-
-      // Return the file URL or metadata
-      reply.send({ url: `/uploads/${filename}` })
+      const fileName = await saveImage(userId, 'glamShot', data.file, data.mimetype)
+      reply.send({ message: 'Glam-shot uploaded successfully', fileName })
     }
   })
 
+  fastify.get('/glam-shot', {
+    preHandler: roleGuard(['member']),
+    handler: async (request, reply) => {
+      const userId = request.session?.userId
+      const glamShotPath = await getImagePath(userId, 'glamShot')
+
+      if (!glamShotPath || !fs.existsSync(glamShotPath)) {
+        return reply.status(404).send({ error: 'Glam-shot not found' })
+      }
+
+      return reply.sendFile(glamShotPath) // Requires fastify-static
+    }
+  })
 }
 
 export default profileRoutes

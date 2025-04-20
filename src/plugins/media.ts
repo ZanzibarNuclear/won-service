@@ -13,8 +13,7 @@ const media: FastifyPluginAsync = async (fastify, options) => {
   })
 
   await fastify.register(require('@fastify/static'), {
-    root: path.join(__dirname, 'public'),
-    prefix: '/public/',
+    root: fastify.config.IMAGE_STORAGE_PATH,
   })
 
   const imagePath = fastify.config.IMAGE_STORAGE_PATH

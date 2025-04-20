@@ -2,8 +2,6 @@ import { Kysely } from "kysely"
 import { DB } from '../types'
 import { ProfileUpdate } from "../../types/won-flux-types"
 
-// FIXME: rewrite using new user_profiles table
-
 export class UserProfileRepository {
   constructor(private db: Kysely<DB>) { }
 
@@ -74,6 +72,10 @@ export class UserProfileRepository {
       .where('id', '=', id)
       .returningAll()
       .executeTakeFirst()
+  }
+
+  async getGlamShot(id: string) {
+    return await this.db.selectFrom('user_profiles').select(['glam_shot']).executeTakeFirst()
   }
 
   async updateGlamShot(id: string, glamShot: string) {
