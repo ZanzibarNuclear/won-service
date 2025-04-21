@@ -72,12 +72,38 @@ export class UserProfileRepository {
       .executeTakeFirst()
   }
 
+  async clearAvatar(id: string) {
+    return await this.db
+      .updateTable('user_profiles')
+      .set({
+        id,
+        avatar: null,
+        updated_at: new Date()
+      })
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
   async updateGlamShot(id: string, glamShot: string) {
     return await this.db
       .updateTable('user_profiles')
       .set({
         id,
         glam_shot: glamShot,
+        updated_at: new Date()
+      })
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
+  async clearGlamShot(id: string) {
+    return await this.db
+      .updateTable('user_profiles')
+      .set({
+        id,
+        glam_shot: null,
         updated_at: new Date()
       })
       .where('id', '=', id)

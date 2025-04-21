@@ -26,14 +26,14 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
     await pump(file, fs.createWriteStream(imagePath))
 
     // Update the database with the file name
-    const relativePath = path.join(userId, fileName)
+    const relativePath = path.join(userId, fileName) + '?v=' + Date.now()
     if (imageType === 'avatar') {
       await fastify.data.userProfiles.updateAvatar(userId, relativePath)
     } else if (imageType === 'glamShot') {
       await fastify.data.userProfiles.updateGlamShot(userId, relativePath)
     }
 
-    return fileName
+    return relativePath
   }
 
   const getImagePath = async (userId: string, imageType: 'avatar' | 'glamShot') => {
@@ -92,7 +92,8 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
       }
 
       const fileName = await saveImage(userId, 'avatar', data.file, data.mimetype)
-      reply.send({ message: 'Avatar uploaded successfully', fileName })
+      const freshProfile = await fastify.data.userProfiles.updateAvatar(userId, fileName)
+      reply.send(freshProfile)
     }
   })
 
@@ -105,7 +106,6 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
       if (!avatarPath || !fs.existsSync(avatarPath)) {
         return reply.status(404).send({ error: 'Avatar not found' })
       }
-
       return reply.sendFile(avatarPath) // Requires fastify-static
     }
   })
@@ -121,7 +121,8 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
       }
 
       const fileName = await saveImage(userId, 'glamShot', data.file, data.mimetype)
-      reply.send({ message: 'Glam-shot uploaded successfully', fileName })
+      const freshProfile = await fastify.data.userProfiles.updateGlamShot(userId, fileName)
+      reply.send(freshProfile)
     }
   })
 
