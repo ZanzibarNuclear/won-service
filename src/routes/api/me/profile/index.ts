@@ -8,9 +8,46 @@ import fs from 'fs'
 import path from 'path'
 import { adjustProfileImagePaths } from '../../../../utils'
 
-const pump = promisify(pipeline)
-
 const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
+
+  fastify.get('/', {
+    preHandler: roleGuard(['member']),
+    handler: async (request, reply) => {
+      fastify.log.info('find profile for current user')
+
+      const profile = await fastify.data.userProfiles.get(request.session?.userId)
+      if (!profile) {
+        return reply.status(404).send()
+      }
+      return adjustProfileImagePaths(profile, fastify.memberImageViewPath)
+    }
+  })
+
+  fastify.post('/', {
+    preHandler: roleGuard(['member']),
+    handler: async (request, reply) => {
+      fastify.log.info('create profile for current user')
+      const userId = request.session?.userId
+      const body = request.body as { alias: string }
+      const profile = await fastify.data.userProfiles.create(userId, body.alias)
+      return adjustProfileImagePaths(profile, fastify.memberImageViewPath)
+    }
+  })
+
+  fastify.put('/', {
+    preHandler: roleGuard(['member']),
+    handler: async (request, reply) => {
+      fastify.log.info('update profile for current user')
+      const userId = request.session?.userId
+      const body = request.body as ProfileUpdate
+      const profile = await fastify.data.userProfiles.update(userId, body)
+      return adjustProfileImagePaths(profile, fastify.memberImageViewPath)
+    }
+  })
+
+  /* ======= profile image handling ======= */
+
+  const pump = promisify(pipeline)
   const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/gif', 'image/webp']
 
   const saveImage = async (userId: string, imageType: 'avatar' | 'glamShot', file: any, mimetype: string) => {
@@ -56,40 +93,6 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
     const fileName = imageType === 'avatar' ? profile?.avatar : profile?.glam_shot
     return fileName ? path.join(fastify.memberImageFilePath, userId, fileName) : null
   }
-
-  fastify.get('/', {
-    preHandler: roleGuard(['member']),
-    handler: async (request, reply) => {
-      fastify.log.info('find profile for current user')
-
-      const profile = await fastify.data.userProfiles.get(request.session?.userId)
-      if (!profile) {
-        return reply.status(404).send()
-      }
-      const adjusted = adjustProfileImagePaths(profile, fastify.memberImageViewPath)
-      return adjusted
-    }
-  })
-
-  fastify.post('/', {
-    preHandler: roleGuard(['member']),
-    handler: async (request, reply) => {
-      fastify.log.info('create profile for current user')
-      const userId = request.session?.userId
-      const body = request.body as { alias: string }
-      return await fastify.data.userProfiles.create(userId, body.alias)
-    }
-  })
-
-  fastify.put('/', {
-    preHandler: roleGuard(['member']),
-    handler: async (request, reply) => {
-      fastify.log.info('update profile for current user')
-      const userId = request.session?.userId
-      const body = request.body as ProfileUpdate
-      return await fastify.data.userProfiles.update(userId, body)
-    }
-  })
 
   fastify.post('/avatar', {
     preHandler: roleGuard(['member']),
