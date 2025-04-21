@@ -73,16 +73,20 @@ export class UserProfileRepository {
   }
 
   async clearAvatar(id: string) {
-    return await this.db
-      .updateTable('user_profiles')
-      .set({
-        id,
-        avatar: null,
-        updated_at: new Date()
-      })
-      .where('id', '=', id)
-      .returningAll()
-      .executeTakeFirst()
+    const avatar = await this.db.selectFrom('user_profiles').select(['avatar']).executeTakeFirst()
+    if (avatar) {
+      await this.db
+        .updateTable('user_profiles')
+        .set({
+          id,
+          avatar: null,
+          updated_at: new Date()
+        })
+        .where('id', '=', id)
+        .returningAll()
+        .executeTakeFirst()
+    }
+    return avatar
   }
 
   async updateGlamShot(id: string, glamShot: string) {
@@ -99,15 +103,18 @@ export class UserProfileRepository {
   }
 
   async clearGlamShot(id: string) {
-    return await this.db
-      .updateTable('user_profiles')
-      .set({
-        id,
-        glam_shot: null,
-        updated_at: new Date()
-      })
-      .where('id', '=', id)
-      .returningAll()
-      .executeTakeFirst()
+    const glamShot = await this.db.selectFrom('user_profiles').select(['glam_shot']).executeTakeFirst()
+    if (glamShot) {
+      await this.db
+        .updateTable('user_profiles')
+        .set({
+          id,
+          glam_shot: null,
+          updated_at: new Date()
+        })
+        .where('id', '=', id)
+        .execute()
+    }
+    return glamShot
   }
 }

@@ -36,15 +36,22 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
     return relativePath
   }
 
+  const removeImage = async (imagePath: string) => {
+    const cleanImagePath = imagePath.split('?')[0] // Remove query parameters
+    const filePath = path.join(fastify.memberImageFilePath, cleanImagePath)
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath) // Delete the file
+      fastify.log.info('Image deleted: ' + filePath)
+    } else {
+      fastify.log.error('File not found: ' + filePath)
+    }
+  }
+
   const getImagePath = async (userId: string, imageType: 'avatar' | 'glamShot') => {
     const profile = await fastify.data.userProfiles.get(userId)
     const fileName = imageType === 'avatar' ? profile?.avatar : profile?.glam_shot
-
-    if (!fileName) {
-      return null
-    }
-
-    return path.join(fastify.memberImageFilePath, userId, fileName)
+    return fileName ? path.join(fastify.memberImageFilePath, userId, fileName) : null
   }
 
   fastify.get('/', {
@@ -110,6 +117,18 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
     }
   })
 
+  fastify.delete('/avatar', {
+    preHandler: roleGuard(['member']),
+    handler: async (request, reply) => {
+      const userId = request.session?.userId
+      const imagePath = await fastify.data.userProfiles.clearAvatar(userId)
+      if (imagePath) {
+        await removeImage(imagePath)
+      }
+      reply.code(201).send()
+    }
+  })
+
   fastify.post('/glam-shot', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
@@ -137,6 +156,18 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
       }
 
       return reply.sendFile(glamShotPath) // Requires fastify-static
+    }
+  })
+
+  fastify.delete('/glam-shot', {
+    preHandler: roleGuard(['member']),
+    handler: async (request, reply) => {
+      const userId = request.session?.userId
+      const imagePath = await fastify.data.userProfiles.clearGlamShot(userId)
+      if (imagePath) {
+        await removeImage(imagePath)
+      }
+      reply.code(201).send()
     }
   })
 }
