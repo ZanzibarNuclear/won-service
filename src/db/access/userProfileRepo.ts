@@ -103,7 +103,7 @@ export class UserProfileRepository {
   }
 
   async clearGlamShot(id: string) {
-    const result = await this.db.selectFrom('user_profiles').select(['glam_shot']).executeTakeFirst()
+    const result: any = await this.db.selectFrom('user_profiles').select(['glam_shot']).executeTakeFirst()
     if (result?.glamShot) {
       await this.db
         .updateTable('user_profiles')
