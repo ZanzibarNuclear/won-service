@@ -73,8 +73,8 @@ export class UserProfileRepository {
   }
 
   async clearAvatar(id: string) {
-    const avatar = await this.db.selectFrom('user_profiles').select(['avatar']).executeTakeFirst()
-    if (avatar) {
+    const result = await this.db.selectFrom('user_profiles').select(['avatar']).executeTakeFirst()
+    if (result?.avatar) {
       await this.db
         .updateTable('user_profiles')
         .set({
@@ -86,7 +86,7 @@ export class UserProfileRepository {
         .returningAll()
         .executeTakeFirst()
     }
-    return avatar
+    return result?.avatar
   }
 
   async updateGlamShot(id: string, glamShot: string) {
@@ -103,8 +103,8 @@ export class UserProfileRepository {
   }
 
   async clearGlamShot(id: string) {
-    const glamShot = await this.db.selectFrom('user_profiles').select(['glam_shot']).executeTakeFirst()
-    if (glamShot) {
+    const result = await this.db.selectFrom('user_profiles').select(['glam_shot']).executeTakeFirst()
+    if (result?.glamShot) {
       await this.db
         .updateTable('user_profiles')
         .set({
@@ -115,6 +115,6 @@ export class UserProfileRepository {
         .where('id', '=', id)
         .execute()
     }
-    return glamShot
+    return result?.glamShot
   }
 }

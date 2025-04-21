@@ -37,6 +37,9 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
   }
 
   const removeImage = async (imagePath: string) => {
+    if (!imagePath) {
+      return
+    }
     const cleanImagePath = imagePath.split('?')[0] // Remove query parameters
     const filePath = path.join(fastify.memberImageFilePath, cleanImagePath)
 
