@@ -29,7 +29,8 @@ declare module 'fastify' {
     }
     sendMagicLink: (email: string) => void
     session: UserCredentials | null
-    profileImagePath: string
+    memberImageFilePath: string
+    memberImageViewPath: string
     generateSessionToken: (sessionData: UserCredentials) => string
     setSessionToken: (reply: FastifyReply, token: string) => void
     removeSessionToken: (reply: FastifyReply) => void
@@ -61,8 +62,8 @@ declare module 'fastify' {
       RESEND_AUTH_KEY: string
       RESEND_FEEDBACK_KEY: string
       ADMIN_EMAIL: string
-      IMAGE_STORAGE_PATH: string
-      IMAGE_ACCESS_ROOT: string
+      MEMBER_IMAGE_FILE_PATH: string
+      MEMBER_IMAGE_VIEW_PATH: string
       TURNSTILE_SECRET_KEY: string
       GITHUB_CLIENT_ID: string
       GITHUB_CLIENT_SECRET: string

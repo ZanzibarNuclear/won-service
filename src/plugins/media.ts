@@ -5,6 +5,12 @@ import fs from 'fs'
 import path from 'path'
 
 const media: FastifyPluginAsync = async (fastify, options) => {
+  const filePath = fastify.config.MEMBER_IMAGE_FILE_PATH
+  const viewPath = fastify.config.MEMBER_IMAGE_VIEW_PATH
+
+  fastify.decorate('memberImageFilePath', filePath)
+  fastify.decorate('memberImageViewPath', viewPath)
+
   await fastify.register(multipart, {
     limits: {
       fileSize: 5 * 1024 * 1024,
@@ -13,22 +19,19 @@ const media: FastifyPluginAsync = async (fastify, options) => {
   })
 
   await fastify.register(require('@fastify/static'), {
-    root: fastify.config.IMAGE_STORAGE_PATH,
-    prefix: fastify.config.IMAGE_ACCESS_ROOT
+    root: filePath,
+    prefix: viewPath
   })
 
-  const imagePath = fastify.config.IMAGE_STORAGE_PATH
-  if (!fs.existsSync(imagePath)) {
-    throw new Error(`Image storage path does not exist: ${imagePath}`)
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Image storage path does not exist: ${filePath}`)
   }
 
   try {
-    fs.accessSync(imagePath, fs.constants.W_OK)
+    fs.accessSync(filePath, fs.constants.W_OK)
   } catch (err) {
-    throw new Error(`Image storage path is not writable: ${imagePath}`)
+    throw new Error(`Image storage path is not writable: ${filePath}`)
   }
-
-  fastify.decorate('profileImagePath', imagePath)
 
   fastify.log.info('registered media plugin')
 }

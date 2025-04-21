@@ -25,14 +25,16 @@ export class UserProfileRepository {
   }
 
   async update(id: string, deltas: ProfileUpdate) {
+
+    // NOTE: do not update avatar or glam_shot this way;
+    //       use updateAvatar, updateGlamShot instead when new image is uploaded
+
     return await this.db
       .updateTable('user_profiles')
       .set({
         alias: deltas.alias,
         handle: deltas.handle,
         full_name: deltas.fullName,
-        avatar: deltas.avatar,
-        glam_shot: deltas.glamShot,
         bio: deltas.bio,
         location: deltas.location,
         website: deltas.website,
@@ -57,10 +59,6 @@ export class UserProfileRepository {
       .executeTakeFirst()
   }
 
-  async getAvatar(id: string) {
-    return await this.db.selectFrom('user_profiles').select(['avatar']).executeTakeFirst()
-  }
-
   async updateAvatar(id: string, avatar: string) {
     return await this.db
       .updateTable('user_profiles')
@@ -72,10 +70,6 @@ export class UserProfileRepository {
       .where('id', '=', id)
       .returningAll()
       .executeTakeFirst()
-  }
-
-  async getGlamShot(id: string) {
-    return await this.db.selectFrom('user_profiles').select(['glam_shot']).executeTakeFirst()
   }
 
   async updateGlamShot(id: string, glamShot: string) {

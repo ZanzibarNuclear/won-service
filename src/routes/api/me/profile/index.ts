@@ -6,6 +6,7 @@ import { promisify } from 'util'
 import '@fastify/static'
 import fs from 'fs'
 import path from 'path'
+import { adjustProfileImagePaths } from '../../../../utils'
 
 const pump = promisify(pipeline)
 
@@ -13,7 +14,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
   const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/gif', 'image/webp']
 
   const saveImage = async (userId: string, imageType: 'avatar' | 'glamShot', file: any, mimetype: string) => {
-    const userDir = path.join(fastify.profileImagePath, userId)
+    const userDir = path.join(fastify.memberImageFilePath, userId)
     if (!fs.existsSync(userDir)) {
       fs.mkdirSync(userDir, { recursive: true })
     }
@@ -43,18 +44,20 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
       return null
     }
 
-    return path.join(fastify.profileImagePath, userId, fileName)
+    return path.join(fastify.memberImageFilePath, userId, fileName)
   }
 
   fastify.get('/', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
       fastify.log.info('find profile for current user')
+
       const profile = await fastify.data.userProfiles.get(request.session?.userId)
       if (!profile) {
         return reply.status(404).send()
       }
-      return profile
+      const adjusted = adjustProfileImagePaths(profile, fastify.memberImageViewPath)
+      return adjusted
     }
   })
 
