@@ -1,1 +1,6 @@
-{}
+{
+  "files.autoSave": "onFocusChange",
+  "files.autoSaveWorkspaceFilesOnly": true,
+  "editor.formatOnSave": true,
+  "workbench.editor.closeOnFileDelete": true
+}

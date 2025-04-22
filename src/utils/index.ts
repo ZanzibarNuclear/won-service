@@ -1,3 +1,5 @@
+import path from 'path'
+
 function generateRandomString(length: number) {
   const characters =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -11,4 +13,11 @@ function generateRandomString(length: number) {
 
 export const genKey = (digits = 10) => {
   return generateRandomString(digits)
+}
+
+export const adjustProfileImagePaths = (profile: any, imageViewPath: string) => {
+  return Object.assign({}, profile, {
+    avatar: profile.avatar ? path.join(imageViewPath, profile.avatar) : null,
+    glamShot: profile.glamShot ? path.join(imageViewPath, profile.glamShot) : null
+  })
 }

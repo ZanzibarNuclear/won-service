@@ -2,8 +2,6 @@ import { Kysely } from "kysely"
 import { DB } from '../types'
 import { ProfileUpdate } from "../../types/won-flux-types"
 
-// FIXME: rewrite using new user_profiles table
-
 export class UserProfileRepository {
   constructor(private db: Kysely<DB>) { }
 
@@ -27,14 +25,16 @@ export class UserProfileRepository {
   }
 
   async update(id: string, deltas: ProfileUpdate) {
+
+    // NOTE: do not update avatar or glam_shot this way;
+    //       use updateAvatar, updateGlamShot instead when new image is uploaded
+
     return await this.db
       .updateTable('user_profiles')
       .set({
         alias: deltas.alias,
         handle: deltas.handle,
         full_name: deltas.fullName,
-        avatar: deltas.avatar,
-        glam_shot: deltas.glamShot,
         bio: deltas.bio,
         location: deltas.location,
         website: deltas.website,
@@ -65,10 +65,28 @@ export class UserProfileRepository {
       .set({
         id,
         avatar: avatar,
+        updated_at: new Date()
       })
       .where('id', '=', id)
       .returningAll()
       .executeTakeFirst()
+  }
+
+  async clearAvatar(id: string) {
+    const result = await this.db.selectFrom('user_profiles').select(['avatar']).executeTakeFirst()
+    if (result?.avatar) {
+      await this.db
+        .updateTable('user_profiles')
+        .set({
+          id,
+          avatar: null,
+          updated_at: new Date()
+        })
+        .where('id', '=', id)
+        .returningAll()
+        .executeTakeFirst()
+    }
+    return result?.avatar
   }
 
   async updateGlamShot(id: string, glamShot: string) {
@@ -77,9 +95,26 @@ export class UserProfileRepository {
       .set({
         id,
         glam_shot: glamShot,
+        updated_at: new Date()
       })
       .where('id', '=', id)
       .returningAll()
       .executeTakeFirst()
+  }
+
+  async clearGlamShot(id: string) {
+    const result: any = await this.db.selectFrom('user_profiles').select(['glam_shot']).executeTakeFirst()
+    if (result?.glamShot) {
+      await this.db
+        .updateTable('user_profiles')
+        .set({
+          id,
+          glam_shot: null,
+          updated_at: new Date()
+        })
+        .where('id', '=', id)
+        .execute()
+    }
+    return result?.glamShot
   }
 }
