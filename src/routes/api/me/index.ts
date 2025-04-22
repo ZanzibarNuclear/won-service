@@ -18,7 +18,7 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
 
       return {
         id: user.id,
-        alias: profile.alias,
+        alias: profile?.alias,
         roles: request.session.roles,
         profile: adjustedProfile
       }

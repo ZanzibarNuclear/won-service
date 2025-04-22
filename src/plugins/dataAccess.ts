@@ -9,6 +9,7 @@ import { LessonContentPartRepository } from '../db/access/contentPartRepo'
 import { LessonPathRepository } from '../db/access/lessonPathRepo'
 import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
 import { LessonStepRepository } from '../db/access/lessonStepRepo'
+import { PublicProfileRepository } from '../db/access/profileRepo'
 import { UserProfileRepository } from '../db/access/userProfileRepo'
 import { UserRepository } from '../db/access/userRepo'
 
@@ -23,6 +24,7 @@ const dataAccessPlugin: FastifyPluginAsync = async (fastify, options) => {
     lessonContents: new LessonContentPartRepository(fastify.db),
     lessonPaths: new LessonPathRepository(fastify.db),
     lessonSteps: new LessonStepRepository(fastify.db),
+    publicProfiles: new PublicProfileRepository(fastify.db),
     userProfiles: new UserProfileRepository(fastify.db),
     users: new UserRepository(fastify.db)
   }
