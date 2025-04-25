@@ -23,4 +23,21 @@ export class PublicProfileRepository {
       .where('handle', '=', handle)
       .executeTakeFirst()
   }
+
+  async getNameTags(limit: number = 0, offset: number = 0) {
+    let query = this.db
+      .selectFrom('user_profiles')
+      .select(['alias', 'handle', 'avatar'])
+      .where('handle', 'is not', null)
+      .orderBy('created_at', 'asc')
+
+    if (limit > 0) {
+      query = query.limit(limit)
+    }
+    if (offset > 0) {
+      query = query.offset(offset)
+    }
+
+    return await query.execute()
+  }
 }
