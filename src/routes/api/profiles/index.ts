@@ -17,6 +17,19 @@ const profileRoute: FastifyPluginAsync = async (fastify, options) => {
     const adjusted = adjustProfileImagePaths(profile, fastify.memberImageViewPath)
     return adjusted
   })
+
+  fastify.get<{
+    Querystring: {
+      limit?: number
+      offset?: number
+    }
+  }>('/name-tags', async (request) => {
+
+    const { limit, offset } = request.query
+    const results = await fastify.data.publicProfiles.getNameTags(limit, offset)
+    const adjusted = results.map(tag => adjustProfileImagePaths(tag, fastify.memberImageViewPath))
+    return adjusted
+  })
 }
 
 export default profileRoute
