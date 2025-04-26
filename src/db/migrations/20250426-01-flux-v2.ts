@@ -16,6 +16,8 @@ export async function up(db: Kysely<any>): Promise<void> {
     .createTable('flux_users')
     .addColumn('id', 'serial', (col) => col.primaryKey())
     .addColumn('user_id', 'uuid', (col) => col.references('users.id').unique().notNull())
+    .addColumn('following', 'integer', (col) => col.defaultTo(0).notNull())
+    .addColumn('followers', 'integer', (col) => col.defaultTo(0).notNull())
     .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .execute()
 
@@ -58,9 +60,6 @@ export async function up(db: Kysely<any>): Promise<void> {
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
-  // await db.schema.alterTable('z_v1_flux_users').renameTo('flux_users').execute()
-  // await db.schema.alterTable('z_v1_flux_followers').renameTo('flux_followers').execute()
-  // await db.schema.alterTable('z_v1_fluxes').renameTo('fluxes').execute()
-  // await db.schema.alterTable('z_v1_flux_boosts').renameTo('flux_boosts').execute()
-  // await db.schema.alterTable('z_v1_flux_views').renameTo('flux_views').execute()
+  await db.schema.alterTable('karma_awards').dropColumn('user_id').execute()
+  await db.schema.alterTable('karma_awards').addColumn('flux_user_id', 'integer').execute()
 }
