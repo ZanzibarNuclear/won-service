@@ -66,17 +66,16 @@ export interface FluxBoosts {
 }
 
 export interface Fluxes {
-  blargy: string | null;
-  boost_count: Generated<number>;
+  boosts: Generated<number>;
   content: string;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
   flux_user_id: number;
   id: Generated<number>;
   parent_id: number | null;
-  reply_count: Generated<number>;
+  reactions: Generated<number>;
   updated_at: Generated<Timestamp>;
-  view_count: Generated<number>;
+  views: Generated<number>;
 }
 
 export interface FluxFollowers {
@@ -87,13 +86,9 @@ export interface FluxFollowers {
 
 export interface FluxUsers {
   created_at: Generated<Timestamp>;
-  digest_frequency: string | null;
-  display_name: string;
-  email_notifications: Timestamp | null;
-  handle: string;
+  followers: Generated<number>;
+  following: Generated<number>;
   id: Generated<number>;
-  text_notifications: Timestamp | null;
-  updated_at: Generated<Timestamp>;
   user_id: string;
 }
 
@@ -136,9 +131,9 @@ export interface Invitations {
 export interface KarmaAwards {
   achievement_id: number | null;
   created_at: Generated<Timestamp>;
-  flux_user_id: number;
   karma_awarded: Generated<number>;
   name: string;
+  user_id: string;
 }
 
 export interface LearningBookmarks {
