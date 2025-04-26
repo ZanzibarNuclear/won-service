@@ -157,6 +157,27 @@ export class FluxRepository {
   // subscriptions
 
   // identity
+
+  /* ===
+
+  get FluxUser by handle
+
+  SELECT
+    "flux_users"."id", 
+    "handle", 
+    "alias", 
+    "avatar", 
+    "flux_users"."created_at",
+    "following", 
+    "followers"
+  FROM
+    "flux_users"
+    INNER JOIN "user_profiles" AS "up" 
+    ON "up"."id" = "flux_users"."user_id"
+  WHERE
+    "up"."handle" = $1;
+
+    === */
   async getFluxUser(userId: string) {
     return await this.db
       .selectFrom('flux_users')
@@ -164,6 +185,28 @@ export class FluxRepository {
       .where('user_id', '=', userId)
       .executeTakeFirst()
   }
+
+  /* ===
+
+  get FluxUser[] by FluxUserId[]
+
+  SELECT
+    "flux_users"."id", 
+    "handle", 
+    "alias", 
+    "avatar", 
+    "flux_users"."created_at",
+    "following", 
+    "followers"
+  FROM
+    "flux_users"
+    INNER JOIN "user_profiles" AS "up" 
+    ON "up"."id" = "flux_users"."user_id"
+  WHERE
+    "up"."handle" = $1;
+
+    === */
+
 
   async createFluxUser(userId: string, handle: string, displayName: string) {
     return await this.db

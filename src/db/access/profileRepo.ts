@@ -24,6 +24,16 @@ export class PublicProfileRepository {
       .executeTakeFirst()
   }
 
+  async isHandleAvailable(handle: string) {
+    const result = await this.db.selectFrom('user_profiles')
+      .where('handle', '=', handle)
+      .select('id')
+      .executeTakeFirst()
+
+    const anything = result?.id
+    return !anything
+  }
+
   async getNameTags(limit: number = 0, offset: number = 0) {
     let query = this.db
       .selectFrom('user_profiles')
