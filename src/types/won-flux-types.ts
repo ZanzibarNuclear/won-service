@@ -28,17 +28,16 @@ export interface Profile {
 }
 
 export interface ProfileUpdate {
-  id: string
-  alias: string | null
-  handle: string | null
-  fullName: string | null
-  avatar: string | null
-  glamShot: string | null
-  bio: string | null
-  location: string | null
-  website: string | null
-  whyJoined: string | null
-  whyNuclear: string | null
+  alias?: string | null
+  handle?: string | null
+  fullName?: string | null
+  avatar?: string | null
+  glamShot?: string | null
+  bio?: string | null
+  location?: string | null
+  website?: string | null
+  whyJoined?: string | null
+  whyNuclear?: string | null
 }
 
 export interface Flux {
