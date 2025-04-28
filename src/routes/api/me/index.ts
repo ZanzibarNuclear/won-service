@@ -1,4 +1,5 @@
 import { FastifyPluginAsync } from 'fastify'
+import { roleGuard } from '../../../utils/roleGuard'
 import { adjustProfileImagePaths } from '../../../utils'
 
 
@@ -21,6 +22,22 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
         alias: profile?.alias,
         roles: request.session.roles,
         profile: adjustedProfile
+      }
+    }
+  })
+
+  fastify.post('/flux', {
+    preHandler: roleGuard(['member']),
+    handler: async (request, reply) => {
+      fastify.log.info('setting up Flux for current user')
+      const { alias, handler } = request.body as { alias: string, handler: string }
+      const userId = request.session?.userId
+
+      if (userId) {
+        const cleanUpdates = {
+          alias, handler
+        }
+        await fastify.data.userProfiles.update(userId, cleanUpdates)
       }
     }
   })

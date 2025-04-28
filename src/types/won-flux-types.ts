@@ -1,3 +1,9 @@
+export interface Session {
+  userId: string
+  alias: string
+  roles: string[]
+}
+
 export interface UserCredentials {
   sub: string
   name: string | null

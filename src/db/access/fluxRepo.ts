@@ -9,14 +9,8 @@ export class FluxRepository {
   constructor(private db: Kysely<DB>) {
     this.selectFluxQuery = this.db
       .selectFrom('fluxes')
+      .where('deleted_at', 'is', null)
       .selectAll()
-      .select((eb) => [
-        jsonObjectFrom(
-          eb.selectFrom('flux_users as author')
-            .select(['author.id', 'author.handle', 'author.display_name'])
-            .whereRef('author.id', '=', 'fluxes.flux_user_id')
-        ).as('author')
-      ])
   }
 
   // queries
@@ -73,7 +67,7 @@ export class FluxRepository {
       .executeTakeFirst()
     await this.db
       .updateTable('fluxes')
-      .set({ reply_count: Number(reactionCount?.count) })
+      .set({ reactions: Number(reactionCount?.count) })
       .where('id', '=', fluxId)
       .executeTakeFirst()
   }
@@ -98,7 +92,7 @@ export class FluxRepository {
     // TODO: is there a way to use subquery
     return await this.db
       .updateTable('fluxes')
-      .set({ boost_count: Number(boostCount?.count) })
+      .set({ boosts: Number(boostCount?.count) })
       .where('id', '=', fluxId)
       .returningAll()
       .executeTakeFirst()
@@ -133,7 +127,7 @@ export class FluxRepository {
     // TODO: is there a way to use subquery
     return await this.db
       .updateTable('fluxes')
-      .set({ view_count: Number(viewCount?.count) })
+      .set({ views: Number(viewCount?.count) })
       .where('id', '=', fluxId)
       .returningAll()
       .executeTakeFirst()
@@ -207,14 +201,11 @@ export class FluxRepository {
 
     === */
 
-
-  async createFluxUser(userId: string, handle: string, displayName: string) {
+  async createFluxUser(userId: string) {
     return await this.db
       .insertInto('flux_users')
       .values({
         user_id: userId,
-        handle: handle,
-        display_name: displayName
       })
       .returningAll()
       .executeTakeFirstOrThrow()
