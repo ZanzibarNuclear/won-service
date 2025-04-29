@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from 'fastify'
-import { ProfileUpdate } from '../../../../types/won-flux-types';
+import { ProfileUpdate } from '../../../../types/won-flux-types'
 import { roleGuard } from '../../../../utils/roleGuard'
 import { pipeline } from 'stream'
 import { promisify } from 'util'

@@ -3,7 +3,6 @@ import { roleGuard } from '../../../utils/roleGuard'
 import { adjustProfileImagePaths } from '../../../utils'
 import { ProfileUpdate } from '../../../types/won-flux-types'
 
-
 const meRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.get('/', {
     handler: async (request, reply) => {
@@ -27,22 +26,30 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
     }
   })
 
+  fastify.get('/flux-activation', {
+    preHandler: roleGuard(['member']),
+    handler: async (request, reply) => {
+      let fluxUser = null
+      if (request.session?.userId) {
+        fluxUser = await fastify.data.flux.getFluxUser(request.session?.userId)
+      }
+      reply.send(fluxUser)
+    }
+  })
+
   fastify.post('/flux-activation', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
-      fastify.log.info('setting up Flux for current user')
-      const { alias, handle } = request.body as { alias: string, handle: string }
-      fastify.log.info('Requesting changes to profile: alias ' + alias + ', handle ' + handle)
       const userId = request.session?.userId
+      const { alias, handle } = request.body as ProfileUpdate
       if (userId) {
-        if (!!alias || !!handle) {
-          // request profile changes to alias and handle
+        // apply updates
+        if (alias || handle) {
           await fastify.data.userProfiles.update(userId, {
             alias, handle
           })
         }
         const fluxUser = await fastify.data.flux.createFluxUser(userId)
-        fastify.log.info(fluxUser)
         reply.send(fluxUser)
       } else {
         reply.code(400).send('Active user is required')
