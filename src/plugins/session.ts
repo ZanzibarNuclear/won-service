@@ -9,6 +9,7 @@ interface SessionAuthPluginOptions {
 
 const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (fastify, options) => {
   fastify.decorateRequest('session', null)
+  fastify.decorateRequest('userId', '')
 
   let sessionCookieName = 'session_token'
   if (fastify.config.NODE_ENV !== 'production') {
@@ -34,6 +35,7 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
         roles: creds.role
       }
       request.session = sessionData
+      request.userId = creds.sub
     } catch (error) {
       fastify.log.info('Removing session cookie due to verification failure:', { cause: error })
       fastify.removeSessionToken(reply)

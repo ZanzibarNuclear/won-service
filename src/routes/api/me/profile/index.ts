@@ -9,13 +9,10 @@ import path from 'path'
 import { adjustProfileImagePaths } from '../../../../utils'
 
 const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
-
   fastify.get('/', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
-      fastify.log.info('find profile for current user')
-
-      const profile = await fastify.data.userProfiles.get(request.session?.userId)
+      const profile = await fastify.data.userProfiles.get(request.userId)
       if (!profile) {
         return reply.status(404).send()
       }
@@ -26,10 +23,8 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.post('/', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
-      fastify.log.info('create profile for current user')
-      const userId = request.session?.userId
       const body = request.body as { alias: string }
-      const profile = await fastify.data.userProfiles.create(userId, body.alias)
+      const profile = await fastify.data.userProfiles.create(request.userId, body.alias)
       return adjustProfileImagePaths(profile, fastify.memberImageViewPath)
     }
   })
@@ -38,9 +33,8 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
       fastify.log.info('update profile for current user')
-      const userId = request.session?.userId
       const body = request.body as ProfileUpdate
-      const profile = await fastify.data.userProfiles.update(userId, body)
+      const profile = await fastify.data.userProfiles.update(request.userId, body)
       return adjustProfileImagePaths(profile, fastify.memberImageViewPath)
     }
   })
@@ -97,7 +91,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.post('/avatar', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
-      const userId = request.session?.userId
+      const userId = request.userId
       const data = await request.file()
 
       if (!data || !allowedMimeTypes.includes(data.mimetype)) {
@@ -113,8 +107,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.get('/avatar', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
-      const userId = request.session?.userId
-      const avatarPath = await getImagePath(userId, 'avatar')
+      const avatarPath = await getImagePath(request.userId, 'avatar')
 
       if (!avatarPath || !fs.existsSync(avatarPath)) {
         return reply.status(404).send({ error: 'Avatar not found' })
@@ -126,8 +119,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.delete('/avatar', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
-      const userId = request.session?.userId
-      const imagePath = await fastify.data.userProfiles.clearAvatar(userId)
+      const imagePath = await fastify.data.userProfiles.clearAvatar(request.userId)
       if (imagePath) {
         await removeImage(imagePath)
       }
@@ -138,15 +130,12 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.post('/glam-shot', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
-      const userId = request.session?.userId
       const data = await request.file()
-
       if (!data || !allowedMimeTypes.includes(data.mimetype)) {
         return reply.status(400).send({ error: 'Invalid file type' })
       }
-
-      const fileName = await saveImage(userId, 'glamShot', data.file, data.mimetype)
-      const freshProfile = await fastify.data.userProfiles.updateGlamShot(userId, fileName)
+      const fileName = await saveImage(request.userId, 'glamShot', data.file, data.mimetype)
+      const freshProfile = await fastify.data.userProfiles.updateGlamShot(request.userId, fileName)
       reply.send(freshProfile)
     }
   })
@@ -154,13 +143,10 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.get('/glam-shot', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
-      const userId = request.session?.userId
-      const glamShotPath = await getImagePath(userId, 'glamShot')
-
+      const glamShotPath = await getImagePath(request.userId, 'glamShot')
       if (!glamShotPath || !fs.existsSync(glamShotPath)) {
         return reply.status(404).send({ error: 'Glam-shot not found' })
       }
-
       return reply.sendFile(glamShotPath) // Requires fastify-static
     }
   })
@@ -168,8 +154,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.delete('/glam-shot', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
-      const userId = request.session?.userId
-      const imagePath = await fastify.data.userProfiles.clearGlamShot(userId)
+      const imagePath = await fastify.data.userProfiles.clearGlamShot(request.userId)
       if (imagePath) {
         await removeImage(imagePath)
       }
