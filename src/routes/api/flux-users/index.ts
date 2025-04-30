@@ -18,8 +18,14 @@ const fluxUsersRoutes: FastifyPluginAsync = async (fastify, options) => {
 
   fastify.get('/:handle', async (request, reply) => {
     const { handle } = request.params as { handle: string }
-    const fluxUser = await db.selectFrom('flux_users').selectAll().where('handle', '=', handle).executeTakeFirst()
-    return fluxUser
+    const rows = await db
+      .selectFrom("flux_users")
+      .innerJoin("user_profiles", "user_profiles.id", "flux_users.user_id")
+      .where("user_profiles.handle", "=", handle)
+      .selectAll()
+      .executeTakeFirst();
+
+    return rows
   })
 }
 

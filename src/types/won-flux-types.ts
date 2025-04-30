@@ -1,7 +1,7 @@
 export interface Session {
   userId: string
-  alias: string
-  roles: string[]
+  alias: string | null
+  roles: string[] | null
 }
 
 export interface UserCredentials {

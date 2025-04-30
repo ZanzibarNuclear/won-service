@@ -86,6 +86,6 @@ declare module 'fastify' {
     }
   }
   interface FastifyRequest {
-    session: Session
+    session: Session | null
   }
 }
