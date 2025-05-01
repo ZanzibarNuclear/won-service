@@ -60,26 +60,26 @@ export interface FeedbackMessages {
 }
 
 export interface FluxBoosts {
-  created_at: Generated<Timestamp>;
+  boosted_at: Generated<Timestamp>;
   flux_id: number;
   flux_user_id: number;
 }
 
 export interface Fluxes {
+  author_id: number;
   boosts: Generated<number>;
   content: string;
-  created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
-  flux_user_id: number;
   id: Generated<number>;
-  parent_id: number | null;
+  posted_at: Generated<Timestamp>;
   reactions: Generated<number>;
+  reply_to: number | null;
   updated_at: Generated<Timestamp>;
   views: Generated<number>;
 }
 
 export interface FluxFollowers {
-  created_at: Generated<Timestamp>;
+  followed_at: Generated<Timestamp>;
   follower_id: number;
   following_id: number;
 }
@@ -93,9 +93,9 @@ export interface FluxUsers {
 }
 
 export interface FluxViews {
-  created_at: Generated<Timestamp>;
   flux_id: number;
   flux_user_id: number | null;
+  viewed_at: Generated<Timestamp>;
 }
 
 export interface Identities {
@@ -203,10 +203,7 @@ export interface Profiles {
   avatar_url: string | null;
   bio: string | null;
   created_at: Generated<Timestamp>;
-  email: string | null;
-  email_verified_at: Timestamp | null;
-  full_name: string | null;
-  id: Generated<string>;
+  id: string;
   join_reason: string | null;
   karma_score: Generated<number>;
   location: string | null;
@@ -259,6 +256,7 @@ export interface Users {
   alias: string | null;
   created_at: Generated<Timestamp>;
   email: string;
+  email_verified_at: Timestamp | null;
   id: Generated<string>;
   last_sign_in_at: Timestamp;
   updated_at: Generated<Timestamp>;

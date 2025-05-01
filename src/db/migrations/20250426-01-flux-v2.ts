@@ -25,19 +25,19 @@ export async function up(db: Kysely<any>): Promise<void> {
     .createTable('flux_followers')
     .addColumn('follower_id', 'integer', (col) => col.references('flux_users.id').notNull())
     .addColumn('following_id', 'integer', (col) => col.references('flux_users.id').notNull())
-    .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
+    .addColumn('followed_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .execute()
 
   await db.schema
     .createTable('fluxes')
     .addColumn('id', 'serial', (col) => col.primaryKey())
-    .addColumn('flux_user_id', 'integer', (col) => col.references('flux_users.id').notNull())
+    .addColumn('author_id', 'integer', (col) => col.references('flux_users.id').notNull())
+    .addColumn('reply_to', 'integer', (col) => col.references('fluxes.id').onDelete('set null'))
     .addColumn('content', 'text', (col) => col.notNull())
-    .addColumn('parent_id', 'integer', (col) => col.references('fluxes.id').onDelete('set null'))
     .addColumn('reactions', 'integer', (col) => col.defaultTo(0).notNull())
     .addColumn('boosts', 'integer', (col) => col.defaultTo(0).notNull())
     .addColumn('views', 'integer', (col) => col.defaultTo(0).notNull())
-    .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
+    .addColumn('posted_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .addColumn('updated_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .addColumn('deleted_at', 'timestamp')
     .execute()
@@ -47,7 +47,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('flux_id', 'integer', (col) => col.references('fluxes.id').notNull())
     .addColumn('flux_user_id', 'integer', (col) =>
       col.references('flux_users.id').onDelete('cascade').notNull())
-    .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
+    .addColumn('boosted_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .addPrimaryKeyConstraint('flux_boosts_pkey', ['flux_id', 'flux_user_id'])
     .execute()
 
@@ -55,7 +55,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .createTable('flux_views')
     .addColumn('flux_id', 'integer', (col) => col.references('fluxes.id').notNull())
     .addColumn('flux_user_id', 'integer')
-    .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
+    .addColumn('viewed_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .execute()
 }
 

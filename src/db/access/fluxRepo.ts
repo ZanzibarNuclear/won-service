@@ -1,6 +1,6 @@
+import { jsonObjectFrom } from 'kysely/helpers/postgres';
 import { Kysely } from "kysely"
 import { DB } from '../types'
-import { jsonObjectFrom } from "kysely/helpers/postgres"
 import type { FluxFilter } from "../../types/won-flux-types"
 
 export class FluxRepository {
@@ -11,6 +11,19 @@ export class FluxRepository {
       .selectFrom('fluxes')
       .where('deleted_at', 'is', null)
       .selectAll()
+
+    const selectFluxQuery = db
+      .selectFrom('fluxes')
+      .selectAll()
+      .select((eb) => [
+        jsonObjectFrom(
+          eb.selectFrom('flux_users as author')
+            .innerJoin('user_profiles as up', 'up.id', 'author.user_id')
+            .select(['author.id', 'up.handle', 'up.alias'])
+            .whereRef('author.id', '=', 'fluxes.author_id')
+        ).as('author')
+      ])
+
   }
 
   // queries
@@ -23,10 +36,10 @@ export class FluxRepository {
   async getFluxes(limit: number, offset: number, filter: FluxFilter) {
     let enhancedQuery = this.selectFluxQuery
     if (filter.authorId) {
-      enhancedQuery = enhancedQuery.where('flux_user_id', '=', filter.authorId)
+      enhancedQuery = enhancedQuery.where('author_id', '=', filter.authorId)
     }
     if (filter.fluxId) {
-      enhancedQuery = enhancedQuery.where('parent_id', '=', filter.fluxId)
+      enhancedQuery = enhancedQuery.where('reply_to', '=', filter.fluxId)
     }
     if (filter.order) {
       // TODO: probably not good to have a hidden magic words
@@ -34,7 +47,7 @@ export class FluxRepository {
         enhancedQuery = enhancedQuery.orderBy('boost_count', 'desc')
       }
     } else {
-      enhancedQuery = enhancedQuery.orderBy('fluxes.created_at', 'desc')
+      enhancedQuery = enhancedQuery.orderBy('fluxes.posted_at', 'desc')
     }
     return await enhancedQuery
       .limit(limit)
@@ -43,18 +56,18 @@ export class FluxRepository {
   }
 
   // mutations
-  async createFlux(fluxUserId: number, parentId: number | null, content: string) {
+  async createFlux(authorId: number, replyTo: number | null, content: string) {
     let freshFlux = await this.db
       .insertInto('fluxes')
       .values({
-        flux_user_id: fluxUserId,
-        parent_id: parentId,
+        author_id: authorId,
+        reply_to: replyTo,
         content: content,
       })
       .returningAll()
       .executeTakeFirst()
-    if (freshFlux && parentId) {
-      await this.recountReactions(parentId)
+    if (freshFlux && replyTo) {
+      await this.recountReactions(replyTo)
     }
     return freshFlux
   }
@@ -63,7 +76,7 @@ export class FluxRepository {
     const reactionCount = await this.db
       .selectFrom('fluxes')
       .select((eb) => eb.fn.count('id').as('count'))
-      .where('parent_id', '=', fluxId)
+      .where('reply_to', '=', fluxId)
       .executeTakeFirst()
     await this.db
       .updateTable('fluxes')
@@ -77,7 +90,7 @@ export class FluxRepository {
       .updateTable('fluxes')
       .set({ content })
       .where('id', '=', fluxId)
-      .where('flux_user_id', '=', authorId)
+      .where('author_id', '=', authorId)
       .returningAll()
       .executeTakeFirst()
   }
@@ -173,33 +186,59 @@ export class FluxRepository {
 
     === */
   async getFluxUser(userId: string) {
-    return await this.db
-      .selectFrom('flux_users')
-      .selectAll()
-      .where('user_id', '=', userId)
-      .executeTakeFirst()
+    const fluxAuthor = await this.db
+      .selectFrom("flux_users as fu")
+      .innerJoin("user_profiles as up", "up.id", "fu.user_id")
+      .where("up.id", "=", userId)
+      .select([
+        "fu.id",
+        "handle",
+        "alias",
+        "avatar",
+        "fu.created_at",
+        "followers",
+        "following",
+      ])
+      .executeTakeFirst();
+    return fluxAuthor
   }
 
-  /* ===
+  async getFluxUserByHandle(handle: string) {
+    const fluxAuthor = await this.db
+      .selectFrom("user_profiles as up")
+      .innerJoin("flux_users as fu", "fu.user_id", "up.id")
+      .where("handle", "=", handle)
+      .select([
+        "fu.id",
+        "handle",
+        "alias",
+        "avatar",
+        "fu.created_at",
+        "followers",
+        "following",
+      ])
+      .executeTakeFirst();
+    return fluxAuthor
+  }
 
-  get FluxUser[] by FluxUserId[]
+  async getFluxUsers(ids: number[]) {
+    const fluxAuthors = await this.db
+      .selectFrom("flux_users as fu")
+      .innerJoin("user_profiles as up", "up.id", "fu.user_id")
+      .where("fu.id", "in", ids)
+      .select([
+        "fu.id",
+        "handle",
+        "alias",
+        "avatar",
+        "fu.created_at",
+        "followers",
+        "following",
+      ])
+      .execute();
 
-  SELECT
-    "flux_users"."id", 
-    "handle", 
-    "alias", 
-    "avatar", 
-    "flux_users"."created_at",
-    "following", 
-    "followers"
-  FROM
-    "flux_users"
-    INNER JOIN "user_profiles" AS "up" 
-    ON "up"."id" = "flux_users"."user_id"
-  WHERE
-    "up"."handle" = $1;
-
-    === */
+    return fluxAuthors
+  }
 
   async createFluxUser(userId: string) {
     return await this.db

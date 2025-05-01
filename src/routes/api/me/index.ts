@@ -10,18 +10,20 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
       if (!request.session?.userId) {
         return {}
       }
-      const user = await fastify.data.users.getUser(request.session.userId)
+      const user = await fastify.data.users.getUser(request.userId)
       if (!user) {
         return {}
       }
-      const profile = await fastify.data.userProfiles.get(request.session.userId)
+      const profile = await fastify.data.userProfiles.get(request.userId)
       const adjustedProfile = adjustProfileImagePaths(profile, fastify.memberImageViewPath)
+      const fluxUser = await fastify.data.flux.getFluxUser(request.userId)
 
       return {
         id: user.id,
         alias: profile?.alias,
         roles: request.session.roles,
-        profile: adjustedProfile
+        profile: adjustedProfile,
+        fluxUser
       }
     }
   })
@@ -31,7 +33,7 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
     handler: async (request, reply) => {
       let fluxUser = null
       if (request.session?.userId) {
-        fluxUser = await fastify.data.flux.getFluxUser(request.session?.userId)
+        fluxUser = await fastify.data.flux.getFluxUser(request.userId)
       }
       reply.send(fluxUser)
     }

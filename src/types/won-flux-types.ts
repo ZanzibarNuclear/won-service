@@ -42,16 +42,15 @@ export interface ProfileUpdate {
 
 export interface Flux {
   id: number
-  author: string
-  authorUsername: string
-  authorAvatar: string
+  authorId: number
   replyTo: number | null
   content: string
-  timestamp: string
-  viewCount: number
-  replyCount: number
-  boostCount: number
-  boosted: boolean
+  views: number
+  boosts: number
+  reactions: number
+  postedAt: string
+  updatedAt: string
+  deletedAt: string
 }
 
 export interface FluxResponse {
