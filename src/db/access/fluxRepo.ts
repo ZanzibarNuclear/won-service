@@ -185,11 +185,11 @@ export class FluxRepository {
     "up"."handle" = $1;
 
     === */
-  async getFluxUser(userId: string) {
+  async getFluxUser(userId: number) {
     const fluxAuthor = await this.db
       .selectFrom("flux_users as fu")
       .innerJoin("user_profiles as up", "up.id", "fu.user_id")
-      .where("up.id", "=", userId)
+      .where("up.id", "=", userId.toString())
       .select([
         "fu.id",
         "handle",

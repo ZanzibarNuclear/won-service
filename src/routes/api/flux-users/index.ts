@@ -16,16 +16,14 @@ const fluxUsersRoutes: FastifyPluginAsync = async (fastify, options) => {
     return fluxUsers
   })
 
-  fastify.get('/:handle', async (request, reply) => {
-    const { handle } = request.params as { handle: string }
-    const rows = await db
-      .selectFrom("flux_users")
-      .innerJoin("user_profiles", "user_profiles.id", "flux_users.user_id")
-      .where("user_profiles.handle", "=", handle)
-      .selectAll()
-      .executeTakeFirst();
+  fastify.get('/id-:fluxUserId', async (request, reply) => {
+    const { fluxUserId } = request.params as { fluxUserId: number }
+    return fastify.data.flux.getFluxUser(fluxUserId)
+  })
 
-    return rows
+  fastify.get('/handle-:handle', async (request, reply) => {
+    const { handle } = request.params as { handle: string }
+    return fastify.data.flux.getFluxUserByHandle(handle)
   })
 }
 
