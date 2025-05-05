@@ -60,6 +60,7 @@ export class FluxRepository {
   }
 
   // mutations
+  // FIXME: these need to return full flux using getFlux method - or just an ID and let the handler decide what to return to the client
   async createFlux(authorId: number, replyTo: number | null, content: string) {
     let freshFlux = await this.db
       .insertInto('fluxes')

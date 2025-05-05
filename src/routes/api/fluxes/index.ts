@@ -86,7 +86,7 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
 
   fastify.post('/:fluxId/boost', async (request, reply) => {
     if (!request.session?.userId) {
-      fastify.log.warn(`Only known users may post fluxes`)
+      fastify.log.info('Ignoring: Only known users may boost fluxes')
       return reply.status(200)
     }
     const author = await fastify.data.flux.getFluxUser(request.session.userId)
@@ -98,17 +98,18 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
     try {
       return await fastify.data.flux.boostFlux(fluxId, author.id)
     } catch (error) {
-      fastify.log.error(`Failed to boost flux ${fluxId} by user ${author.id}`)
       if ((error as any).code === '23505') {
+        fastify.log.info('Already boosted by user. You only boost once.')
         return reply.status(201).send({ message: 'Flux already boosted by user' })
       }
+      fastify.log.error(`Failed to boost flux ${fluxId} by user ${author.id}`)
       return reply.status(500).send({ message: 'Failed to boost flux' })
     }
   })
 
   fastify.delete('/:fluxId/boost', async (request, reply) => {
     if (!request.session?.userId) {
-      fastify.log.warn(`Only known users may post fluxes`)
+      fastify.log.warn(`Only known users may unboost fluxes`)
       return reply.status(401).send({ error: 'Unauthorized' })
     }
     const author = await fastify.data.flux.getFluxUser(request.session.userId)
