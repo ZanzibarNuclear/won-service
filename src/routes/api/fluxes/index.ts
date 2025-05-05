@@ -87,7 +87,7 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.post('/:fluxId/boost', async (request, reply) => {
     if (!request.session?.userId) {
       fastify.log.info('Ignoring: Only known users may boost fluxes')
-      return reply.status(200)
+      return reply.status(201).send({ message: 'Only members can boost. Join today.' })
     }
     const author = await fastify.data.flux.getFluxUser(request.session.userId)
     if (!author) {
@@ -103,7 +103,7 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
         return reply.status(201).send({ message: 'Flux already boosted by user' })
       }
       fastify.log.error(`Failed to boost flux ${fluxId} by user ${author.id}`)
-      return reply.status(500).send({ message: 'Failed to boost flux' })
+      return reply.status(500).send({ message: 'Failed to boost. We will look into this.' })
     }
   })
 

@@ -69,12 +69,17 @@ export class FluxRepository {
         reply_to: replyTo,
         content: content,
       })
-      .returningAll()
+      .returning('id')
       .executeTakeFirst()
-    if (freshFlux && replyTo) {
+
+    const freshId = freshFlux?.id
+    if (!freshId) {
+      throw new Error('failed to create flux')
+    }
+    if (freshId && replyTo) {
       await this.recountReactions(replyTo)
     }
-    return freshFlux
+    return this.getFlux(freshId)
   }
 
   async recountReactions(fluxId: number) {
@@ -120,9 +125,9 @@ export class FluxRepository {
     await this.db
       .insertInto('flux_boosts')
       .values({ flux_id: fluxId, flux_user_id: fluxUserId })
-      .executeTakeFirst()
-
-    return await this.recountFluxBoosts(fluxId)
+      .execute()
+    await this.recountFluxBoosts(fluxId)
+    return this.getFlux(fluxId)
   }
 
   async deboostFlux(fluxId: number, fluxUserId: number) {
@@ -131,8 +136,8 @@ export class FluxRepository {
       .where('flux_id', '=', fluxId)
       .where('flux_user_id', '=', fluxUserId)
       .executeTakeFirst()
-
-    return await this.recountFluxBoosts(fluxId)
+    await this.recountFluxBoosts(fluxId)
+    return this.getFlux(fluxId)
   }
 
   async retallyFluxViews(fluxId: number) {
