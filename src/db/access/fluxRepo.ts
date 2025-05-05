@@ -43,7 +43,7 @@ export class FluxRepository {
       enhancedQuery = enhancedQuery.where('author_id', '=', filter.authorId)
     }
     if (filter.fluxId) {
-      enhancedQuery = enhancedQuery.where('reply_to', '=', filter.fluxId)
+      enhancedQuery = enhancedQuery.where('reaction_to', '=', filter.fluxId)
     }
     if (filter.order) {
       // TODO: probably not good to have a hidden magic words
@@ -61,12 +61,12 @@ export class FluxRepository {
 
   // mutations
   // FIXME: these need to return full flux using getFlux method - or just an ID and let the handler decide what to return to the client
-  async createFlux(authorId: number, replyTo: number | null, content: string) {
+  async createFlux(authorId: number, reactionTo: number | null, content: string) {
     let freshFlux = await this.db
       .insertInto('fluxes')
       .values({
         author_id: authorId,
-        reply_to: replyTo,
+        reaction_to: reactionTo,
         content: content,
       })
       .returning('id')
@@ -76,8 +76,8 @@ export class FluxRepository {
     if (!freshId) {
       throw new Error('failed to create flux')
     }
-    if (freshId && replyTo) {
-      await this.recountReactions(replyTo)
+    if (freshId && reactionTo) {
+      await this.recountReactions(reactionTo)
     }
     return this.getFlux(freshId)
   }
@@ -86,7 +86,7 @@ export class FluxRepository {
     const reactionCount = await this.db
       .selectFrom('fluxes')
       .select((eb) => eb.fn.count('id').as('count'))
-      .where('reply_to', '=', fluxId)
+      .where('reaction_to', '=', fluxId)
       .executeTakeFirst()
     await this.db
       .updateTable('fluxes')

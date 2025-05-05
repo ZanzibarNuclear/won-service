@@ -72,8 +72,8 @@ export interface Fluxes {
   deleted_at: Timestamp | null;
   id: Generated<number>;
   posted_at: Generated<Timestamp>;
+  reaction_to: number | null;
   reactions: Generated<number>;
-  reply_to: number | null;
   updated_at: Generated<Timestamp>;
   views: Generated<number>;
 }

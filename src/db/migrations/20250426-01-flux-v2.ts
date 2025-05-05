@@ -32,7 +32,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .createTable('fluxes')
     .addColumn('id', 'serial', (col) => col.primaryKey())
     .addColumn('author_id', 'integer', (col) => col.references('flux_users.id').notNull())
-    .addColumn('reply_to', 'integer', (col) => col.references('fluxes.id').onDelete('set null'))
+    .addColumn('reaction_to', 'integer', (col) => col.references('fluxes.id').onDelete('set null'))
     .addColumn('content', 'text', (col) => col.notNull())
     .addColumn('reactions', 'integer', (col) => col.defaultTo(0).notNull())
     .addColumn('boosts', 'integer', (col) => col.defaultTo(0).notNull())
