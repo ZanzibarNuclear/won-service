@@ -1,29 +1,33 @@
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
-import { Kysely } from "kysely"
+import { Kysely, sql } from "kysely"
 import { DB } from '../types'
 import type { FluxFilter } from "../../types/won-flux-types"
 
 export class FluxRepository {
   selectFluxQuery: any
+  selectFluxUserQuery: any
+
+  // TODO: use env var instead of hardcoding '/media/members/' (available via fastify)
+  // OR come up with a better strategy for locating / storing CDN file paths
 
   constructor(private db: Kysely<DB>) {
     this.selectFluxQuery = this.db
       .selectFrom('fluxes')
       .where('deleted_at', 'is', null)
-      .selectAll()
-
-    const selectFluxQuery = db
-      .selectFrom('fluxes')
-      .selectAll()
       .select((eb) => [
         jsonObjectFrom(
           eb.selectFrom('flux_users as author')
             .innerJoin('user_profiles as up', 'up.id', 'author.user_id')
-            .select(['author.id', 'up.handle', 'up.alias'])
+            .select([
+              'author.id',
+              'up.handle',
+              'up.alias',
+              sql<string>`concat('/media/members/', up.avatar)`.as('avatar'),
+            ])
             .whereRef('author.id', '=', 'fluxes.author_id')
         ).as('author')
       ])
-
+      .selectAll()
   }
 
   // queries
@@ -164,32 +168,11 @@ export class FluxRepository {
   // subscriptions
 
   // identity
-
-  /* ===
-
-  get FluxUser by handle
-
-  SELECT
-    "flux_users"."id", 
-    "handle", 
-    "alias", 
-    "avatar", 
-    "flux_users"."created_at",
-    "following", 
-    "followers"
-  FROM
-    "flux_users"
-    INNER JOIN "user_profiles" AS "up" 
-    ON "up"."id" = "flux_users"."user_id"
-  WHERE
-    "up"."handle" = $1;
-
-    === */
-  async getFluxUser(userId: number) {
+  async getFluxUser(userId: string) {
     const fluxAuthor = await this.db
       .selectFrom("flux_users as fu")
       .innerJoin("user_profiles as up", "up.id", "fu.user_id")
-      .where("up.id", "=", userId.toString())
+      .where("fu.user_id", "=", userId)
       .select([
         "fu.id",
         "handle",
@@ -201,6 +184,7 @@ export class FluxRepository {
       ])
       .executeTakeFirst();
     return fluxAuthor
+
   }
 
   async getFluxUserByHandle(handle: string) {
