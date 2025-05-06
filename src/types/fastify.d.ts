@@ -10,6 +10,7 @@ import { LessonPathRepository } from '../db/access/lessonPathRepo'
 import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
 import { LessonStepRepository } from '../db/access/lessonStepRepo'
 import { PublicProfileRepository } from '../db/access/profileRepo'
+import { Session } from '../types/won-flux-types'
 import { UserProfileRepository } from '../db/access/userProfileRepo'
 import { UserRepository } from '../db/access/userRepo'
 
@@ -86,5 +87,6 @@ declare module 'fastify' {
   }
   interface FastifyRequest {
     session: Session | null
+    userId: string
   }
 }

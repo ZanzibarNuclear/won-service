@@ -1,3 +1,9 @@
+export interface Session {
+  userId: string
+  alias: string | null
+  roles: string[] | null
+}
+
 export interface UserCredentials {
   sub: string
   name: string | null
@@ -22,31 +28,29 @@ export interface Profile {
 }
 
 export interface ProfileUpdate {
-  id: string
-  alias: string | null
-  handle: string | null
-  fullName: string | null
-  avatar: string | null
-  glamShot: string | null
-  bio: string | null
-  location: string | null
-  website: string | null
-  whyJoined: string | null
-  whyNuclear: string | null
+  alias?: string | null
+  handle?: string | null
+  fullName?: string | null
+  avatar?: string | null
+  glamShot?: string | null
+  bio?: string | null
+  location?: string | null
+  website?: string | null
+  whyJoined?: string | null
+  whyNuclear?: string | null
 }
 
 export interface Flux {
   id: number
-  author: string
-  authorUsername: string
-  authorAvatar: string
+  authorId: number
   replyTo: number | null
   content: string
-  timestamp: string
-  viewCount: number
-  replyCount: number
-  boostCount: number
-  boosted: boolean
+  views: number
+  boosts: number
+  reactions: number
+  postedAt: string
+  updatedAt: string
+  deletedAt: string
 }
 
 export interface FluxResponse {

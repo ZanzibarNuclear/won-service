@@ -77,7 +77,7 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
     }
     const { fluxId } = request.params as { fluxId: number }
     try {
-      return await fastify.data.flux.countView(fluxId, fluxUserId)
+      return await fastify.data.flux.registerView(fluxId, fluxUserId)
     } catch (error) {
       fastify.log.error(`Failed to record view for flux ${fluxId} by user ${fluxUserId}`)
       return reply.status(500).send({ error: 'Failed to record view' })
@@ -86,8 +86,8 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
 
   fastify.post('/:fluxId/boost', async (request, reply) => {
     if (!request.session?.userId) {
-      fastify.log.warn(`Only known users may post fluxes`)
-      return reply.status(200)
+      fastify.log.info('Ignoring: Only known users may boost fluxes')
+      return reply.status(201).send({ message: 'Only members can boost. Join today.' })
     }
     const author = await fastify.data.flux.getFluxUser(request.session.userId)
     if (!author) {
@@ -98,17 +98,18 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
     try {
       return await fastify.data.flux.boostFlux(fluxId, author.id)
     } catch (error) {
-      fastify.log.error(`Failed to boost flux ${fluxId} by user ${author.id}`)
       if ((error as any).code === '23505') {
+        fastify.log.info('Already boosted by user. You only boost once.')
         return reply.status(201).send({ message: 'Flux already boosted by user' })
       }
-      return reply.status(500).send({ message: 'Failed to boost flux' })
+      fastify.log.error(`Failed to boost flux ${fluxId} by user ${author.id}`)
+      return reply.status(500).send({ message: 'Failed to boost. We will look into this.' })
     }
   })
 
   fastify.delete('/:fluxId/boost', async (request, reply) => {
     if (!request.session?.userId) {
-      fastify.log.warn(`Only known users may post fluxes`)
+      fastify.log.warn(`Only known users may unboost fluxes`)
       return reply.status(401).send({ error: 'Unauthorized' })
     }
     const author = await fastify.data.flux.getFluxUser(request.session.userId)

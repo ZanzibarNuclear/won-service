@@ -18,6 +18,14 @@ const profileRoute: FastifyPluginAsync = async (fastify, options) => {
     return adjusted
   })
 
+  fastify.get('/:handle/available', async (request, reply) => {
+    const { handle } = request.params as { handle: string }
+    fastify.log.info('Checking availability of handle: ' + handle)
+    const available = await fastify.data.publicProfiles.isHandleAvailable(handle)
+    fastify.log.info(available ? 'Yes, go for it!' : 'Taken, hands off!!')
+    return available
+  })
+
   fastify.get<{
     Querystring: {
       limit?: number

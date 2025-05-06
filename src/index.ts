@@ -5,8 +5,26 @@ import * as dotenv from 'dotenv'
 
 dotenv.config()
 
+const envToLogger: Record<string, any> = {
+  development: {
+    level: process.env.LOG_LEVEL || 'info',
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        translateTime: 'HH:MM:ss Z',
+        ignore: 'pid,hostname',
+      },
+    },
+  },
+  production: {
+    level: process.env.LOG_LEVEL || 'info',
+  },
+  test: false,
+};
+const environment = process.env.NODE_ENV || 'development'
+
 const fastify = Fastify({
-  logger: true
+  logger: envToLogger[environment] || true
 })
 
 // Autoload plugins
