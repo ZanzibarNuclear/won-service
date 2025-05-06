@@ -112,12 +112,10 @@ export class FluxRepository {
       .where('flux_id', '=', fluxId)
       .executeTakeFirst()
 
-    // TODO: is there a way to use subquery
     return await this.db
       .updateTable('fluxes')
       .set({ boosts: Number(boostCount?.count) })
       .where('id', '=', fluxId)
-      .returningAll()
       .executeTakeFirst()
   }
 
@@ -127,7 +125,7 @@ export class FluxRepository {
       .values({ flux_id: fluxId, flux_user_id: fluxUserId })
       .execute()
     await this.recountFluxBoosts(fluxId)
-    return this.getFlux(fluxId)
+    return await this.getFlux(fluxId)
   }
 
   async deboostFlux(fluxId: number, fluxUserId: number) {
@@ -137,7 +135,7 @@ export class FluxRepository {
       .where('flux_user_id', '=', fluxUserId)
       .executeTakeFirst()
     await this.recountFluxBoosts(fluxId)
-    return this.getFlux(fluxId)
+    return await this.getFlux(fluxId)
   }
 
   async retallyFluxViews(fluxId: number) {
@@ -147,28 +145,27 @@ export class FluxRepository {
       .where('flux_id', '=', fluxId)
       .executeTakeFirst()
 
-    // TODO: is there a way to use subquery
     return await this.db
       .updateTable('fluxes')
       .set({ views: Number(viewCount?.count) })
       .where('id', '=', fluxId)
-      .returningAll()
       .executeTakeFirst()
   }
 
   /**
-   * Count a view for a flux by a user.
+   * Register a view for a flux by a user.
    * @param fluxId - The ID of the flux.
    * @param fluxUserId - The ID of the user viewing the flux. Use -1 for anonymous views.
    * @returns The updated flux.
    */
-  async countView(fluxId: number, fluxUserId: number) {
+  async registerView(fluxId: number, fluxUserId: number) {
     await this.db
       .insertInto('flux_views')
       .values({ flux_id: fluxId, flux_user_id: fluxUserId })
       .execute()
 
-    return await this.retallyFluxViews(fluxId)
+    await this.retallyFluxViews(fluxId)
+    return await this.getFlux(fluxId)
   }
 
   // subscriptions

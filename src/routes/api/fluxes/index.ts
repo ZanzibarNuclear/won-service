@@ -77,7 +77,7 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
     }
     const { fluxId } = request.params as { fluxId: number }
     try {
-      return await fastify.data.flux.countView(fluxId, fluxUserId)
+      return await fastify.data.flux.registerView(fluxId, fluxUserId)
     } catch (error) {
       fastify.log.error(`Failed to record view for flux ${fluxId} by user ${fluxUserId}`)
       return reply.status(500).send({ error: 'Failed to record view' })
