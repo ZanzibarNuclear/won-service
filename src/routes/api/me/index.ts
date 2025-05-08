@@ -7,7 +7,7 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.get('/', {
     handler: async (request, reply) => {
       fastify.log.info('get current user identity and roles')
-      if (!request.session?.userId) {
+      if (!request.userId) {
         return {}
       }
       const user = await fastify.data.users.getUser(request.userId)
@@ -21,7 +21,7 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
       return {
         id: user.id,
         alias: profile?.alias,
-        roles: request.session.roles,
+        roles: request.session?.roles,
         profile: adjustedProfile,
         fluxUser
       }
@@ -33,7 +33,7 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
     handler: async (request, reply) => {
       let fluxUser = null
       if (request.session?.userId) {
-        fluxUser = await fastify.data.flux.getFluxUser(request.userId)
+        fluxUser = await fastify.data.flux.getFluxUser(request.userId!)
       }
       reply.send(fluxUser)
     }
@@ -42,7 +42,7 @@ const meRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.post('/flux-activation', {
     preHandler: roleGuard(['member']),
     handler: async (request, reply) => {
-      const userId = request.session?.userId
+      const userId = request.userId!
       const { alias, handle } = request.body as ProfileUpdate
       if (userId) {
         // apply updates
