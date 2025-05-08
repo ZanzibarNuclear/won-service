@@ -8,6 +8,11 @@ export interface EventFilter {
   actor?: string
 }
 
+interface CreateEventRequest {
+  actor_id?: string;
+  details: any;
+}
+
 export class EventRepository {
   constructor(private db: Kysely<DB>) { }
 
@@ -39,13 +44,18 @@ export class EventRepository {
   }
 
   // mutations
-  async create(actorId: string | undefined, details: string) {
+
+  async create(actorId: string | null, details: any) {
+    const values: CreateEventRequest = {
+      details
+    }
+    if (actorId) {
+      values['actor_id'] = actorId
+    }
+    console.log('recording event: ' + JSON.stringify(values))
     return await this.db
       .insertInto('events')
-      .values({
-        actor_id: actorId,
-        details: details
-      })
+      .values(values)
       .returningAll()
       .executeTakeFirst()
   }

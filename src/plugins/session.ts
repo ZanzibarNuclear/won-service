@@ -9,7 +9,7 @@ interface SessionAuthPluginOptions {
 
 const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (fastify, options) => {
   fastify.decorateRequest('session', null)
-  fastify.decorateRequest('userId', '')
+  fastify.decorateRequest('userId', null)
 
   let sessionCookieName = 'session_token'
   if (fastify.config.NODE_ENV !== 'production') {

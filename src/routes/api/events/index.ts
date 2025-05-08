@@ -31,19 +31,19 @@ const eventsRoutes: FastifyPluginAsync = async (fastify, options) => {
   })
 
   type eventPayload = {
-    actor: string | undefined
+    actor: string | null
     details: string
   }
 
   fastify.post<{
     Body: eventPayload
   }>('/', async (request, reply) => {
+    const actor = request.userId
     const { details } = request.body
-    const actor = request.session?.userId
 
     try {
       const event = await fastify.data.events.create(actor, details)
-      reply.status(201).send(event)
+      reply.status(201).send()
     } catch (err) {
       fastify.log.error(err)
       throw fastify.httpErrors.internalServerError('Sorry, something went wrong.')
