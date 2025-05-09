@@ -1,6 +1,8 @@
 import { Kysely } from "kysely"
 import { DB } from '../types'
 import { UserCredentials } from '../../types/won-flux-types'
+import { NotFoundError, ConflictError, DatabaseError } from '../../errors/AppError'
+import { withErrorHandling, ensureExists } from '../../utils/errorHandling'
 
 export class UserRepository {
   constructor(private db: Kysely<DB>) { }
@@ -68,97 +70,174 @@ export class UserRepository {
   }
 
   async grantRole(userId: string, role: string) {
-    // Check if user exists
-    const user = await this.getUser(userId)
-    if (!user) {
-      throw new Error(`User with ID ${userId} not found`)
-    }
+    return withErrorHandling(
+      async () => {
+        // Check if user exists
+        const user = await this.getUser(userId)
+        ensureExists(
+          user,
+          NotFoundError,
+          `User with ID ${userId} not found`,
+          'USER_NOT_FOUND',
+          { userId }
+        )
 
-    // Check if role exists
-    const roleExists = await this.db
-      .selectFrom('roles')
-      .where('key', '=', role)
-      .executeTakeFirst()
+        // Check if role exists
+        const roleExists = await this.db
+          .selectFrom('roles')
+          .where('key', '=', role)
+          .executeTakeFirst()
 
-    if (!roleExists) {
-      throw new Error(`Role with key ${role} not found`)
-    }
+        ensureExists(
+          roleExists,
+          NotFoundError,
+          `Role with key ${role} not found`,
+          'ROLE_NOT_FOUND',
+          { roleKey: role }
+        )
 
-    // Check if role is already granted
-    const existingRole = await this.db
-      .selectFrom('user_roles')
-      .where('user_id', '=', userId)
-      .where('role_id', '=', role)
-      .executeTakeFirst()
+        // Check if role is already granted
+        const existingRole = await this.db
+          .selectFrom('user_roles')
+          .where('user_id', '=', userId)
+          .where('role_id', '=', role)
+          .executeTakeFirst()
 
-    if (existingRole) {
-      throw new Error(`Role ${role} is already granted to user ${userId}`)
-    }
+        if (existingRole) {
+          throw new ConflictError(
+            `Role ${role} is already granted to user ${userId}`,
+            'ROLE_ALREADY_GRANTED',
+            { userId, roleKey: role }
+          )
+        }
 
-    // Grant the role
-    return await this.db
-      .insertInto('user_roles')
-      .values({
-        user_id: userId,
-        role_id: role,
-      })
-      .execute()
+        // Grant the role
+        return await this.db
+          .insertInto('user_roles')
+          .values({
+            user_id: userId,
+            role_id: role,
+          })
+          .execute()
+      },
+      `Failed to grant role ${role} to user ${userId}`,
+      'GRANT_ROLE_ERROR',
+      { userId, roleKey: role }
+    )
   }
 
   async revokeRole(userId: string, role: string) {
-    // Check if user exists
-    const user = await this.getUser(userId)
-    if (!user) {
-      throw new Error(`User with ID ${userId} not found`)
-    }
+    return withErrorHandling(
+      async () => {
+        // Check if user exists
+        const user = await this.getUser(userId)
+        ensureExists(
+          user,
+          NotFoundError,
+          `User with ID ${userId} not found`,
+          'USER_NOT_FOUND',
+          { userId }
+        )
 
-    // Check if role exists
-    const roleExists = await this.db
-      .selectFrom('roles')
-      .where('key', '=', role)
-      .executeTakeFirst()
+        // Check if role exists
+        const roleExists = await this.db
+          .selectFrom('roles')
+          .where('key', '=', role)
+          .executeTakeFirst()
 
-    if (!roleExists) {
-      throw new Error(`Role with key ${role} not found`)
-    }
+        ensureExists(
+          roleExists,
+          NotFoundError,
+          `Role with key ${role} not found`,
+          'ROLE_NOT_FOUND',
+          { roleKey: role }
+        )
 
-    // Check if the user has the role before revoking
-    const existingRole = await this.db
-      .selectFrom('user_roles')
-      .where('user_id', '=', userId)
-      .where('role_id', '=', role)
-      .executeTakeFirst()
+        // Check if the user has the role before revoking
+        const existingRole = await this.db
+          .selectFrom('user_roles')
+          .where('user_id', '=', userId)
+          .where('role_id', '=', role)
+          .executeTakeFirst()
 
-    if (!existingRole) {
-      throw new Error(`User ${userId} does not have role ${role}`)
-    }
+        ensureExists(
+          existingRole,
+          NotFoundError,
+          `User ${userId} does not have role ${role}`,
+          'ROLE_NOT_ASSIGNED',
+          { userId, roleKey: role }
+        )
 
-    // Revoke the role
-    return await this.db
-      .deleteFrom('user_roles')
-      .where('user_id', '=', userId)
-      .where('role_id', '=', role)
-      .execute()
+        // Revoke the role
+        return await this.db
+          .deleteFrom('user_roles')
+          .where('user_id', '=', userId)
+          .where('role_id', '=', role)
+          .execute()
+      },
+      `Failed to revoke role ${role} from user ${userId}`,
+      'REVOKE_ROLE_ERROR',
+      { userId, roleKey: role }
+    )
   }
 
   async getUserRoles(userId: string) {
-    return await this.db
-      .selectFrom('user_roles')
-      .selectAll()
-      .where('user_id', '=', userId)
-      .execute()
+    return withErrorHandling(
+      async () => {
+        // Check if user exists
+        const user = await this.getUser(userId)
+        ensureExists(
+          user,
+          NotFoundError,
+          `User with ID ${userId} not found`,
+          'USER_NOT_FOUND',
+          { userId }
+        )
+
+        return await this.db
+          .selectFrom('user_roles')
+          .selectAll()
+          .where('user_id', '=', userId)
+          .execute()
+      },
+      `Failed to get roles for user ${userId}`,
+      'GET_USER_ROLES_ERROR',
+      { userId }
+    )
   }
 
   async getCreds(userId: string): Promise<UserCredentials> {
-    const profile = await this.db.selectFrom('user_profiles').select(['alias']).where('id', '=', userId).executeTakeFirst()
-    const result = await this.getUserRoles(userId)
-    const alias = profile?.alias || null
-    const roles = result.map((row: any) => row.roleId)
-    const creds = {
-      sub: userId,
-      name: alias,
-      role: roles
-    }
-    return creds
+    return withErrorHandling(
+      async () => {
+        // Check if user exists
+        const user = await this.getUser(userId)
+        ensureExists(
+          user,
+          NotFoundError,
+          `User with ID ${userId} not found`,
+          'USER_NOT_FOUND',
+          { userId }
+        )
+
+        const profile = await this.db
+          .selectFrom('user_profiles')
+          .select(['alias'])
+          .where('id', '=', userId)
+          .executeTakeFirst()
+
+        const result = await this.getUserRoles(userId)
+        const alias = profile?.alias || null
+        const roles = result.map((row: any) => row.roleId)
+
+        return {
+          sub: userId,
+          name: alias,
+          role: roles
+        }
+      },
+      `Failed to get credentials for user ${userId}`,
+      'GET_USER_CREDS_ERROR',
+      { userId }
+    )
   }
 }
