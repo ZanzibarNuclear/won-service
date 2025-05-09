@@ -80,6 +80,35 @@ npm run build
 node dist/index.js
 ```
 
+## Testing
+
+The project includes tests for various components:
+
+```bash
+# Run all JavaScript tests
+npm test
+
+# Run tests for utility functions (requires build first)
+npm run test:utils
+
+# Run all tests (JavaScript and TypeScript)
+npm run test:all
+```
+
+### Security Tests
+
+The security utilities include tests to verify:
+
+- JWT secret key validation
+- Secure secret generation
+- Entropy checking
+
+To run the security-related tests:
+
+```bash
+npm run test:utils
+```
+
 ## Branching Strategy
 
 - feature-branch - for working on changes; might be broken at any moment, needs to work to merge into staging branch

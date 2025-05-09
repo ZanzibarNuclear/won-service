@@ -1,9 +1,6 @@
-'use strict';
-
-const { describe, it } = require('node:test');
-const assert = require('node:assert');
-// Import from the compiled JavaScript in dist folder
-const { validateSecretKeyStrength } = require('../../dist/utils/validateSecretKey');
+import { describe, it } from 'node:test';
+import assert from 'node:assert';
+import { validateSecretKeyStrength } from '../../src/utils/validateSecretKey';
 
 describe('validateSecretKeyStrength', () => {
   it('should validate a strong secret key', () => {
@@ -52,7 +49,7 @@ describe('validateSecretKeyStrength', () => {
     const commonPatternKey = 'ABCDEFGHIpassword123!@#$%^&*()_+-=';
     const result = validateSecretKeyStrength(commonPatternKey);
     assert.strictEqual(result.isValid, false);
-    assert.ok(result.reason.includes('common pattern'));
+    assert.ok(result.reason?.includes('common pattern'));
   });
 
   it('should accept a key that meets custom requirements', () => {
@@ -66,12 +63,10 @@ describe('validateSecretKeyStrength', () => {
     assert.strictEqual(result.isValid, true);
   });
 
-  it('should reject a key with low entropy or other issues', () => {
+  it('should reject a key with low entropy', () => {
     const lowEntropyKey = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA!1A';
     const result = validateSecretKeyStrength(lowEntropyKey);
     assert.strictEqual(result.isValid, false);
-    // The validation might fail for different reasons (entropy or missing character types)
-    // so we just check that it fails, not the specific reason
-    assert.ok(result.reason, 'Should provide a reason for rejection');
+    assert.strictEqual(result.reason, 'Secret key has insufficient entropy (randomness)');
   });
 });
