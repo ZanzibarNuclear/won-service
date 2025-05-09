@@ -105,7 +105,6 @@ export class UserRepository {
       name: alias,
       role: roles
     }
-    console.log('creds: ' + JSON.stringify(creds))
     return creds
   }
 }

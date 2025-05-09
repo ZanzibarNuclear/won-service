@@ -37,14 +37,14 @@ fastify.register(AutoLoad, {
   dir: join(__dirname, 'routes'),
 })
 
-fastify.addHook('onRequest', (request, reply, done) => {
-  console.log('Incoming request:', {
-    method: request.method,
-    url: request.url,
-    headers: request.headers,
-  })
-  done()
-})
+// fastify.addHook('onRequest', (request, reply, done) => {
+//   console.log('Incoming request:', {
+//     method: request.method,
+//     url: request.url,
+//     headers: request.headers,
+//   })
+//   done()
+// })
 
 const start = async () => {
   fastify.log.info('starting server')
