@@ -1,12 +1,12 @@
 import { FastifyError, FastifyReply, FastifyRequest } from 'fastify'
-import { AppError, DatabaseError, NotFoundError, ValidationError, ConflictError, UnauthorizedError, ForbiddenError } from '../errors/AppError'
+import { AppError } from '../errors/AppError'
 
 /**
- * Global error handler middleware for Fastify
- * Standardizes error responses across the API
- */
+* Global error handler middleware for Fastify
+* Standardizes error responses across the API
+*/
 export default function errorHandler(
-  error: FastifyError | Error,
+  error: Error | FastifyError,
   request: FastifyRequest,
   reply: FastifyReply
 ) {
@@ -16,7 +16,7 @@ export default function errorHandler(
   if (error instanceof AppError) {
     const response = {
       status: 'error',
-      code: error.code,
+      code: error.code || 'APP_ERROR',
       message: error.message,
       ...(process.env.NODE_ENV !== 'production' && error.context && { context: error.context })
     }
@@ -24,23 +24,24 @@ export default function errorHandler(
     return reply.status(error.statusCode).send(response)
   }
 
-  // Handle Fastify validation errors
-  if (error.validation) {
+  // Handle Fastify validation errors (using type assertion with a runtime check)
+  const fastifyError = error as FastifyError
+  if (fastifyError.validation && Array.isArray(fastifyError.validation)) {
     const response = {
       status: 'error',
       code: 'VALIDATION_ERROR',
       message: 'Validation failed',
-      errors: error.validation
+      errors: fastifyError.validation
     }
 
     return reply.status(400).send(response)
   }
 
   // Handle other Fastify errors with statusCode
-  if ('statusCode' in error && error.statusCode) {
+  if ('statusCode' in error && typeof error.statusCode === 'number') {
     const response = {
       status: 'error',
-      code: error.code || 'UNKNOWN_ERROR',
+      code: fastifyError.code || 'FASTIFY_ERROR',
       message: error.message
     }
 
