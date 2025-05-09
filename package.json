@@ -24,10 +24,7 @@
     "generate": "kysely-codegen --dialect=postgres --out-file=./src/db/types.ts",
     "generate-supa": "kysely-codegen --dialect=postgres --out-file=./src/db/supaTypes.ts",
     "generate-help": "kysely-codegen --help",
-    "test": "node --test test/**/*.test.js",
-    "test:ts": "bash scripts/test-ts.sh",
-    "test:all": "npm run test && npm run test:ts",
-    "test:utils": "npm run build && node --test test/utils/*.test.js"
+    "test": "node --test 'test/**/*.test.js'"
   },
   "dependencies": {
     "@fastify/autoload": "^6.3.0",
