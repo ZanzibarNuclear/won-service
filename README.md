@@ -21,12 +21,62 @@ staging, production, etc.
 
 Some of the plugins are used as is: cookie, cors, env and sensible. OAuth2 and sessionAuth are customized to handle OAuth2 and session handling.
 
+## Security
+
+### JWT Secret Key
+
+The application uses JWT for authentication. A strong JWT secret key is required for security:
+
+- In development: Minimum 32 characters with a mix of uppercase, lowercase, numbers, and special characters
+- In production: Minimum 48 characters with higher entropy requirements
+
+To generate a secure JWT secret key, use the provided script:
+
+```bash
+# Generate a 48-character secure secret
+node scripts/generate-secret.js
+
+# Or specify a custom length (minimum 32)
+node scripts/generate-secret.js 64
+```
+
+Add the generated key to your `.env` file:
+
+```
+JWT_SECRET_KEY=your_generated_secret_here
+```
+
+The application validates the strength of security-critical secrets at startup and will:
+
+- Warn about weak secrets in development
+- Prevent startup with weak secrets in production
+
+### Environment Variables
+
+Security-critical environment variables:
+
+- `JWT_SECRET_KEY`: Secret for signing JWT tokens
+- `COOKIE_SECRET`: Secret for cookie signing
+- `DATABASE_URL`: Database connection string (should use SSL in production)
+- Various OAuth client secrets
+
+Never commit these values to version control. Use environment variables or a secure secrets management solution.
+
 ## Getting Started
 
 When you are ready to test, be sure to try a local build.
 
-```
+```bash
+# Install dependencies
+npm install
+
+# Generate a secure JWT secret
+node scripts/generate-secret.js >> .env
+
+# Build the application
 npm run build
+
+# Start the server
 node dist/index.js
 ```
 

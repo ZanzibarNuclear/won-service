@@ -4,14 +4,14 @@ const { test } = require('node:test')
 const assert = require('node:assert')
 
 const Fastify = require('fastify')
-const Support = require('../../plugins/support')
+const Support = require('../../src/plugins/env')
 
 test('support works standalone', async (t) => {
   const fastify = Fastify()
   fastify.register(Support)
 
   await fastify.ready()
-  assert.equal(fastify.someSupport(), 'hugs')
+  assert.equal(fastify.API_BASE_URL, 'blargy')
 })
 
 // You can also use plugin with opts in fastify v2
