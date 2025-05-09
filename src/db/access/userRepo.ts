@@ -68,7 +68,34 @@ export class UserRepository {
   }
 
   async grantRole(userId: string, role: string) {
-    // TODO: handle error cases: 1) user not found, 2) role not found, 3) already granted
+    // Check if user exists
+    const user = await this.getUser(userId)
+    if (!user) {
+      throw new Error(`User with ID ${userId} not found`)
+    }
+
+    // Check if role exists
+    const roleExists = await this.db
+      .selectFrom('roles')
+      .where('key', '=', role)
+      .executeTakeFirst()
+
+    if (!roleExists) {
+      throw new Error(`Role with key ${role} not found`)
+    }
+
+    // Check if role is already granted
+    const existingRole = await this.db
+      .selectFrom('user_roles')
+      .where('user_id', '=', userId)
+      .where('role_id', '=', role)
+      .executeTakeFirst()
+
+    if (existingRole) {
+      throw new Error(`Role ${role} is already granted to user ${userId}`)
+    }
+
+    // Grant the role
     return await this.db
       .insertInto('user_roles')
       .values({
@@ -79,7 +106,34 @@ export class UserRepository {
   }
 
   async revokeRole(userId: string, role: string) {
-    // TODO: handle error cases: 1) user not found, 2) role not found
+    // Check if user exists
+    const user = await this.getUser(userId)
+    if (!user) {
+      throw new Error(`User with ID ${userId} not found`)
+    }
+
+    // Check if role exists
+    const roleExists = await this.db
+      .selectFrom('roles')
+      .where('key', '=', role)
+      .executeTakeFirst()
+
+    if (!roleExists) {
+      throw new Error(`Role with key ${role} not found`)
+    }
+
+    // Check if the user has the role before revoking
+    const existingRole = await this.db
+      .selectFrom('user_roles')
+      .where('user_id', '=', userId)
+      .where('role_id', '=', role)
+      .executeTakeFirst()
+
+    if (!existingRole) {
+      throw new Error(`User ${userId} does not have role ${role}`)
+    }
+
+    // Revoke the role
     return await this.db
       .deleteFrom('user_roles')
       .where('user_id', '=', userId)
