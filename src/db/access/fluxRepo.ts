@@ -39,19 +39,32 @@ export class FluxRepository {
 
   async getFluxes(limit: number, offset: number, filter: FluxFilter) {
     let enhancedQuery = this.selectFluxQuery
-    if (filter.authorId) {
+    const { authorId, fluxId, order, from, to } = filter
+    if (authorId) {
       enhancedQuery = enhancedQuery.where('author_id', '=', filter.authorId)
     }
-    if (filter.fluxId) {
+    if (fluxId) {
       enhancedQuery = enhancedQuery.where('reaction_to', '=', filter.fluxId)
     }
-    if (filter.order) {
-      // TODO: probably not good to have a hidden magic words
-      if (filter.order === 'trending') {
+    if (order) {
+      if (order === 'hottest') {
+        // most boosted and in order of recency
         enhancedQuery = enhancedQuery.orderBy('boost_count', 'desc')
+        enhancedQuery = enhancedQuery.orderBy('fluxes.posted_at', 'desc')
+      } else if (order === 'oldest') {
+        enhancedQuery = enhancedQuery.orderBy('fluxes.posted_at', 'asc')
+      } else if (order === 'newest') {
+        enhancedQuery = enhancedQuery.orderBy('fluxes.posted_at', 'desc')
       }
     } else {
+      // by default, get the latest posts first -- someday, filter by user preferences by default
       enhancedQuery = enhancedQuery.orderBy('fluxes.posted_at', 'desc')
+    }
+    if (from) {
+      enhancedQuery = enhancedQuery.where('posted_at', '>=', new Date(from))
+    }
+    if (to) {
+      enhancedQuery = enhancedQuery.where('posted_at', '<', new Date(to))
     }
     return await enhancedQuery
       .limit(limit)

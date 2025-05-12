@@ -2,21 +2,23 @@ import { FastifyPluginAsync } from 'fastify'
 
 const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
 
-  const DEFAULT_FLUXES_LIMIT = 3
-  const MAX_FLUXES_LIMIT = 10
+  const DEFAULT_FLUXES_LIMIT = 5
+  const MAX_FLUXES_LIMIT = 25
 
   fastify.get<{
     Querystring: {
       limit?: number
       offset?: number
-      order?: string
+      order?: 'hottest' | 'oldest' | 'newest'
+      from?: string
+      to?: string
       authorId?: number
       fluxId?: number
     }
   }>('/', async (request, reply) => {
-    const { limit, offset, order, authorId, fluxId } = request.query
+    const { limit, offset, order, from, to, authorId, fluxId } = request.query
 
-    fastify.log.info(`Fetching fluxes under constraints -- filter: ${order}, author: ${authorId}, flux: ${fluxId}, limit: ${limit}, offset: ${offset}`)
+    fastify.log.info(`Fetching fluxes under constraints -- limit: ${limit}, offset: ${offset}, sorting: ${order}, after: ${from}, before: ${to}, by: ${authorId}, reacting_to: ${fluxId}`)
 
     // guard against returning too many
     let guardedLimit = DEFAULT_FLUXES_LIMIT
