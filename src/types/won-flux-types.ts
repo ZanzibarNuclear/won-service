@@ -78,5 +78,6 @@ export interface FluxFilter {
   authorId?: number
   fluxId?: number
   from?: string
+  after?: string
   to?: string
 }

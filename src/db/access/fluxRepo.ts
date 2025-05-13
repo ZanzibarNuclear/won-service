@@ -39,7 +39,7 @@ export class FluxRepository {
 
   async getFluxes(limit: number, offset: number, filter: FluxFilter) {
     let enhancedQuery = this.selectFluxQuery
-    const { authorId, fluxId, order, from, to } = filter
+    const { authorId, fluxId, order, from, after, to } = filter
     if (authorId) {
       enhancedQuery = enhancedQuery.where('author_id', '=', filter.authorId)
     }
@@ -62,6 +62,12 @@ export class FluxRepository {
     }
     if (from) {
       enhancedQuery = enhancedQuery.where('posted_at', '>=', new Date(from))
+    } else if (after) {
+      const afterTs = new Date(after)
+      // Add 1 millisecond to ensure we exclude the exact timestamp
+      afterTs.setMilliseconds(afterTs.getMilliseconds() + 1)
+      console.log('looking for flux after ', afterTs)
+      enhancedQuery = enhancedQuery.where('posted_at', '>', afterTs)
     }
     if (to) {
       enhancedQuery = enhancedQuery.where('posted_at', '<', new Date(to))
