@@ -27,7 +27,7 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
       fastify.log.info(`Adjusting limit to ${guardedLimit}`)
     }
 
-    const results = await fastify.data.flux.getFluxes(guardedLimit, offset || 0, { order, authorId, fluxId })
+    const results = await fastify.data.flux.getFluxes(guardedLimit, offset || 0, { order, from, to, authorId, fluxId })
     return { items: results, total: results.length, hasMore: results.length === guardedLimit }
   })
 
