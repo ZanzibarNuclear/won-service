@@ -48,7 +48,7 @@ export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('flux_ratings')
     .addColumn('id', 'serial', (col) => col.primaryKey())
-    .addColumn('moderator_id', 'uuid', (col) => col.references('users.id').unique().notNull())
+    .addColumn('moderator_id', 'uuid', (col) => col.references('users.id').notNull())
     .addColumn('created_at', 'timestamp', (col) => col.defaultTo(sql`now()`).notNull())
     .addColumn('flux_id', 'serial', (col) => col.references('fluxes.id').notNull())
     .addColumn('rating', 'text', (col) => col.defaultTo('unrated').notNull())

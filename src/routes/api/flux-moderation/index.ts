@@ -18,12 +18,20 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     }
   }>('/latest-ratings', async (request) => {
     const { limit } = request.query
-    return fastify.data.fluxModeration.latestFluxRatings(limit)
+    return fastify.data.fluxModeration.getLatestRatings(limit)
   })
 
-  fastify.post('/ratings', async (request) => {
+  fastify.get('/ratings', async () => {
+    return fastify.data.fluxModeration.get()
+  })
+
+  /**
+   * This provides an easy way for the moderation bot to see where it left off.
+   * In case of a restart.
+   */
+  fastify.post('/ratings', async (request, reply) => {
     // FIXME: this should come from the session, which ought to verify the identity of the actor
-    const moderatorId = '31f11824-af44-4959-95be-e542037dce9b'
+    const moderatorId = '658179b5-b6bd-4d79-8960-9e01c933e489'
 
     const { fluxId, ratingCode, reason } = request.body as FluxRatingBody
 
@@ -32,5 +40,10 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     return fluxRating
   })
 }
+
+/**
+ * TODO: might also be useful to list fluxes without ratings prior to the last rated flux.
+ * Sweep for any misses.
+ */
 
 export default fluxModerationRoutes
