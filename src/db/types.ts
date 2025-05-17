@@ -84,6 +84,23 @@ export interface FluxFollowers {
   following_id: number;
 }
 
+export interface FluxRatingLevels {
+  code: string;
+  created_at: Generated<Timestamp>;
+  description: string;
+  retired: Timestamp | null;
+  severity: number | null;
+}
+
+export interface FluxRatings {
+  created_at: Generated<Timestamp>;
+  flux_id: Generated<number>;
+  id: Generated<number>;
+  moderator_id: string;
+  rating: Generated<string>;
+  reason: string | null;
+}
+
 export interface FluxUsers {
   created_at: Generated<Timestamp>;
   followers: Generated<number>;
@@ -259,6 +276,7 @@ export interface Users {
   email_verified_at: Timestamp | null;
   id: Generated<string>;
   last_sign_in_at: Timestamp;
+  system_bot: Generated<boolean | null>;
   updated_at: Generated<Timestamp>;
 }
 
@@ -279,6 +297,8 @@ export interface DB {
   feedback_messages: FeedbackMessages;
   flux_boosts: FluxBoosts;
   flux_followers: FluxFollowers;
+  flux_rating_levels: FluxRatingLevels;
+  flux_ratings: FluxRatings;
   flux_users: FluxUsers;
   flux_views: FluxViews;
   fluxes: Fluxes;
