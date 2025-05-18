@@ -1,11 +1,11 @@
 import { FastifyPluginAsync } from 'fastify'
-import { roleGuard } from '../../../utils/roleGuard'
+import { roleGuard } from '../../../../utils/roleGuard'
 
 const apiKeysRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   // Generate a new API key for a system user
   fastify.post<{
     Body: { userId: string; description?: string; expiresInDays?: number }
-  }>('/keys', {
+  }>('/', {
     preHandler: roleGuard(['admin']),
     schema: {
       body: {
@@ -55,7 +55,7 @@ const apiKeysRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =
   // List all API keys for a system user
   fastify.get<{
     Querystring: { userId: string }
-  }>('/keys', {
+  }>('/', {
     preHandler: roleGuard(['admin']),
     schema: {
       querystring: {
@@ -91,7 +91,7 @@ const apiKeysRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =
   // Revoke an API key
   fastify.delete<{
     Params: { keyId: string }
-  }>('/keys/:keyId', {
+  }>('/:keyId', {
     preHandler: roleGuard(['admin']),
     schema: {
       params: {

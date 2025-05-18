@@ -116,24 +116,25 @@ export class UserRepository {
       .executeTakeFirst()
   }
 
-  async createUser(email: string) {
+  async createUser(email: string, system: boolean = false) {
     const user = await this.db
       .insertInto('users')
       .values({
         email: email,
-        last_sign_in_at: new Date()
+        last_sign_in_at: new Date(),
+        system_bot: system
       })
       .returningAll()
       .executeTakeFirst()
 
     // create an empty profile for new user
-    if (user) {
+    if (user && !system) {
       await this.db
         .insertInto('user_profiles')
         .values({
           id: user.id
         })
-        .executeTakeFirst()
+        .execute()
     }
 
     return user
@@ -147,12 +148,17 @@ export class UserRepository {
       .executeTakeFirst()
   }
 
-  async getUsers(limit: number, offset: number) {
-    return await this.db
-      .selectFrom('users')
-      .selectAll()
-      .limit(10)
-      .execute()
+  async getUsers(limit: number = 0, offset: number = 0) {
+    const MAX_LIMIT = 100
+    let query = this.db.selectFrom('users').selectAll()
+    if (limit) {
+      const adjustedLimit = limit > MAX_LIMIT ? MAX_LIMIT : limit
+      query = query.limit(adjustedLimit)
+    }
+    if (offset) {
+      query = query.offset(offset)
+    }
+    return await query.execute()
   }
 
   async grantRole(userId: string, role: string) {
