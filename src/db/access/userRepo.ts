@@ -1,11 +1,97 @@
 import { Kysely } from "kysely"
 import { DB } from '../types'
 import { UserCredentials } from '../../types/won-flux-types'
-import { NotFoundError, ConflictError, DatabaseError } from '../../errors/AppError'
+import { NotFoundError, ConflictError, UnauthorizedError } from '../../errors/AppError'
 import { withErrorHandling, ensureExists } from '../../utils/errorHandling'
 
 export class UserRepository {
   constructor(private db: Kysely<DB>) { }
+
+  async createApiKey(userId: string, keyHash: string, description?: string, expiresAt?: Date) {
+    // Check if user exists and is a system bot
+    // TODO: create a guard for this
+    const user = await this.getUser(userId)
+    if (!user) {
+      throw new NotFoundError(`User with ID ${userId} not found`, 'USER_NOT_FOUND', { userId })
+    }
+    if (!user.system_bot) {
+      throw new ConflictError(
+        `User ${userId} is not a system bot`,
+        'NOT_SYSTEM_BOT',
+        { userId }
+      )
+    }
+
+    // Store key
+    return await this.db
+      .insertInto('api_keys')
+      .values({
+        user_id: userId,
+        key_hash: keyHash,
+        description,
+        expires_at: expiresAt
+      })
+      .returningAll()
+      .executeTakeFirst()
+  }
+
+  async getApiKeys(userId: string) {
+    // Check if user exists and is a system bot
+    const user = await this.getUser(userId)
+    if (!user) {
+      throw new NotFoundError(`User with ID ${userId} not found`, 'USER_NOT_FOUND', { userId })
+    }
+    if (!user.system_bot) {
+      throw new ConflictError(
+        `User ${userId} is not a system bot`,
+        'NOT_SYSTEM_BOT',
+        { userId }
+      )
+    }
+
+    // fetch keys for system user
+    return await this.db
+      .selectFrom('api_keys')
+      .selectAll()
+      .where('user_id', '=', userId)
+      .where('revoked_at', 'is', null)
+      .execute()
+  }
+
+  async revokeApiKey(keyId: number) {
+    const apiKey = await this.db
+      .selectFrom('api_keys')
+      .selectAll()
+      .where('id', '=', keyId)
+      .executeTakeFirst()
+
+    ensureExists(
+      apiKey,
+      NotFoundError,
+      `API key with ID ${keyId} not found`,
+      'API_KEY_NOT_FOUND',
+      { keyId }
+    )
+
+    return await this.db
+      .updateTable('api_keys')
+      .set({
+        revoked_at: new Date()
+      })
+      .where('id', '=', keyId)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
+  async updateApiKeyLastUsed(keyId: number) {
+    return await this.db
+      .updateTable('api_keys')
+      .set({
+        last_used_at: new Date()
+      })
+      .where('id', '=', keyId)
+      .execute()
+  }
 
   async findUserByEmail(email: string) {
     return await this.db

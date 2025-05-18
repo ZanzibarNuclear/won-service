@@ -30,6 +30,17 @@ export interface Achievements {
   name: string;
 }
 
+export interface ApiKeys {
+  created_at: Generated<Timestamp>;
+  description: string | null;
+  expires_at: Timestamp | null;
+  id: Generated<number>;
+  key_hash: string;
+  last_used_at: Timestamp | null;
+  revoked_at: Timestamp | null;
+  user_id: string;
+}
+
 export interface Courses {
   archived_at: Timestamp | null;
   cover_art: string | null;
@@ -292,6 +303,7 @@ export interface ViolationReports {
 
 export interface DB {
   achievements: Achievements;
+  api_keys: ApiKeys;
   courses: Courses;
   events: Events;
   feedback_messages: FeedbackMessages;

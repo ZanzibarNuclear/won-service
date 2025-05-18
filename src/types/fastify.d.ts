@@ -40,6 +40,8 @@ declare module 'fastify' {
     generateSessionToken: (sessionData: UserCredentials) => string
     setSessionToken: (reply: FastifyReply, token: string) => void
     removeSessionToken: (reply: FastifyReply) => void
+    generateApiKey: (userId: string) => Promise<string>
+    verifyApiKey: (apiKey: string, secret: string) => Promise<string>
     resendAuth: Resend
     resendFeedback: Resend
     sendAuthEmail: (from: string, to: string, subject: string, htmlBody: string) => Promise<EmailResponse>

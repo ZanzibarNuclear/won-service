@@ -16,6 +16,6 @@
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "declaration": true
   },
-  "include": ["src/**/*.ts", "dist/**/*.js", "src/swagger.ts"],
+  "include": ["src/**/*.ts", "dist/**/*.js", "src/swagger.ts", "src/tests/test-api-key.ts"],
   "exclude": ["node_modules"]
 }
