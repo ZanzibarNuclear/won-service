@@ -13,14 +13,14 @@ export class FluxModerationRepository {
       .execute()
   }
 
-  async rateFlux(moderatorId: string, fluxId: number, ratingCode: string, reason: string) {
+  async rateFlux(moderatorId: string, fluxId: number, rating: string, reason: string) {
     return await this.db
       .insertInto('flux_ratings')
       .values({
         moderator_id: moderatorId,
         flux_id: fluxId,
-        rating: ratingCode,
-        reason: reason
+        rating,
+        reason
       })
       .returningAll()
       .executeTakeFirst()

@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from 'fastify'
 
 interface FluxRatingBody {
   fluxId: number
-  ratingCode: string
+  rating: string
   reason: string
 }
 
@@ -33,9 +33,9 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     // FIXME: this should come from the session, which ought to verify the identity of the actor
     const moderatorId = '658179b5-b6bd-4d79-8960-9e01c933e489'
 
-    const { fluxId, ratingCode, reason } = request.body as FluxRatingBody
+    const { fluxId, rating, reason } = request.body as FluxRatingBody
 
-    const fluxRating = await fastify.data.fluxModeration.rateFlux(moderatorId, fluxId, ratingCode, reason)
+    const fluxRating = await fastify.data.fluxModeration.rateFlux(moderatorId, fluxId, rating, reason)
 
     return fluxRating
   })
