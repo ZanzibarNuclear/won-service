@@ -45,7 +45,7 @@ const apiKeysRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =
       // Store a hash of the API key in the database
       await fastify.data.users.createApiKey(userId, apiKey, description, expiresAt)
 
-      return { apiKey }
+      return apiKey
     } catch (error) {
       fastify.log.error(`Error generating API key: ${error}`)
       return reply.status(500).send({ error: 'Failed to generate API key' })
@@ -81,7 +81,7 @@ const apiKeysRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =
         expiresAt: key.expires_at
       }))
 
-      return { apiKeys: sanitizedKeys }
+      return sanitizedKeys
     } catch (error) {
       fastify.log.error(`Error listing API keys: ${error}`)
       return reply.status(500).send({ error: 'Failed to list API keys' })

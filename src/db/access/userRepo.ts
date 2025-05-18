@@ -1,25 +1,18 @@
 import { Kysely } from "kysely"
 import { DB } from '../types'
 import { UserCredentials } from '../../types/won-flux-types'
-import { NotFoundError, ConflictError, UnauthorizedError } from '../../errors/AppError'
+import { NotFoundError, ConflictError } from '../../errors/AppError'
 import { withErrorHandling, ensureExists } from '../../utils/errorHandling'
 
 export class UserRepository {
   constructor(private db: Kysely<DB>) { }
 
   async createApiKey(userId: string, keyHash: string, description?: string, expiresAt?: Date) {
-    // Check if user exists and is a system bot
+    // Check if user exists
     // TODO: create a guard for this
     const user = await this.getUser(userId)
     if (!user) {
       throw new NotFoundError(`User with ID ${userId} not found`, 'USER_NOT_FOUND', { userId })
-    }
-    if (!user.system_bot) {
-      throw new ConflictError(
-        `User ${userId} is not a system bot`,
-        'NOT_SYSTEM_BOT',
-        { userId }
-      )
     }
 
     // Store key
@@ -36,17 +29,10 @@ export class UserRepository {
   }
 
   async getApiKeys(userId: string) {
-    // Check if user exists and is a system bot
+    // Check if user exists
     const user = await this.getUser(userId)
     if (!user) {
       throw new NotFoundError(`User with ID ${userId} not found`, 'USER_NOT_FOUND', { userId })
-    }
-    if (!user.system_bot) {
-      throw new ConflictError(
-        `User ${userId} is not a system bot`,
-        'NOT_SYSTEM_BOT',
-        { userId }
-      )
     }
 
     // fetch keys for system user
@@ -65,13 +51,9 @@ export class UserRepository {
       .where('id', '=', keyId)
       .executeTakeFirst()
 
-    ensureExists(
-      apiKey,
-      NotFoundError,
-      `API key with ID ${keyId} not found`,
-      'API_KEY_NOT_FOUND',
-      { keyId }
-    )
+    if (!apiKey) {
+      throw new NotFoundError(`API key with ID ${keyId} not found`, 'API_KEY_NOT_FOUND', { apiKey })
+    }
 
     return await this.db
       .updateTable('api_keys')

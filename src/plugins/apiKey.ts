@@ -11,50 +11,52 @@ const apiKeyPlugin: FastifyPluginAsync<ApiKeyPluginOptions> = async (fastify, op
   fastify.decorate('generateApiKey', generateApiKey)
   fastify.decorate('verifyApiKey', verifyApiKey)
 
+  // TODO: add logic to session plugin to verify API Key when used -- or maybe it was fine
+
   // Add a hook to check for API key in the Authorization header
-  fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
-    // Skip if session is already set by the session plugin
-    if (request.session) {
-      return
-    }
+  // fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
+  //   // Skip if session is already set by the session plugin
+  //   if (request.session) {
+  //     return
+  //   }
 
-    const authHeader = request.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return
-    }
+  //   const authHeader = request.headers.authorization
+  //   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  //     return
+  //   }
 
-    const apiKey = authHeader.substring(7) // Remove 'Bearer ' prefix
-    try {
-      if (!fastify.config.JWT_SECRET_KEY) {
-        throw new Error('JWT_SECRET_KEY is not set')
-      }
+  //   const apiKey = authHeader.substring(7) // Remove 'Bearer ' prefix
+  //   try {
+  //     if (!fastify.config.JWT_SECRET_KEY) {
+  //       throw new Error('JWT_SECRET_KEY is not set')
+  //     }
 
-      const userId = await verifyApiKey(apiKey, fastify.config.JWT_SECRET_KEY)
-      const user = await fastify.data.users.getUser(userId)
+  //     const userId = await verifyApiKey(apiKey, fastify.config.JWT_SECRET_KEY)
+  //     const user = await fastify.data.users.getUser(userId)
 
-      if (!user) {
-        throw new Error('User not found')
-      }
+  //     if (!user) {
+  //       throw new Error('User not found')
+  //     }
 
-      if (!user.system_bot) {
-        throw new Error('API key authentication is only for system users')
-      }
+  //     if (!user.system_bot) {
+  //       throw new Error('API key authentication is only for system users')
+  //     }
 
-      const credentials = await fastify.data.users.getCreds(userId)
-      const sessionData = {
-        userId: credentials.sub,
-        alias: credentials.name,
-        roles: credentials.role
-      }
+  //     const credentials = await fastify.data.users.getCreds(userId)
+  //     const sessionData = {
+  //       userId: credentials.sub,
+  //       alias: credentials.name,
+  //       roles: credentials.role
+  //     }
 
-      request.session = sessionData
-      request.userId = credentials.sub
+  //     request.session = sessionData
+  //     request.userId = credentials.sub
 
-    } catch (error) {
-      fastify.log.error(`API key authentication failed: ${error}`)
-      // Don't send an error response here to allow other auth methods to try
-    }
-  })
+  //   } catch (error) {
+  //     fastify.log.error(`API key authentication failed: ${error}`)
+  //     // Don't send an error response here to allow other auth methods to try
+  //   }
+  // })
 
   // Function to generate a new API key for a system user
   async function generateApiKey(userId: string): Promise<string> {
