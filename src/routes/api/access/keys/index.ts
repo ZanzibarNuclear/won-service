@@ -20,15 +20,18 @@ const apiKeysRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =
     }
   }, async function (request, reply) {
     const { userId, description, expiresInDays } = request.body
+    fastify.log.info('API key has been requested for user ' + userId)
 
     try {
       // Check if user exists and is a system bot
-      const user = await fastify.data.users.getUser(userId)
+      const user: any = await fastify.data.users.getUser(userId)
       if (!user) {
+        fastify.log.error('Did not find user')
         return reply.status(404).send({ error: 'User not found' })
       }
 
-      if (!user.system_bot) {
+      if (!user.systemBot) {
+        fastify.log.error('Not a system user' + JSON.stringify(user))
         return reply.status(400).send({ error: 'API keys can only be generated for system users' })
       }
 
@@ -45,6 +48,7 @@ const apiKeysRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =
       // Store a hash of the API key in the database
       await fastify.data.users.createApiKey(userId, apiKey, description, expiresAt)
 
+      fastify.log.info('returning api key: ' + apiKey)
       return apiKey
     } catch (error) {
       fastify.log.error(`Error generating API key: ${error}`)

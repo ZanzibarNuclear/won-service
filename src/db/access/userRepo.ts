@@ -9,7 +9,6 @@ export class UserRepository {
 
   async createApiKey(userId: string, keyHash: string, description?: string, expiresAt?: Date) {
     // Check if user exists
-    // TODO: create a guard for this
     const user = await this.getUser(userId)
     if (!user) {
       throw new NotFoundError(`User with ID ${userId} not found`, 'USER_NOT_FOUND', { userId })

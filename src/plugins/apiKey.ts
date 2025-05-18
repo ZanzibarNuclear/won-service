@@ -64,12 +64,6 @@ const apiKeyPlugin: FastifyPluginAsync<ApiKeyPluginOptions> = async (fastify, op
       throw new Error('JWT_SECRET_KEY is not set')
     }
 
-    // Check if the user is a system user
-    const user = await fastify.data.users.getUser(userId)
-    if (!user || !user.system_bot) {
-      throw new Error('API keys can only be generated for system users')
-    }
-
     // Generate a random key part to make the API key unique
     const randomPart = crypto.randomBytes(16).toString('hex')
 
