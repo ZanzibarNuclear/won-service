@@ -75,17 +75,7 @@ const apiKeysRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =
 
     try {
       const apiKeys = await fastify.data.users.getApiKeys(userId)
-
-      // Don't return the actual key hash for security
-      const sanitizedKeys = apiKeys.map(key => ({
-        id: key.id,
-        description: key.description,
-        createdAt: key.created_at,
-        lastUsedAt: key.last_used_at,
-        expiresAt: key.expires_at
-      }))
-
-      return sanitizedKeys
+      return apiKeys
     } catch (error) {
       fastify.log.error(`Error listing API keys: ${error}`)
       return reply.status(500).send({ error: 'Failed to list API keys' })
