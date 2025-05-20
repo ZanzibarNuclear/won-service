@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import AutoLoad from '@fastify/autoload'
 import { join } from 'path'
 import * as dotenv from 'dotenv'
+import errorHandler from './middleware/errorHandler'
 
 dotenv.config()
 
@@ -37,14 +38,17 @@ fastify.register(AutoLoad, {
   dir: join(__dirname, 'routes'),
 })
 
-fastify.addHook('onRequest', (request, reply, done) => {
-  console.log('Incoming request:', {
-    method: request.method,
-    url: request.url,
-    headers: request.headers,
-  })
-  done()
-})
+// Register global error handler
+fastify.setErrorHandler(errorHandler)
+
+// fastify.addHook('onRequest', (request, reply, done) => {
+//   console.log('Incoming request:', {
+//     method: request.method,
+//     url: request.url,
+//     headers: request.headers,
+//   })
+//   done()
+// })
 
 const start = async () => {
   fastify.log.info('starting server')
@@ -55,7 +59,7 @@ const start = async () => {
     if (!host || !port) {
       throw new Error('API_HOST or API_PORT is not set')
     }
-    console.log('\n' + fastify.printRoutes())
+    fastify.log.info('\n' + fastify.printRoutes())
     await fastify.listen({ host, port: Number(port) })
   } catch (err) {
     fastify.log.error(err)

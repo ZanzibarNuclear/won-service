@@ -1,0 +1,34 @@
+
+Generated Secret Key:
+---------------------
+5f6e82e466370cae1daafd6d59c3a7bcdf71b4a316b94648
+
+Add this to your .env file:
+JWT_SECRET_KEY=5f6e82e466370cae1daafd6d59c3a7bcdf71b4a316b94648
+
+
+
+Generated Secret Key:
+---------------------
+b934e3aac7dc413936b60a87d2a6e45947f91f37d871abd1
+
+Add this to your .env file:
+JWT_SECRET_KEY=b934e3aac7dc413936b60a87d2a6e45947f91f37d871abd1
+
+
+
+Generated Secret Key:
+---------------------
+GoI.T]a#q80)91Ke*o=gpb[&Bh*Y,3kT2uVEx:t&%|FOU(o.
+
+Secret characteristics:
+- Length: 48 characters
+- Contains uppercase letters: Yes
+- Contains lowercase letters: Yes
+- Contains numbers: Yes
+- Contains special characters: Yes
+
+Add this to your .env file:
+JWT_SECRET_KEY=GoI.T]a#q80)91Ke*o=gpb[&Bh*Y,3kT2uVEx:t&%|FOU(o.
+
+

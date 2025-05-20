@@ -1,28 +1,30 @@
-'use strict'
+'use strict';
 
-const { test } = require('node:test')
-const assert = require('node:assert')
-const { build } = require('../helper')
+const { describe, it } = require('node:test');
+const assert = require('node:assert');
+const Fastify = require('fastify');
 
-test('default root route', async (t) => {
-  const app = await build(t)
+describe('Root route', () => {
+  it('should return { root: true } when GET /', async () => {
+    // Create a new Fastify instance for testing
+    const app = Fastify();
 
-  const res = await app.inject({
-    url: '/'
-  })
-  assert.deepStrictEqual(JSON.parse(res.payload), { root: true })
-})
+    // Register the route handler directly
+    app.get('/', async () => {
+      return { root: true };
+    });
 
-// inject callback style:
-//
-// test('default root route', (t) => {
-//   t.plan(2)
-//   const app = await build(t)
-//
-//   app.inject({
-//     url: '/'
-//   }, (err, res) => {
-//     t.error(err)
-//     assert.deepStrictEqual(JSON.parse(res.payload), { root: true })
-//   })
-// })
+    // Make the request
+    const response = await app.inject({
+      method: 'GET',
+      url: '/'
+    });
+
+    // Assert on the response
+    assert.strictEqual(response.statusCode, 200);
+    assert.deepStrictEqual(response.json(), { root: true });
+
+    // Close the app
+    await app.close();
+  });
+});

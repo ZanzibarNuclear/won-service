@@ -30,6 +30,17 @@ export interface Achievements {
   name: string;
 }
 
+export interface ApiKeys {
+  created_at: Generated<Timestamp>;
+  description: string | null;
+  expires_at: Timestamp | null;
+  id: Generated<number>;
+  key_hash: string;
+  last_used_at: Timestamp | null;
+  revoked_at: Timestamp | null;
+  user_id: string;
+}
+
 export interface Courses {
   archived_at: Timestamp | null;
   cover_art: string | null;
@@ -82,6 +93,23 @@ export interface FluxFollowers {
   followed_at: Generated<Timestamp>;
   follower_id: number;
   following_id: number;
+}
+
+export interface FluxRatingLevels {
+  code: string;
+  created_at: Generated<Timestamp>;
+  description: string;
+  retired: Timestamp | null;
+  severity: number | null;
+}
+
+export interface FluxRatings {
+  created_at: Generated<Timestamp>;
+  flux_id: Generated<number>;
+  id: Generated<number>;
+  moderator_id: string;
+  rating: Generated<string>;
+  reason: string | null;
 }
 
 export interface FluxUsers {
@@ -259,6 +287,7 @@ export interface Users {
   email_verified_at: Timestamp | null;
   id: Generated<string>;
   last_sign_in_at: Timestamp;
+  system_bot: Generated<boolean | null>;
   updated_at: Generated<Timestamp>;
 }
 
@@ -274,11 +303,14 @@ export interface ViolationReports {
 
 export interface DB {
   achievements: Achievements;
+  api_keys: ApiKeys;
   courses: Courses;
   events: Events;
   feedback_messages: FeedbackMessages;
   flux_boosts: FluxBoosts;
   flux_followers: FluxFollowers;
+  flux_rating_levels: FluxRatingLevels;
+  flux_ratings: FluxRatings;
   flux_users: FluxUsers;
   flux_views: FluxViews;
   fluxes: Fluxes;

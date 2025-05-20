@@ -74,7 +74,10 @@ export interface Course {
 }
 
 export interface FluxFilter {
-  order?: string
+  order?: 'hottest' | 'oldest' | 'newest'
   authorId?: number
   fluxId?: number
+  from?: string
+  after?: string
+  to?: string
 }

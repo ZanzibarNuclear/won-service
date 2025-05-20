@@ -1,6 +1,7 @@
 import fp from 'fastify-plugin'
 import { FastifyPluginAsync } from 'fastify'
 import fastifyEnv from '@fastify/env'
+import { validateSecretKeyStrength } from '../utils/validateSecretKey'
 
 const envSchema = {
   type: 'object',
@@ -41,6 +42,43 @@ const envSchema = {
   }
 }
 
+/**
+ * Validates security-critical environment variables
+ * @param fastify - Fastify instance
+ */
+function validateSecurityEnvVars(fastify: any) {
+  // Skip validation in test environment
+  if (fastify.config.NODE_ENV === 'test') {
+    return;
+  }
+
+  // Validate JWT secret key if present
+  if (fastify.config.JWT_SECRET_KEY) {
+    // Use stricter validation in production
+    const options = fastify.config.NODE_ENV === 'production'
+      ? { minLength: 48 } // Stricter for production
+      : { minLength: 32 }; // More lenient for development
+
+    const validation = validateSecretKeyStrength(fastify.config.JWT_SECRET_KEY, options);
+
+    if (!validation.isValid) {
+      // In production, throw an error to prevent startup with weak secrets
+      if (fastify.config.NODE_ENV === 'production') {
+        throw new Error(`Invalid JWT_SECRET_KEY: ${validation.reason}`);
+      } else {
+        // In development, log a warning but allow startup
+        fastify.log.warn(`WARNING: JWT_SECRET_KEY is weak: ${validation.reason}`);
+      }
+    }
+  } else if (fastify.config.NODE_ENV === 'production') {
+    // In production, JWT_SECRET_KEY should be required
+    throw new Error('JWT_SECRET_KEY is required in production environment');
+  }
+
+  // Similar validation could be added for other security-critical env vars
+  // like COOKIE_SECRET, API keys, etc.
+}
+
 const envPlugin: FastifyPluginAsync = async (fastify, options) => {
   const envOptions = {
     confKey: 'config',
@@ -48,6 +86,10 @@ const envPlugin: FastifyPluginAsync = async (fastify, options) => {
     dotenv: true
   }
   await fastify.register(fastifyEnv, envOptions)
+
+  // Validate security-critical environment variables
+  validateSecurityEnvVars(fastify);
+
   fastify.log.info('registered env plugin')
 }
 
