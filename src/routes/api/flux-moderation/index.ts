@@ -1,4 +1,5 @@
 import { FastifyPluginAsync } from 'fastify'
+import { roleGuard } from '../../../utils/roleGuard'
 
 interface FluxRatingBody {
   fluxId: number
@@ -16,29 +17,40 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     Querystring: {
       limit?: number
     }
-  }>('/latest-ratings', async (request) => {
+  }>('/latest-ratings', {
+    preHandler: roleGuard(['moderator'])
+  }, async (request) => {
     const { limit } = request.query
     return fastify.data.fluxModeration.getLatestRatings(limit)
   })
 
-  fastify.get('/ratings', async () => {
+  fastify.get('/ratings', {
+    preHandler: roleGuard(['moderator'])
+  }, async () => {
     return fastify.data.fluxModeration.get()
   })
 
   /**
-   * This provides an easy way for the moderation bot to see where it left off.
-   * In case of a restart.
+   * This provides an easy way for the moderation bot to see 
+   * where it left off, say, in case of a restart.
    */
-  fastify.post('/ratings', async (request, reply) => {
-    // FIXME: this should come from the session, which ought to verify the identity of the actor
-    const moderatorId = '658179b5-b6bd-4d79-8960-9e01c933e489'
+  fastify.post('/ratings', {
+    preHandler: roleGuard(['moderator'])
+  },
+    async (request, reply) => {
 
-    const { fluxId, rating, reason } = request.body as FluxRatingBody
+      // const moderatorId = '658179b5-b6bd-4d79-8960-9e01c933e489'
+      const moderatorId = request.userId
+      const { fluxId, rating, reason } = request.body as FluxRatingBody
 
-    const fluxRating = await fastify.data.fluxModeration.rateFlux(moderatorId, fluxId, rating, reason)
+      if (moderatorId) {
+        const fluxRating = await fastify.data.fluxModeration.rateFlux(moderatorId, fluxId, rating, reason)
+        return fluxRating
+      } else {
+        reply.code(403).send('Unknown agent')
+      }
 
-    return fluxRating
-  })
+    })
 }
 
 /**
