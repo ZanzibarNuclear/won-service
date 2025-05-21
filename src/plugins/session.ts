@@ -18,7 +18,7 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
 
   fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
     fastify.log.info('session cookie name: ' + sessionCookieName)
-    fastify.log.info('cookies: ' + request.cookies)
+    fastify.log.info('cookies: ' + JSON.stringify(request.cookies))
     const sessionToken = request.cookies[sessionCookieName]
     if (!sessionToken) {
       fastify.log.info(`no session token found`)
