@@ -52,7 +52,7 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
     reply.setCookie(sessionCookieName, token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       path: '/',
       domain: fastify.config.COOKIE_DOMAIN || 'localhost'
     })
@@ -62,7 +62,7 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
     reply.clearCookie(sessionCookieName, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       path: '/',
       domain: fastify.config.COOKIE_DOMAIN || 'localhost'
     })
