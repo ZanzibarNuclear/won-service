@@ -17,20 +17,18 @@ const apiKeyPlugin: FastifyPluginAsync<ApiKeyPluginOptions> = async (fastify, op
   fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
     // Skip if session is already set by the session plugin
     if (request.session) {
+      fastify.log.info('apiKey plug-in: Creds already established')
       return
     }
 
     const authHeader = request.headers.authorization
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      fastify.log.info('apiKey plug-in: no app key')
       return
     }
 
     const apiKey = authHeader.substring(7) // Remove 'Bearer ' prefix
     try {
-      if (!fastify.config.JWT_SECRET_KEY) {
-        throw new Error('JWT_SECRET_KEY is not set')
-      }
-
       const userId = await verifyApiKey(apiKey, fastify.config.JWT_SECRET_KEY)
       const user: any = await fastify.data.users.getUser(userId)
 
@@ -42,6 +40,7 @@ const apiKeyPlugin: FastifyPluginAsync<ApiKeyPluginOptions> = async (fastify, op
         throw new Error('API key authentication is only for system users')
       }
 
+      fastify.log.info('Looks like a system user')
       const credentials = await fastify.data.users.getCreds(userId)
       const sessionData = {
         userId: credentials.sub,
@@ -60,10 +59,6 @@ const apiKeyPlugin: FastifyPluginAsync<ApiKeyPluginOptions> = async (fastify, op
 
   // Function to generate a new API key for a system user
   async function generateApiKey(userId: string): Promise<string> {
-    if (!fastify.config.JWT_SECRET_KEY) {
-      throw new Error('JWT_SECRET_KEY is not set')
-    }
-
     // Generate a random key part to make the API key unique
     const randomPart = crypto.randomBytes(16).toString('hex')
 
@@ -108,6 +103,10 @@ const apiKeyPlugin: FastifyPluginAsync<ApiKeyPluginOptions> = async (fastify, op
     }
 
     return userId
+  }
+
+  if (!fastify.config.JWT_SECRET_KEY) {
+    throw new Error('JWT_SECRET_KEY is not set')
   }
 
   fastify.log.info('registered api key plugin')
