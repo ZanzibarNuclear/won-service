@@ -44,6 +44,7 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
       const { fluxId, rating, reason } = request.body as FluxRatingBody
 
       if (moderatorId) {
+        fastify.log.info('Posting a rating for flux ' + fluxId)
         const fluxRating = await fastify.data.fluxModeration.rateFlux(moderatorId, fluxId, rating, reason)
         return fluxRating
       } else {
