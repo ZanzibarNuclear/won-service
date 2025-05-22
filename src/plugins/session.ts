@@ -17,17 +17,19 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
   }
 
   fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
+    // Skip if session is already set by the session plugin
+    if (request.session) {
+      fastify.log.info('session plug-in: Creds already established')
+      return
+    }
+
     const sessionToken = request.cookies[sessionCookieName]
     if (!sessionToken) {
-      fastify.log.info(`no session token found`)
+      fastify.log.info('no session token')
       return
-    } else {
-      fastify.log.info(`found session token: ${sessionToken}`)
     }
+    fastify.log.info('session token found')
     try {
-      if (!fastify.config.JWT_SECRET_KEY) {
-        throw new Error('JWT_SECRET_KEY is not set')
-      }
       const creds = await verifySessionToken(sessionToken, fastify.config.JWT_SECRET_KEY)
       const sessionData = {
         userId: creds.sub,
@@ -50,7 +52,7 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
     reply.setCookie(sessionCookieName, token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       path: '/',
       domain: fastify.config.COOKIE_DOMAIN || 'localhost'
     })
@@ -60,7 +62,7 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
     reply.clearCookie(sessionCookieName, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       path: '/',
       domain: fastify.config.COOKIE_DOMAIN || 'localhost'
     })
@@ -92,7 +94,11 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
     return creds
   }
 
+  if (!fastify.config.JWT_SECRET_KEY) {
+    throw new Error('JWT_SECRET_KEY is not set')
+  }
+
   fastify.log.info('registered session plugin')
 }
 
-export default fp(sessionAuthPlugin, { name: 'sessionAuth', dependencies: ['env', 'cookie'] })
+export default fp(sessionAuthPlugin, { name: 'sessionAuth', dependencies: ['env', 'cookie', 'dataAccess'] })

@@ -5,6 +5,15 @@ const rootRoute: FastifyPluginAsync = async (fastify, options) => {
     return { message: 'Flux Service API' }
   })
 
+  fastify.get('/about', async (request, reply) => {
+    const latestEvent = await fastify.data.events.get(1, 0, {})
+    return {
+      fastifyVersion: fastify.version,
+      latestEvent: latestEvent,
+      message: 'Hello, pretty bots.'
+    }
+  })
+
   fastify.get('/image-config', async (request, reply) => {
     return {
       avatarBaseUrl: fastify.memberImageViewPath

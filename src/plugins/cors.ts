@@ -4,7 +4,11 @@ import fp from 'fastify-plugin'
 
 const corsPlugin: FastifyPluginAsync = async (fastify, options) => {
   await fastify.register(fastifyCors, {
-    origin: true,
+    origin: [
+      'http://localhost:3000',
+      'https://staging.won-app-next.pages.dev',
+      /\.worldofnuclear\.com$/
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'Set-Cookie', 'X-Session-Token'],
     credentials: true,

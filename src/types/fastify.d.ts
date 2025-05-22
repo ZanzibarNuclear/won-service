@@ -4,6 +4,7 @@ import { AuthRepository } from '../db/access/authRepo'
 import { CourseRepository } from '../db/access/courseRepo'
 import { EventRepository } from '../db/access/eventRepo'
 import { FeedbackRepository } from '../db/access/feedbackRepo'
+import { FluxModerationRepository } from '../db/access/fluxModerationRepo'
 import { FluxRepository } from '../db/access/fluxRepo'
 import { LessonContentPartRepository } from './../db/access/contentPartRepo';
 import { LessonPathRepository } from '../db/access/lessonPathRepo'
@@ -23,6 +24,7 @@ declare module 'fastify' {
       events: EventRepository
       feedback: FeedbackRepository
       flux: FluxRepository
+      fluxModeration: FluxModerationRepository
       lessonPlans: LessonPlanRepository
       lessonContents: LessonContentPartRepository
       lessonPaths: LessonPathRepository
@@ -38,6 +40,8 @@ declare module 'fastify' {
     generateSessionToken: (sessionData: UserCredentials) => string
     setSessionToken: (reply: FastifyReply, token: string) => void
     removeSessionToken: (reply: FastifyReply) => void
+    generateApiKey: (userId: string) => Promise<string>
+    verifyApiKey: (apiKey: string, secret: string) => Promise<string>
     resendAuth: Resend
     resendFeedback: Resend
     sendAuthEmail: (from: string, to: string, subject: string, htmlBody: string) => Promise<EmailResponse>
