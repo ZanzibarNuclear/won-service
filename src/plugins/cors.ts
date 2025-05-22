@@ -7,7 +7,7 @@ const corsPlugin: FastifyPluginAsync = async (fastify, options) => {
     origin: [
       'http://localhost:3000',
       'https://staging.won-app-next.pages.dev',
-      /\.worldofnuclear\.com$/
+      /worldofnuclear\.com$/
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'Set-Cookie', 'X-Session-Token'],
