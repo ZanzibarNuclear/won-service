@@ -115,13 +115,15 @@ export class FluxRepository {
   }
 
   async updateFlux(fluxId: number, content: string, authorId: number) {
-    return await this.db
+    await this.db
       .updateTable('fluxes')
       .set({ content })
       .where('id', '=', fluxId)
       .where('author_id', '=', authorId)
       .returningAll()
-      .executeTakeFirst()
+      .execute()
+
+    return this.getFlux(fluxId)
   }
 
   async recountFluxBoosts(fluxId: number) {
