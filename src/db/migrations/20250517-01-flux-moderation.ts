@@ -34,12 +34,12 @@ export async function up(db: Kysely<any>): Promise<void> {
       },
       {
         code: 'harsh',
-        description: '* Contains any of the following curse words: "ass", "asshole", "hell", "damn", "bitch", "bastard"\n* Attacking others, name- calling\n* Sexually explicit\n* Illegal topics',
+        description: '* Contains any of the following curse words: "ass", "asshole", "hell", "damn", "bitch", "bastard"\n* Attacking others, name-calling\n* Sexually explicit',
         severity: 3,
       },
       {
         code: 'violation',
-        description: '* Contains any of the following curse words: "fuck", "shit", "cunt", "motherfucker"\n* Threats of violence\n* Graphic sexuality',
+        description: '* Contains any of the forbidden words.\n* Threats of violence\n* Graphic sexuality\n* Illegal information',
         severity: 4,
       },
     ])
