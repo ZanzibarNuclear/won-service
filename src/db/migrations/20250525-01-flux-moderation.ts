@@ -12,7 +12,6 @@ export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .alterTable('fluxes')
     .addColumn('blocked_at', 'timestamp')
-    .addColumn('rating', 'text')
     .execute()
 
   await db.schema

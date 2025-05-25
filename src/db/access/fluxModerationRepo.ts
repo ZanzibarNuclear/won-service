@@ -25,6 +25,25 @@ export class FluxModerationRepository {
       .executeTakeFirst()
   }
 
+  async updateRating(ratingId: number, userId: string, updateData: {
+    actionTaken: 'accepted' | 'modified',
+    reviewNote: string,
+    rating?: string
+  }) {
+    return await this.db
+      .updateTable('flux_ratings')
+      .set({
+        action_taken: updateData.actionTaken,
+        review_note: updateData.reviewNote,
+        rating: updateData.rating || undefined,
+        reviewed_at: new Date(),
+        reviewed_by: userId
+      })
+      .where('id', '=', ratingId)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
   async get(offset: number = 0, limit: number = 10) {
     return await this.db
       .selectFrom('flux_ratings')
@@ -48,7 +67,7 @@ export class FluxModerationRepository {
     return latest
   }
 
-  async findRatings(offset: number = 0, limit: number = 10, ratings: string[] = [], latest: boolean = false) {
+  async findRatings(offset: number = 0, limit: number = 10, ratings: string[] = [], latest: boolean = false, needsReview: boolean = false) {
     let query = this.db
       .selectFrom('flux_ratings as fr')
       .innerJoin('fluxes as f', 'f.id', 'fr.flux_id')
@@ -57,12 +76,24 @@ export class FluxModerationRepository {
       .limit(limit)
       .offset(offset)
 
-    if (ratings) {
+    if (ratings && ratings.length > 0) {
       const ratingsArray = Array.isArray(ratings) ? ratings : [ratings]
       query = query.where('fr.rating', 'in', ratingsArray)
     }
 
+    if (needsReview) {
+      query = query.where('fr.reviewed_at', 'is', null)
+    }
+
     return await query
       .execute()
+  }
+
+  async getRatingById(ratingId: number) {
+    return await this.db
+      .selectFrom('flux_ratings')
+      .selectAll()
+      .where('id', '=', ratingId)
+      .executeTakeFirst()
   }
 }

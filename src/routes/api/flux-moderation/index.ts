@@ -7,6 +7,12 @@ interface FluxRatingBody {
   reason: string
 }
 
+interface FluxRatingUpdateBody {
+  actionTaken: 'accepted' | 'modified'
+  reviewNote: string
+  rating?: string
+}
+
 const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.get('/rating-levels', async () => {
@@ -19,13 +25,14 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
       offset?: number
       latest?: boolean
       ratings?: string[]
+      needsReview?: boolean
     }
   }>('/ratings', {
     preHandler: roleGuard(['moderator', 'admin'])
   }, async (request, reply) => {
-    const { offset, limit, latest, ratings } = request.query
+    const { offset, limit, latest, ratings, needsReview } = request.query
 
-    return fastify.data.fluxModeration.findRatings(offset, limit, ratings, latest)
+    return fastify.data.fluxModeration.findRatings(offset, limit, ratings, latest, needsReview)
   })
 
   fastify.get<{
@@ -77,6 +84,46 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     } else {
       reply.code(403).send('Unknown agent')
     }
+  })
+
+  /**
+   * Allows admins to update existing ratings with action_taken and review_note
+   * Optionally allows changing the rating itself
+   */
+  fastify.put<{
+    Params: {
+      ratingId: number
+    }
+  }>('/ratings/:ratingId', {
+    preHandler: roleGuard(['admin'])
+  }, async (request, reply) => {
+    const { ratingId } = request.params
+    const userId = request.userId
+    const updateData = request.body as FluxRatingUpdateBody
+
+    if (!userId) {
+      return reply.code(403).send('Unknown agent')
+    }
+
+    // Validate action_taken value
+    if (!['accepted', 'modified'].includes(updateData.actionTaken)) {
+      return reply.code(400).send('Invalid action_taken value. Must be "accepted" or "modified"')
+    }
+
+    // Check if rating exists
+    const existingRating = await fastify.data.fluxModeration.getRatingById(ratingId)
+    if (!existingRating) {
+      return reply.notFound('Rating not found')
+    }
+
+    fastify.log.info(`Updating rating ${ratingId} with action: ${updateData.actionTaken}`)
+    const updatedRating = await fastify.data.fluxModeration.updateRating(
+      ratingId,
+      userId,
+      updateData
+    )
+
+    return updatedRating
   })
 }
 
