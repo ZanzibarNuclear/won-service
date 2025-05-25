@@ -71,7 +71,11 @@ export class FluxModerationRepository {
     let query = this.db
       .selectFrom('flux_ratings as fr')
       .innerJoin('fluxes as f', 'f.id', 'fr.flux_id')
-      .select(['fr.id', 'fr.rating', 'fr.reason', 'fr.flux_id', 'f.author_id', 'f.content'])
+      .select([
+        'fr.id', 'fr.rating', 'fr.reason', 'fr.flux_id',
+        'f.author_id', 'f.content', 'blocked_at',
+        'action_taken', 'review_note'
+      ])
       .orderBy('created_at', latest ? 'desc' : 'asc')
       .limit(limit)
       .offset(offset)
