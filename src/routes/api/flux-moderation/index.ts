@@ -13,6 +13,10 @@ interface FluxRatingUpdateBody {
   rating?: string
 }
 
+interface FluxIdParams {
+  fluxId: number
+}
+
 const DEFAULT_LIMIT = 10
 const MAX_LIMIT = 50
 
@@ -136,6 +140,106 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     )
 
     return updatedRating
+  })
+
+  /**
+   * Marks a flux as deleted by setting its deleted_at timestamp
+   */
+  fastify.put<{
+    Params: FluxIdParams
+  }>('/fluxes/:fluxId/delete', {
+    preHandler: roleGuard(['admin'])
+  }, async (request, reply) => {
+    const { fluxId } = request.params
+    const userId = request.userId
+
+    if (!userId) {
+      return reply.code(403).send('Unknown agent')
+    }
+
+    fastify.log.info(`Admin ${userId} is deleting flux ${fluxId}`)
+    const updatedFlux = await fastify.data.fluxModeration.deleteFlux(fluxId)
+
+    if (!updatedFlux) {
+      return reply.notFound(`Flux with ID ${fluxId} not found`)
+    }
+
+    return updatedFlux
+  })
+
+  /**
+   * Restores a previously deleted flux by clearing its deleted_at timestamp
+   */
+  fastify.put<{
+    Params: FluxIdParams
+  }>('/fluxes/:fluxId/restore', {
+    preHandler: roleGuard(['admin'])
+  }, async (request, reply) => {
+    const { fluxId } = request.params
+    const userId = request.userId
+
+    if (!userId) {
+      return reply.code(403).send('Unknown agent')
+    }
+
+    fastify.log.info(`Admin ${userId} is restoring flux ${fluxId}`)
+    const updatedFlux = await fastify.data.fluxModeration.restoreFlux(fluxId)
+
+    if (!updatedFlux) {
+      return reply.notFound(`Flux with ID ${fluxId} not found`)
+    }
+
+    return updatedFlux
+  })
+
+  /**
+   * Blocks a flux by setting its blocked_at timestamp
+   */
+  fastify.put<{
+    Params: FluxIdParams
+  }>('/fluxes/:fluxId/block', {
+    preHandler: roleGuard(['admin'])
+  }, async (request, reply) => {
+    const { fluxId } = request.params
+    const userId = request.userId
+
+    if (!userId) {
+      return reply.code(403).send('Unknown agent')
+    }
+
+    fastify.log.info(`Admin ${userId} is blocking flux ${fluxId}`)
+    const updatedFlux = await fastify.data.fluxModeration.blockFlux(fluxId)
+
+    if (!updatedFlux) {
+      return reply.notFound(`Flux with ID ${fluxId} not found`)
+    }
+
+    return updatedFlux
+  })
+
+  /**
+   * Unblocks a previously blocked flux by clearing its blocked_at timestamp
+   */
+  fastify.put<{
+    Params: FluxIdParams
+  }>('/fluxes/:fluxId/unblock', {
+    preHandler: roleGuard(['admin'])
+  }, async (request, reply) => {
+    const { fluxId } = request.params
+    const userId = request.userId
+
+    if (!userId) {
+      return reply.code(403).send('Unknown agent')
+    }
+
+    fastify.log.info(`Admin ${userId} is unblocking flux ${fluxId}`)
+    const updatedFlux = await fastify.data.fluxModeration.unblockFlux(fluxId)
+
+    if (!updatedFlux) {
+      return reply.notFound(`Flux with ID ${fluxId} not found`)
+    }
+
+    return updatedFlux
   })
 }
 

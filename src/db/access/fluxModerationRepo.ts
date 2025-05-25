@@ -122,4 +122,68 @@ export class FluxModerationRepository {
       .where('id', '=', ratingId)
       .executeTakeFirst()
   }
+
+  /**
+   * Marks a flux as deleted by setting its deleted_at timestamp
+   * @param fluxId The ID of the flux to delete
+   * @returns The updated flux
+   */
+  async deleteFlux(fluxId: number) {
+    return await this.db
+      .updateTable('fluxes')
+      .set({
+        deleted_at: new Date()
+      })
+      .where('id', '=', fluxId)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
+  /**
+   * Restores a previously deleted flux by clearing its deleted_at timestamp
+   * @param fluxId The ID of the flux to restore
+   * @returns The updated flux
+   */
+  async restoreFlux(fluxId: number) {
+    return await this.db
+      .updateTable('fluxes')
+      .set({
+        deleted_at: null
+      })
+      .where('id', '=', fluxId)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
+  /**
+   * Blocks a flux by setting its blocked_at timestamp
+   * @param fluxId The ID of the flux to block
+   * @returns The updated flux
+   */
+  async blockFlux(fluxId: number) {
+    return await this.db
+      .updateTable('fluxes')
+      .set({
+        blocked_at: new Date()
+      })
+      .where('id', '=', fluxId)
+      .returningAll()
+      .executeTakeFirst()
+  }
+
+  /**
+   * Unblocks a previously blocked flux by clearing its blocked_at timestamp
+   * @param fluxId The ID of the flux to unblock
+   * @returns The updated flux
+   */
+  async unblockFlux(fluxId: number) {
+    return await this.db
+      .updateTable('fluxes')
+      .set({
+        blocked_at: null
+      })
+      .where('id', '=', fluxId)
+      .returningAll()
+      .executeTakeFirst()
+  }
 }
