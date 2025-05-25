@@ -1,4 +1,3 @@
-import { PgsodiumDecryptedKey } from './../supaTypes';
 import { Kysely } from "kysely"
 import { DB } from '../types'
 
@@ -32,10 +31,12 @@ export class FluxModerationRepository {
       .selectAll()
       .orderBy('created_at', 'asc')
       .limit(limit)
+      .offset(offset)
       .execute()
   }
 
   async getLatestRatings(limit = 1) {
+    // FIXME: change this to find the latest post that was rated -- or better, find posts without ratings, starting with the oldest
     const latest = await this.db
       .selectFrom('flux_ratings as fr')
       .innerJoin('users as u', 'u.id', 'fr.moderator_id')
@@ -45,5 +46,23 @@ export class FluxModerationRepository {
       .limit(limit)
       .execute()
     return latest
+  }
+
+  async findRatings(offset: number = 0, limit: number = 10, ratings: string[] = [], latest: boolean = false) {
+    let query = this.db
+      .selectFrom('flux_ratings as fr')
+      .innerJoin('fluxes as f', 'f.id', 'fr.flux_id')
+      .select(['fr.id', 'fr.rating', 'fr.reason', 'fr.flux_id', 'f.author_id', 'f.content'])
+      .orderBy('created_at', latest ? 'desc' : 'asc')
+      .limit(limit)
+      .offset(offset)
+
+    if (ratings) {
+      const ratingsArray = Array.isArray(ratings) ? ratings : [ratings]
+      query = query.where('fr.rating', 'in', ratingsArray)
+    }
+
+    return await query
+      .execute()
   }
 }

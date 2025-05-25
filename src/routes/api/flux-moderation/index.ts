@@ -16,6 +16,21 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
     Querystring: {
       limit?: number
+      offset?: number
+      latest?: boolean
+      ratings?: string[]
+    }
+  }>('/ratings', {
+    preHandler: roleGuard(['moderator', 'admin'])
+  }, async (request, reply) => {
+    const { offset, limit, latest, ratings } = request.query
+
+    return fastify.data.fluxModeration.findRatings(offset, limit, ratings, latest)
+  })
+
+  fastify.get<{
+    Querystring: {
+      limit?: number
     }
   }>('/latest-ratings', {
     preHandler: roleGuard(['moderator'])
@@ -24,10 +39,24 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     return fastify.data.fluxModeration.getLatestRatings(limit)
   })
 
-  fastify.get('/ratings', {
-    preHandler: roleGuard(['moderator'])
-  }, async () => {
-    return fastify.data.fluxModeration.get()
+  fastify.get('/authors/:authorId', async (request, reply) => {
+    const { authorId } = request.params as { authorId: number }
+    const authors = await fastify.data.flux.getFluxUsers([authorId])
+    if (authors.length > 0) {
+      return authors[0]
+    } else {
+      return reply.notFound('Flux author not found')
+    }
+  })
+
+  fastify.get<{
+    Querystring: {
+      authorIds?: number[]
+    }
+  }>('/authors', async (request, reply) => {
+    const { authorIds } = request.query
+    const authors = await fastify.data.flux.getFluxUsers(authorIds || [])
+    return authors
   })
 
   /**
@@ -36,22 +65,19 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
    */
   fastify.post('/ratings', {
     preHandler: roleGuard(['moderator'])
-  },
-    async (request, reply) => {
+  }, async (request, reply) => {
 
-      // const moderatorId = '658179b5-b6bd-4d79-8960-9e01c933e489'
-      const moderatorId = request.userId
-      const { fluxId, rating, reason } = request.body as FluxRatingBody
+    const moderatorId = request.userId
+    const { fluxId, rating, reason } = request.body as FluxRatingBody
 
-      if (moderatorId) {
-        fastify.log.info('Posting a rating for flux ' + fluxId)
-        const fluxRating = await fastify.data.fluxModeration.rateFlux(moderatorId, fluxId, rating, reason)
-        return fluxRating
-      } else {
-        reply.code(403).send('Unknown agent')
-      }
-
-    })
+    if (moderatorId) {
+      fastify.log.info('Posting a rating for flux ' + fluxId)
+      const fluxRating = await fastify.data.fluxModeration.rateFlux(moderatorId, fluxId, rating, reason)
+      return fluxRating
+    } else {
+      reply.code(403).send('Unknown agent')
+    }
+  })
 }
 
 /**

@@ -2,6 +2,7 @@ import { jsonObjectFrom } from 'kysely/helpers/postgres';
 import { Kysely, sql } from "kysely"
 import { DB } from '../types'
 import type { FluxFilter } from "../../types/won-flux-types"
+import { IsArray } from '@sinclair/typebox/build/cjs/type/guard/value';
 
 export class FluxRepository {
   selectFluxQuery: any
@@ -230,10 +231,9 @@ export class FluxRepository {
   }
 
   async getFluxUsers(ids: number[]) {
-    const fluxAuthors = await this.db
+    let query = this.db
       .selectFrom("flux_users as fu")
       .innerJoin("user_profiles as up", "up.id", "fu.user_id")
-      .where("fu.id", "in", ids)
       .select([
         "fu.id",
         "handle",
@@ -243,9 +243,11 @@ export class FluxRepository {
         "followers",
         "following",
       ])
-      .execute();
-
-    return fluxAuthors
+    if (ids) {
+      const idArray = Array.isArray(ids) ? ids : [ids]
+      query = query.where("fu.id", "in", idArray)
+    }
+    return await query.execute();
   }
 
   async createFluxUser(userId: string) {
