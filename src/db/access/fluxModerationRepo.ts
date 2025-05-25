@@ -54,8 +54,30 @@ export class FluxModerationRepository {
       .execute()
   }
 
+  async findUnratedFluxes(offset: number = 0, limit: number = 10) {
+    return await this.db
+      .selectFrom('fluxes as f')
+      .leftJoin('flux_ratings as fr', 'f.id', 'fr.flux_id')
+      .where('fr.id', 'is', null)
+      .where('f.deleted_at', 'is', null)
+      .where('f.blocked_at', 'is', null)
+      .select([
+        'f.id',
+        'f.author_id',
+        'f.content',
+        'f.posted_at',
+        'f.reaction_to',
+        'f.boosts',
+        'f.reactions',
+        'f.views'
+      ])
+      .orderBy('f.posted_at', 'asc')
+      .limit(limit)
+      .offset(offset)
+      .execute()
+  }
+
   async getLatestRatings(limit = 1) {
-    // FIXME: change this to find the latest post that was rated -- or better, find posts without ratings, starting with the oldest
     const latest = await this.db
       .selectFrom('flux_ratings as fr')
       .innerJoin('users as u', 'u.id', 'fr.moderator_id')

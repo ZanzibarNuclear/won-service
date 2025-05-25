@@ -13,6 +13,9 @@ interface FluxRatingUpdateBody {
   rating?: string
 }
 
+const DEFAULT_LIMIT = 10
+const MAX_LIMIT = 50
+
 const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.get('/rating-levels', async () => {
@@ -37,13 +40,22 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.get<{
     Querystring: {
+      offset?: number
       limit?: number
     }
-  }>('/latest-ratings', {
+  }>('/unrated-fluxes', {
     preHandler: roleGuard(['moderator'])
   }, async (request) => {
-    const { limit } = request.query
-    return fastify.data.fluxModeration.getLatestRatings(limit)
+    const { offset, limit = DEFAULT_LIMIT } = request.query
+    const guardedLimit = Math.min(limit, MAX_LIMIT)
+
+    const unrated = await fastify.data.fluxModeration.findUnratedFluxes(offset, limit)
+
+    return {
+      items: unrated,
+      count: unrated.length,
+      hasMore: unrated.length === guardedLimit
+    }
   })
 
   fastify.get('/authors/:authorId', async (request, reply) => {
@@ -126,10 +138,5 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     return updatedRating
   })
 }
-
-/**
- * TODO: might also be useful to list fluxes without ratings prior to the last rated flux.
- * Sweep for any misses.
- */
 
 export default fluxModerationRoutes
