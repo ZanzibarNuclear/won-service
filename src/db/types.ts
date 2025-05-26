@@ -78,6 +78,7 @@ export interface FluxBoosts {
 
 export interface Fluxes {
   author_id: number;
+  blocked_at: Timestamp | null;
   boosts: Generated<number>;
   content: string;
   deleted_at: Timestamp | null;
@@ -99,17 +100,22 @@ export interface FluxRatingLevels {
   code: string;
   created_at: Generated<Timestamp>;
   description: string;
+  display: string | null;
   retired: Timestamp | null;
   severity: number | null;
 }
 
 export interface FluxRatings {
+  action_taken: string | null;
   created_at: Generated<Timestamp>;
   flux_id: Generated<number>;
   id: Generated<number>;
   moderator_id: string;
   rating: Generated<string>;
   reason: string | null;
+  review_note: string | null;
+  reviewed_at: Timestamp | null;
+  reviewed_by: string | null;
 }
 
 export interface FluxUsers {
