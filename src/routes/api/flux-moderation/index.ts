@@ -57,7 +57,7 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
 
     return {
       items: unrated,
-      count: unrated.length,
+      total: unrated.length,
       hasMore: unrated.length === guardedLimit
     }
   })

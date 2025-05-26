@@ -29,7 +29,11 @@ const fluxesRoutes: FastifyPluginAsync = async (fastify, options) => {
     }
 
     const results = await fastify.data.flux.getFluxes(guardedLimit, offset || 0, { order, from, after, to, authorId, fluxId })
-    return { items: results, total: results.length, hasMore: results.length === guardedLimit }
+    return {
+      items: results,
+      total: results.length,
+      hasMore: results.length === guardedLimit
+    }
   })
 
   fastify.post('/', async (request, reply) => {
