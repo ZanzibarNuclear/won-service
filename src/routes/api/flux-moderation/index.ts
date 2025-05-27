@@ -1,6 +1,6 @@
+import { FluxRatings } from './../../../db/types';
 import { FastifyPluginAsync } from 'fastify'
 import { roleGuard } from '../../../utils/roleGuard'
-import { hasSubscribers } from 'diagnostics_channel'
 
 interface FluxRatingBody {
   fluxId: number
@@ -10,7 +10,7 @@ interface FluxRatingBody {
 
 interface FluxRatingUpdateBody {
   actionTaken: 'accepted' | 'modified'
-  reviewNote: string
+  reviewNote?: string
   rating?: string
 }
 
@@ -24,7 +24,7 @@ const MAX_LIMIT = 50
 const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.get('/rating-levels', async () => {
-    return fastify.data.fluxModeration.getRatingLevels()
+    return fastify.data.fluxRating.getRatingLevels()
   })
 
   fastify.get<{
@@ -41,7 +41,7 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     const { offset, limit = DEFAULT_LIMIT, latest, ratings, needsReview } = request.query
     const guardedLimit = Math.min(limit, MAX_LIMIT)
 
-    const results = await fastify.data.fluxModeration.findRatings(offset, guardedLimit, ratings, latest, needsReview)
+    const results = await fastify.data.fluxRating.findRatings(offset, guardedLimit, ratings, latest, needsReview)
     return {
       items: results,
       total: results.length,
@@ -60,7 +60,7 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     const { offset, limit = DEFAULT_LIMIT } = request.query
     const guardedLimit = Math.min(limit, MAX_LIMIT)
 
-    const unrated = await fastify.data.fluxModeration.findUnratedFluxes(offset, limit)
+    const unrated = await fastify.data.fluxRating.findUnratedFluxes(offset, limit)
 
     return {
       items: unrated,
@@ -102,7 +102,7 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
 
     if (moderatorId) {
       fastify.log.info('Posting a rating for flux ' + fluxId)
-      const fluxRating = await fastify.data.fluxModeration.rateFlux(moderatorId, fluxId, rating, reason)
+      const fluxRating = await fastify.data.fluxRating.rateFlux(moderatorId, fluxId, rating, reason)
       return fluxRating
     } else {
       reply.code(403).send('Unknown agent')
@@ -133,14 +133,8 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.code(400).send('Invalid action_taken value. Must be "accepted" or "modified"')
     }
 
-    // Check if rating exists
-    const existingRating = await fastify.data.fluxModeration.getRatingById(ratingId)
-    if (!existingRating) {
-      return reply.notFound('Rating not found')
-    }
-
     fastify.log.info(`Updating rating ${ratingId} with action: ${updateData.actionTaken}`)
-    const updatedRating = await fastify.data.fluxModeration.updateRating(
+    const updatedRating = await fastify.data.fluxRating.updateRating(
       ratingId,
       userId,
       updateData
@@ -165,7 +159,7 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     fastify.log.info(`Admin ${userId} is deleting flux ${fluxId}`)
-    const updatedFlux = await fastify.data.fluxModeration.deleteFlux(fluxId)
+    const updatedFlux = await fastify.data.flux.deleteFlux(fluxId)
 
     if (!updatedFlux) {
       return reply.notFound(`Flux with ID ${fluxId} not found`)
@@ -190,7 +184,7 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     fastify.log.info(`Admin ${userId} is restoring flux ${fluxId}`)
-    const updatedFlux = await fastify.data.fluxModeration.restoreFlux(fluxId)
+    const updatedFlux = await fastify.data.flux.restoreFlux(fluxId)
 
     if (!updatedFlux) {
       return reply.notFound(`Flux with ID ${fluxId} not found`)
@@ -215,7 +209,7 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     fastify.log.info(`Admin ${userId} is blocking flux ${fluxId}`)
-    const updatedFlux = await fastify.data.fluxModeration.blockFlux(fluxId)
+    const updatedFlux = await fastify.data.flux.blockFlux(fluxId)
 
     if (!updatedFlux) {
       return reply.notFound(`Flux with ID ${fluxId} not found`)
@@ -240,7 +234,7 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     fastify.log.info(`Admin ${userId} is unblocking flux ${fluxId}`)
-    const updatedFlux = await fastify.data.fluxModeration.unblockFlux(fluxId)
+    const updatedFlux = await fastify.data.flux.unblockFlux(fluxId)
 
     if (!updatedFlux) {
       return reply.notFound(`Flux with ID ${fluxId} not found`)
