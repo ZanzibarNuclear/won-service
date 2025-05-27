@@ -77,18 +77,6 @@ export class FluxModerationRepository {
       .execute()
   }
 
-  async getLatestRatings(limit = 1) {
-    const latest = await this.db
-      .selectFrom('flux_ratings as fr')
-      .innerJoin('users as u', 'u.id', 'fr.moderator_id')
-      .innerJoin('fluxes as flux', 'flux.id', 'fr.flux_id')
-      .select(['fr.id', 'fr.flux_id', 'fr.created_at', 'u.alias as ratedBy', 'flux.posted_at'])
-      .orderBy('created_at', "desc")
-      .limit(limit)
-      .execute()
-    return latest
-  }
-
   async findRatings(offset: number = 0, limit: number = 10, ratings: string[] = [], latest: boolean = false, needsReview: boolean = false) {
     let query = this.db
       .selectFrom('flux_ratings as fr')

@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from 'fastify'
 import { roleGuard } from '../../../utils/roleGuard'
+import { hasSubscribers } from 'diagnostics_channel'
 
 interface FluxRatingBody {
   fluxId: number
@@ -37,9 +38,15 @@ const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
   }>('/ratings', {
     preHandler: roleGuard(['moderator', 'admin'])
   }, async (request, reply) => {
-    const { offset, limit, latest, ratings, needsReview } = request.query
+    const { offset, limit = DEFAULT_LIMIT, latest, ratings, needsReview } = request.query
+    const guardedLimit = Math.min(limit, MAX_LIMIT)
 
-    return fastify.data.fluxModeration.findRatings(offset, limit, ratings, latest, needsReview)
+    const results = await fastify.data.fluxModeration.findRatings(offset, guardedLimit, ratings, latest, needsReview)
+    return {
+      items: results,
+      total: results.length,
+      hasMore: results.length === guardedLimit
+    }
   })
 
   fastify.get<{
