@@ -1,7 +1,7 @@
 import { Kysely } from "kysely"
 import { DB } from '../types'
 
-export class FluxModerationRepository {
+export class FluxRatingRepository {
 
   constructor(private db: Kysely<DB>) { }
 

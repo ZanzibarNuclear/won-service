@@ -4,8 +4,8 @@ import { AuthRepository } from '../db/access/authRepo'
 import { CourseRepository } from '../db/access/courseRepo'
 import { EventRepository } from '../db/access/eventRepo'
 import { FeedbackRepository } from '../db/access/feedbackRepo'
-import { FluxModerationRepository } from '../db/access/fluxRatingRepo'
 import { FluxRepository } from '../db/access/fluxRepo'
+import { FluxRatingRepository } from '../db/access/fluxRatingRepo'
 import { LessonContentPartRepository } from '../db/access/contentPartRepo'
 import { LessonPathRepository } from '../db/access/lessonPathRepo'
 import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
@@ -21,7 +21,7 @@ const dataAccessPlugin: FastifyPluginAsync = async (fastify, options) => {
     events: new EventRepository(fastify.db),
     feedback: new FeedbackRepository(fastify.db),
     flux: new FluxRepository(fastify.db),
-    fluxModeration: new FluxModerationRepository(fastify.db),
+    fluxRating: new FluxRatingRepository(fastify.db),
     lessonPlans: new LessonPlanRepository(fastify.db),
     lessonContents: new LessonContentPartRepository(fastify.db),
     lessonPaths: new LessonPathRepository(fastify.db),

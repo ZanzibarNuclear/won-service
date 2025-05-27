@@ -1,4 +1,3 @@
-import { FluxRatings } from './../../../db/types';
 import { FastifyPluginAsync } from 'fastify'
 import { roleGuard } from '../../../utils/roleGuard'
 
@@ -24,7 +23,8 @@ const MAX_LIMIT = 50
 const fluxModerationRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.get('/rating-levels', async () => {
-    return fastify.data.fluxRating.getRatingLevels()
+    fastify.log.info('request to get rating levels')
+    return await fastify.data.fluxRating.getRatingLevels()
   })
 
   fastify.get<{
