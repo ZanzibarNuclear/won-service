@@ -231,6 +231,7 @@ export interface MagicAuth {
 export interface ObjectionReasons {
   code: string;
   description: string;
+  sort: number | null;
 }
 
 export interface Profiles {
@@ -301,10 +302,13 @@ export interface ViolationReports {
   app_key: string;
   content_key: string;
   created_at: Generated<Timestamp>;
+  handled_at: Timestamp | null;
+  handled_by: string | null;
   id: Generated<number>;
   message: string | null;
   reasons: string[];
   reported_by: string;
+  resolution_note: string | null;
 }
 
 export interface DB {

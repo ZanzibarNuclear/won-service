@@ -4,6 +4,7 @@ import { AuthRepository } from '../db/access/authRepo'
 import { CourseRepository } from '../db/access/courseRepo'
 import { EventRepository } from '../db/access/eventRepo'
 import { FeedbackRepository } from '../db/access/feedbackRepo'
+import { FlagRepository } from '../db/access/flagRepo'
 import { FluxRatingRepository } from '../db/access/fluxRatingRepo'
 import { FluxRepository } from '../db/access/fluxRepo'
 import { LessonContentPartRepository } from './../db/access/contentPartRepo';
@@ -23,6 +24,7 @@ declare module 'fastify' {
       courses: CourseRepository
       events: EventRepository
       feedback: FeedbackRepository
+      flags: FlagRepository
       flux: FluxRepository
       fluxRating: FluxRatingRepository
       lessonPlans: LessonPlanRepository
