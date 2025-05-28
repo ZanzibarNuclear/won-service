@@ -28,41 +28,22 @@ const flagRoutes: FastifyPluginAsync = async (fastify) => {
     Querystring: {
       limit?: number
       offset?: number
-      latest?: boolean
-      ratings?: string[]
-      needsReview?: boolean
+      unresolved?: boolean
     }
-  }>('/', {
+  }>('/unresolved', {
     preHandler: roleGuard(['admin'])
   }, async (request, reply) => {
-    const { offset, limit = DEFAULT_LIMIT, latest, ratings, needsReview } = request.query
+    const { offset, limit = DEFAULT_LIMIT } = request.query
     const guardedLimit = Math.min(limit, MAX_LIMIT)
 
-    const results = await fastify.data.fluxRating.findRatings(offset, guardedLimit, ratings, latest, needsReview)
+    const filter = {
+      unresolved: true
+    }
+    const results = await fastify.data.flags.get(offset, guardedLimit, filter)
     return {
       items: results,
       total: results.length,
       hasMore: results.length === guardedLimit
-    }
-  })
-
-  fastify.get<{
-    Querystring: {
-      offset?: number
-      limit?: number
-    }
-  }>('/unresolved', {
-    preHandler: roleGuard(['admin'])
-  }, async (request) => {
-    const { offset, limit = DEFAULT_LIMIT } = request.query
-    const guardedLimit = Math.min(limit, MAX_LIMIT)
-
-    const unrated = await fastify.data.fluxRating.findUnratedFluxes(offset, limit)
-
-    return {
-      items: unrated,
-      total: unrated.length,
-      hasMore: unrated.length === guardedLimit
     }
   })
 
@@ -100,109 +81,14 @@ const flagRoutes: FastifyPluginAsync = async (fastify) => {
     const userId = request.userId
     const { resolutionNote } = request.body as FlagUpdateBody
 
-    // const resolvedFlag = await fastify.data.flags.resolve(flagId, userId, resolutionNote)
-
-    // return resolvedFlag
-  })
-
-  /**
-   * Marks a flux as deleted by setting its deleted_at timestamp
-   */
-  fastify.put<{
-    Params: FluxIdParams
-  }>('/fluxes/:fluxId/delete', {
-    preHandler: roleGuard(['admin'])
-  }, async (request, reply) => {
-    const { fluxId } = request.params
-    const userId = request.userId
-
-    if (!userId) {
-      return reply.code(403).send('Unknown agent')
+    try {
+      if (userId) {
+        const resolvedFlag = await fastify.data.flags.resolve(flagId, userId, resolutionNote)
+        return resolvedFlag
+      }
+    } catch (error) {
+      reply.code(500).send({ message: 'Unable to save resolution', error })
     }
-
-    fastify.log.info(`Admin ${userId} is deleting flux ${fluxId}`)
-    const updatedFlux = await fastify.data.flux.deleteFlux(fluxId)
-
-    if (!updatedFlux) {
-      return reply.notFound(`Flux with ID ${fluxId} not found`)
-    }
-
-    return updatedFlux
-  })
-
-  /**
-   * Restores a previously deleted flux by clearing its deleted_at timestamp
-   */
-  fastify.put<{
-    Params: FluxIdParams
-  }>('/fluxes/:fluxId/restore', {
-    preHandler: roleGuard(['admin'])
-  }, async (request, reply) => {
-    const { fluxId } = request.params
-    const userId = request.userId
-
-    if (!userId) {
-      return reply.code(403).send('Unknown agent')
-    }
-
-    fastify.log.info(`Admin ${userId} is restoring flux ${fluxId}`)
-    const updatedFlux = await fastify.data.flux.restoreFlux(fluxId)
-
-    if (!updatedFlux) {
-      return reply.notFound(`Flux with ID ${fluxId} not found`)
-    }
-
-    return updatedFlux
-  })
-
-  /**
-   * Blocks a flux by setting its blocked_at timestamp
-   */
-  fastify.put<{
-    Params: FluxIdParams
-  }>('/fluxes/:fluxId/block', {
-    preHandler: roleGuard(['admin'])
-  }, async (request, reply) => {
-    const { fluxId } = request.params
-    const userId = request.userId
-
-    if (!userId) {
-      return reply.code(403).send('Unknown agent')
-    }
-
-    fastify.log.info(`Admin ${userId} is blocking flux ${fluxId}`)
-    const updatedFlux = await fastify.data.flux.blockFlux(fluxId)
-
-    if (!updatedFlux) {
-      return reply.notFound(`Flux with ID ${fluxId} not found`)
-    }
-
-    return updatedFlux
-  })
-
-  /**
-   * Unblocks a previously blocked flux by clearing its blocked_at timestamp
-   */
-  fastify.put<{
-    Params: FluxIdParams
-  }>('/fluxes/:fluxId/unblock', {
-    preHandler: roleGuard(['admin'])
-  }, async (request, reply) => {
-    const { fluxId } = request.params
-    const userId = request.userId
-
-    if (!userId) {
-      return reply.code(403).send('Unknown agent')
-    }
-
-    fastify.log.info(`Admin ${userId} is unblocking flux ${fluxId}`)
-    const updatedFlux = await fastify.data.flux.unblockFlux(fluxId)
-
-    if (!updatedFlux) {
-      return reply.notFound(`Flux with ID ${fluxId} not found`)
-    }
-
-    return updatedFlux
   })
 }
 

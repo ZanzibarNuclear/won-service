@@ -4,8 +4,9 @@ import { DB } from '../types'
 export interface FlagFilter {
   from?: string
   to?: string
-  asc?: boolean
+  desc?: boolean
   reporter?: string
+  unresolved?: boolean
 }
 
 interface CreateFlagRequest {
@@ -22,7 +23,7 @@ export class FlagRepository {
   // queries
   async get(limit: number = 0, offset: number = 0, filter: FlagFilter) {
 
-    const { from, to, asc, reporter } = filter
+    const { from, to, desc, reporter, unresolved } = filter
     let query = this.db
       .selectFrom('violation_reports')
       .selectAll()
@@ -38,10 +39,13 @@ export class FlagRepository {
       const ts = new Date(to)
       query = query.where('created_at', '<', ts)
     }
+    if (unresolved) {
+      query.where('handled_at', 'is', null)
+    }
     if (limit > 0) {
       query = query.limit(limit).offset(offset)
     }
-    query = query.orderBy('created_at', asc ? 'asc' : 'desc')
+    query = query.orderBy('created_at', desc ? 'desc' : 'asc')
 
     return await query.execute()
   }
@@ -76,7 +80,7 @@ export class FlagRepository {
     return await this.create(reportedBy, 'profile', userId, reasons, message)
   }
 
-  async resolveFlag(flagId: number, userId: string, resolutionNote: string) {
+  async resolve(flagId: number, userId: string, resolutionNote: string) {
     return await this.db
       .updateTable('violation_reports')
       .set({
