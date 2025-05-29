@@ -28,7 +28,6 @@ const flagRoutes: FastifyPluginAsync = async (fastify) => {
     Querystring: {
       limit?: number
       offset?: number
-      unresolved?: boolean
     }
   }>('/unresolved', {
     preHandler: roleGuard(['admin'])
