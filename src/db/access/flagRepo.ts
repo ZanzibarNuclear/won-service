@@ -93,6 +93,10 @@ export class FlagRepository {
   }
 
   async getObjectionReasons() {
-    await this.db.selectFrom('objection_reasons').selectAll().execute()
+    return await this.db
+      .selectFrom('objection_reasons')
+      .selectAll()
+      .orderBy('sort')
+      .execute()
   }
 }
