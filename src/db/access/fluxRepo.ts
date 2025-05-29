@@ -1,4 +1,4 @@
-import { jsonObjectFrom } from 'kysely/helpers/postgres';
+import { jsonObjectFrom } from 'kysely/helpers/postgres'
 import { Kysely, sql } from "kysely"
 import { DB } from '../types'
 import type { FluxFilter } from "../../types/won-flux-types"

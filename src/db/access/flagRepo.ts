@@ -1,3 +1,4 @@
+import { jsonObjectFrom } from 'kysely/helpers/postgres'
 import { Kysely } from "kysely"
 import { DB } from '../types'
 
@@ -22,11 +23,20 @@ export class FlagRepository {
 
   // queries
   async get(limit: number = 0, offset: number = 0, filter: FlagFilter) {
-
     const { from, to, desc, reporter, unresolved } = filter
     let query = this.db
       .selectFrom('violation_reports')
-      .selectAll()
+      .select((eb) => [
+        jsonObjectFrom(
+          eb.selectFrom('user_profiles')
+            .select([
+              'handle',
+              'alias'
+            ])
+            .whereRef('user_profiles.id', '=', 'violation_reports.reported_by')
+        ).as('reporter')
+      ])
+      .select(['id', 'reasons', 'message', 'created_at', 'app_key', 'content_key'])
 
     if (reporter) {
       query = query.where('reported_by', '=', reporter)
