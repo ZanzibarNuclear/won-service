@@ -8,10 +8,7 @@ interface FluxFlagBody {
 }
 
 interface FlagUpdateBody {
-  resolutionNote: string
-}
-interface FluxIdParams {
-  fluxId: number
+  note: string
 }
 
 const DEFAULT_LIMIT = 10
@@ -73,17 +70,16 @@ const flagRoutes: FastifyPluginAsync = async (fastify) => {
     Params: {
       flagId: number
     }
-  }>('/resolution/:flagId', {
+  }>('/:flagId/resolve', {
     preHandler: roleGuard(['admin'])
   }, async (request, reply) => {
     const { flagId } = request.params
     const userId = request.userId
-    const { resolutionNote } = request.body as FlagUpdateBody
+    const { note } = request.body as FlagUpdateBody
 
     try {
       if (userId) {
-        const resolvedFlag = await fastify.data.flags.resolve(flagId, userId, resolutionNote)
-        return resolvedFlag
+        return await fastify.data.flags.resolve(flagId, userId, note)
       }
     } catch (error) {
       reply.code(500).send({ message: 'Unable to save resolution', error })

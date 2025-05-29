@@ -50,7 +50,7 @@ export class FlagRepository {
       query = query.where('created_at', '<', ts)
     }
     if (unresolved) {
-      query.where('handled_at', 'is', null)
+      query = query.where('handled_at', 'is', null)
     }
     if (limit > 0) {
       query = query.limit(limit).offset(offset)
@@ -99,6 +99,7 @@ export class FlagRepository {
         resolution_note: resolutionNote
       })
       .where('id', '=', flagId)
+      .returning(['id'])
       .execute()
   }
 
