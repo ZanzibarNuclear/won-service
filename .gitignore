@@ -1,4 +1,5 @@
 member_files/
+scripts/mongo/*.js
 
 # Logs
 logs

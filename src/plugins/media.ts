@@ -2,7 +2,6 @@ import fp from 'fastify-plugin'
 import { FastifyPluginAsync } from "fastify"
 import multipart from '@fastify/multipart'
 import fs from 'fs'
-import path from 'path'
 
 const media: FastifyPluginAsync = async (fastify, options) => {
   const filePath = fastify.config.MEMBER_IMAGE_FILE_PATH

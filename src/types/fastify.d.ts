@@ -1,3 +1,4 @@
+import { fastifyMongodb } from './../../node_modules/@fastify/mongodb/types/index.d';
 import 'fastify'
 import { UserCredentials } from './won-flux-types'
 import { AuthRepository } from '../db/access/authRepo'
@@ -35,6 +36,7 @@ declare module 'fastify' {
       userProfiles: UserProfileRepository
       users: UserRepository
     }
+    mongo: fastifyMongodb
     sendMagicLink: (email: string) => void
     session: UserCredentials | null
     memberImageFilePath: string
@@ -66,6 +68,7 @@ declare module 'fastify' {
       ALT_BASE_URL: string
       APP_BASE_URL: string
       DATABASE_URL: string
+      MONGO_URI: string
       JWT_SECRET_KEY: string
       COOKIE_DOMAIN: string
       COOKIE_SECRET: string
