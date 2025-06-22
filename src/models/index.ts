@@ -133,3 +133,38 @@ export const EventSchema = z.object({
 })
 
 export type Event = z.infer<typeof EventSchema>
+
+export const TransitionSchema = z.object({
+  toSceneId: z.string(),
+  condition: z.string().optional(), // e.g., "playerHasKey", or a script reference
+})
+
+export type Transition = z.infer<typeof TransitionSchema>
+
+export const ChoiceSchema = z.object({
+  text: z.string(),
+  transition: TransitionSchema,
+})
+
+export type Choice = z.infer<typeof ChoiceSchema>
+
+export const SceneSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  type: z.enum(['normal', 'activity', 'final']),
+  activityType: z.string().optional(), // e.g., 'video', 'equipment'
+  choices: z.array(ChoiceSchema).optional(),
+  transitions: z.array(TransitionSchema).optional(),
+})
+
+export type Scene = z.infer<typeof SceneSchema>
+
+export const StorylineSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  scenes: z.array(SceneSchema),
+  startSceneId: z.string(),
+})
+
+export type Storyline = z.infer<typeof StorylineSchema>
