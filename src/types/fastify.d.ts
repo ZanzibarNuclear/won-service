@@ -16,7 +16,7 @@ import { Session } from '../types/won-flux-types'
 import { UserProfileRepository } from '../db/access/userProfileRepo'
 import { UserRepository } from '../db/access/userRepo'
 import { Collection } from '@fastify/mongodb'
-import { Campaign, Player, Item, Area, Room, Npc, Event, Storyline } from '../models'
+import { Campaign, Player, Item, Zone, Room, Npc, Event, Storyline } from '../models'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -41,7 +41,7 @@ declare module 'fastify' {
       storylines: Collection<Storyline>
       campaigns: Collection<Campaign>
       players: Collection<Player>
-      areas: Collection<Area>
+      zones: Collection<Zone>
       rooms: Collection<Room>
       items: Collection<Item>
       npcs: Collection<Npc>

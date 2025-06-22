@@ -52,8 +52,8 @@ export const ItemSchema = z.object({
 
 export type Item = z.infer<typeof ItemSchema>
 
-// Area: geographic space, with type
-export const AreaSchema = z.object({
+// Zone: geographic space, with type
+export const ZoneSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   type: z.enum(['terrain', 'building', 'underground', 'bunker', 'lab', 'other']),
@@ -72,7 +72,7 @@ export const AreaSchema = z.object({
   ).optional(), // array of points defining the perimeter
 })
 
-export type Area = z.infer<typeof AreaSchema>
+export type Zone = z.infer<typeof ZoneSchema>
 
 // Room, Npc, Event: unchanged for now
 export const RoomSchema = z.object({

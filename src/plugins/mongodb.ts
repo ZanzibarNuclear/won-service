@@ -13,10 +13,11 @@ const mongo: FastifyPluginAsync = async (fastify, options) => {
     // Expose collections for convenience
     const db = fastify.mongo.db!
     fastify.decorate('mongoCollections', {
+      storylines: db.collection('storylines'),
       campaigns: db.collection('campaigns'),
       players: db.collection('players'),
       items: db.collection('items'),
-      areas: db.collection('areas'),
+      zones: db.collection('zones'),
       rooms: db.collection('rooms'),
       npcs: db.collection('npcs'),
       events: db.collection('events')
