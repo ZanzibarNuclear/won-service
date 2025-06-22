@@ -14,6 +14,7 @@ const mongo: FastifyPluginAsync = async (fastify, options) => {
     const db = fastify.mongo.db!
     fastify.decorate('mongoCollections', {
       storylines: db.collection('storylines'),
+      scenes: db.collection('scenes'),
       campaigns: db.collection('campaigns'),
       players: db.collection('players'),
       items: db.collection('items'),

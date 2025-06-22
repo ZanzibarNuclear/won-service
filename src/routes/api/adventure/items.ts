@@ -1,12 +1,12 @@
 import { FastifyPluginAsync } from 'fastify'
 import { ObjectId } from 'mongodb'
-import { ItemSchema } from '../../../../models'
+import { ItemSchema } from '../../../models'
 
 const itemsRoutes: FastifyPluginAsync = async (fastify) => {
   const items = fastify.mongoCollections.items
 
   // Create
-  fastify.post('/', async (request, reply) => {
+  fastify.post('/items/', async (request, reply) => {
     const parsed = ItemSchema.safeParse(request.body)
     if (!parsed.success) {
       return reply.status(400).send(parsed.error)
@@ -16,13 +16,13 @@ const itemsRoutes: FastifyPluginAsync = async (fastify) => {
   })
 
   // Read all
-  fastify.get('/', async (request, reply) => {
+  fastify.get('/items/', async (request, reply) => {
     const all = await items.find().toArray()
     return all
   })
 
   // Read one
-  fastify.get('/:id', async (request, reply) => {
+  fastify.get('/items/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const item = await items.findOne({ _id: new ObjectId(id) })
     if (!item) return reply.status(404).send({ message: 'Item not found' })
@@ -30,7 +30,7 @@ const itemsRoutes: FastifyPluginAsync = async (fastify) => {
   })
 
   // Update
-  fastify.put('/:id', async (request, reply) => {
+  fastify.put('/items/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = ItemSchema.safeParse(request.body)
     if (!parsed.success) {
@@ -45,7 +45,7 @@ const itemsRoutes: FastifyPluginAsync = async (fastify) => {
   })
 
   // Delete
-  fastify.delete('/:id', async (request, reply) => {
+  fastify.delete('/items/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const result = await items.deleteOne({ _id: new ObjectId(id) })
     if (result.deletedCount === 0) return reply.status(404).send({ message: 'Item not found' })

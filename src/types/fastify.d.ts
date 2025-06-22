@@ -39,6 +39,7 @@ declare module 'fastify' {
     }
     mongoCollections: {
       storylines: Collection<Storyline>
+      scenes: Collection<Scene>
       campaigns: Collection<Campaign>
       players: Collection<Player>
       zones: Collection<Zone>
