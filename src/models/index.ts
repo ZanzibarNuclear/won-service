@@ -39,6 +39,15 @@ export const ItemSchema = z.object({
   type: z.string(),
   value: z.number().optional(),
   description: z.string().optional(),
+  qualities: z.object({
+    wearable: z.boolean().optional(),
+    edible: z.boolean().optional(),
+    poisonous: z.boolean().optional(),
+    radioactive: z.boolean().optional(),
+    toxic: z.boolean().optional(),
+    clean: z.boolean().optional(),
+    refreshing: z.boolean().optional(),
+  }).optional(),
 })
 
 export type Item = z.infer<typeof ItemSchema>
@@ -98,6 +107,21 @@ export const NpcSchema = z.object({
   name: z.string(),
   role: z.string().optional(),
   description: z.string().optional(),
+  catchPhrases: z.array(
+    z.object({
+      phrase: z.string(),
+      weight: z.number().min(0).default(1),
+    })
+  ).optional(),
+  items: z.array(z.string()).optional(), // array of item IDs
+  characteristics: z.object({
+    strength: z.number().int().min(1).max(20).optional(),
+    intelligence: z.number().int().min(1).max(20).optional(),
+    wisdom: z.number().int().min(1).max(20).optional(),
+    dexterity: z.number().int().min(1).max(20).optional(),
+    constitution: z.number().int().min(1).max(20).optional(),
+    charisma: z.number().int().min(1).max(20).optional(),
+  }).optional(),
 })
 
 export type Npc = z.infer<typeof NpcSchema>
