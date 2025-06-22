@@ -13,11 +13,13 @@ const mongo: FastifyPluginAsync = async (fastify, options) => {
     // Expose collections for convenience
     const db = fastify.mongo.db!
     fastify.decorate('mongoCollections', {
+      campaigns: db.collection('campaigns'),
       players: db.collection('players'),
       items: db.collection('items'),
       areas: db.collection('areas'),
       rooms: db.collection('rooms'),
-      npcs: db.collection('npcs')
+      npcs: db.collection('npcs'),
+      events: db.collection('events')
     })
   } catch (err) {
     fastify.log.error('MongoDB connection error:', err)

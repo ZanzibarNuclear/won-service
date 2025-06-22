@@ -1,4 +1,3 @@
-import { fastifyMongodb } from './../../node_modules/@fastify/mongodb/types/index.d';
 import 'fastify'
 import { UserCredentials } from './won-flux-types'
 import { AuthRepository } from '../db/access/authRepo'
@@ -16,6 +15,8 @@ import { PublicProfileRepository } from '../db/access/profileRepo'
 import { Session } from '../types/won-flux-types'
 import { UserProfileRepository } from '../db/access/userProfileRepo'
 import { UserRepository } from '../db/access/userRepo'
+import { Collection } from '@fastify/mongodb'
+import { Campaign, Player, Item, Area, Room, Npc, Event } from '../models'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -36,7 +37,15 @@ declare module 'fastify' {
       userProfiles: UserProfileRepository
       users: UserRepository
     }
-    mongo: fastifyMongodb
+    mongoCollections: {
+      campaign: Collection<Campaign>
+      players: Collection<Player>
+      items: Collection<Item>
+      areas: Collection<Area>
+      rooms: Collection<Room>
+      npcs: Collection<Npc>
+      events: Collection<Event>
+    }
     sendMagicLink: (email: string) => void
     session: UserCredentials | null
     memberImageFilePath: string

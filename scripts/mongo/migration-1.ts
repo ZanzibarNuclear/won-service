@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { MongoClient } from 'mongodb'
 
-const collections = ['players', 'items', 'areas', 'rooms', 'npcs']
+const collections = ['campaigns', 'players', 'items', 'areas', 'rooms', 'npcs', 'events']
 const dbName = 'adventure'
 
 async function ensureCollections() {
