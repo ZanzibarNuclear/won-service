@@ -136,6 +136,8 @@ export type Event = z.infer<typeof EventSchema>
 
 export const TransitionSchema = z.object({
   toSceneId: z.string(),
+  description: z.string(), // things to consider and contrast to other transition options
+  reveal: z.string(), // for anything unknown until the decision has been made
   condition: z.string().optional(), // e.g., "playerHasKey", or a script reference
 })
 
