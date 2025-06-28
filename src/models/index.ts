@@ -150,10 +150,44 @@ export const ChoiceSchema = z.object({
 
 export type Choice = z.infer<typeof ChoiceSchema>
 
+export const PassageBlockSchema = z.object({
+  id: z.string(),
+  type: z.literal('passage'),
+  label: z.string(),
+  html: z.string(),
+})
+
+export const ImageBlockSchema = z.object({
+  id: z.string(),
+  type: z.literal('image'),
+  label: z.string(),
+  imageSrc: z.string(),
+  position: z.string().optional(),
+  caption: z.string().optional(),
+})
+
+export const VideoBlockSchema = z.object({
+  id: z.string(),
+  type: z.literal('video'),
+  label: z.string(),
+  url: z.string(),
+})
+
+export const ContentBlockSchema = z.discriminatedUnion('type', [
+  PassageBlockSchema,
+  ImageBlockSchema,
+  VideoBlockSchema,
+])
+
+export type PassageBlock = z.infer<typeof PassageBlockSchema>
+export type ImageBlock = z.infer<typeof ImageBlockSchema>
+export type VideoBlock = z.infer<typeof VideoBlockSchema>
+export type ContentBlock = z.infer<typeof ContentBlockSchema>
+
 export const SceneSchema = z.object({
   id: z.string(),
   title: z.string(),
-  description: z.string(),
+  content: z.array(ContentBlockSchema),
   type: z.enum(['normal', 'activity', 'final']),
   activityType: z.string().optional(), // e.g., 'video', 'equipment'
   choices: z.array(ChoiceSchema).optional(),
@@ -162,11 +196,32 @@ export const SceneSchema = z.object({
 
 export type Scene = z.infer<typeof SceneSchema>
 
-export const StorylineSchema = z.object({
-  name: z.string(),
-  description: z.string().optional(),
+export const ChapterSchema = z.object({
+  id: z.string(),
+  title: z.string(),
   scenes: z.array(SceneSchema),
   startSceneId: z.string(),
+})
+
+export type Chapter = z.infer<typeof ChapterSchema>
+
+export const AdventureSchema = z.object({
+  _id: z.string().optional(),
+  title: z.string(),
+  description: z.string(),
+  coverArt: z.string().optional(),
+  publishedAt: z.date().optional()
+})
+
+export type Adventure = z.infer<typeof AdventureSchema>
+
+export const StorylineSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  coverArt: z.string(),
+  publishedAt: z.string(),
+  chapters: z.array(ChapterSchema),
 })
 
 export type Storyline = z.infer<typeof StorylineSchema>

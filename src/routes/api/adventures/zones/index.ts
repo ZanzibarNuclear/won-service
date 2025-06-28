@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify'
 import { ObjectId } from 'mongodb'
-import { ZoneSchema } from '../../../models'
+import { ZoneSchema } from '../../../../models'
 
 const zonesRoutes: FastifyPluginAsync = async (fastify) => {
   const zones = fastify.mongoCollections.zones

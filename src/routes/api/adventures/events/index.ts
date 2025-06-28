@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify'
 import { ObjectId } from 'mongodb'
-import { EventSchema } from '../../../models'
+import { EventSchema } from '../../../../models'
 
 const eventsRoutes: FastifyPluginAsync = async (fastify) => {
   const events = fastify.mongoCollections.events

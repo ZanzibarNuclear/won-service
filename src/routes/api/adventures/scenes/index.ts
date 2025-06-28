@@ -1,11 +1,14 @@
 import { FastifyPluginAsync } from 'fastify'
 import { ObjectId } from 'mongodb'
-import { SceneSchema } from '../../../models'
+import { SceneSchema } from '../../../../models'
 
+/*
+ * Encompasses transitions to other scenes.
+ */
 const scenesRoutes: FastifyPluginAsync = async (fastify) => {
   const scenes = fastify.mongoCollections.scenes
 
-  fastify.post('/scenes/', async (request, reply) => {
+  fastify.post('/', async (request, reply) => {
     const parsed = SceneSchema.safeParse(request.body)
     if (!parsed.success) {
       return reply.status(400).send(parsed.error)
@@ -14,19 +17,19 @@ const scenesRoutes: FastifyPluginAsync = async (fastify) => {
     return { _id: result.insertedId, ...parsed.data }
   })
 
-  fastify.get('/scenes/', async (request, reply) => {
+  fastify.get('/', async (request, reply) => {
     const all = await scenes.find().toArray()
     return all
   })
 
-  fastify.get('/scenes/:id', async (request, reply) => {
+  fastify.get('/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const item = await scenes.findOne({ _id: new ObjectId(id) })
     if (!item) return reply.status(404).send({ message: 'Scene not found' })
     return item
   })
 
-  fastify.put('/scenes/:id', async (request, reply) => {
+  fastify.put('/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = SceneSchema.safeParse(request.body)
     if (!parsed.success) {
@@ -40,7 +43,7 @@ const scenesRoutes: FastifyPluginAsync = async (fastify) => {
     return { _id: id, ...parsed.data }
   })
 
-  fastify.delete('/scenes/:id', async (request, reply) => {
+  fastify.delete('/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const result = await scenes.deleteOne({ _id: new ObjectId(id) })
     if (result.deletedCount === 0) return reply.status(404).send({ message: 'Scene not found' })

@@ -1,12 +1,12 @@
 import { FastifyPluginAsync } from 'fastify'
 import { ObjectId } from 'mongodb'
-import { StorylineSchema } from '../../../models'
+import { StorylineSchema } from '../../../../models'
 
 const storylinesRoutes: FastifyPluginAsync = async (fastify) => {
   const storylines = fastify.mongoCollections.storylines
 
   // Create
-  fastify.post('/storylines/', async (request, reply) => {
+  fastify.post('/', async (request, reply) => {
     const parsed = StorylineSchema.safeParse(request.body)
     if (!parsed.success) {
       return reply.status(400).send(parsed.error)
@@ -16,13 +16,13 @@ const storylinesRoutes: FastifyPluginAsync = async (fastify) => {
   })
 
   // Read all
-  fastify.get('/storylines/', async (request, reply) => {
+  fastify.get('/', async (request, reply) => {
     const all = await storylines.find().toArray()
     return all
   })
 
   // Read one
-  fastify.get('/storylines/:id', async (request, reply) => {
+  fastify.get('/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const item = await storylines.findOne({ _id: new ObjectId(id) })
     if (!item) return reply.status(404).send({ message: 'Storyline not found' })
@@ -30,7 +30,7 @@ const storylinesRoutes: FastifyPluginAsync = async (fastify) => {
   })
 
   // Update
-  fastify.put('/storylines/:id', async (request, reply) => {
+  fastify.put('/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = StorylineSchema.safeParse(request.body)
     if (!parsed.success) {
@@ -45,7 +45,7 @@ const storylinesRoutes: FastifyPluginAsync = async (fastify) => {
   })
 
   // Delete
-  fastify.delete('/storylines/:id', async (request, reply) => {
+  fastify.delete('/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const result = await storylines.deleteOne({ _id: new ObjectId(id) })
     if (result.deletedCount === 0) return reply.status(404).send({ message: 'Storyline not found' })

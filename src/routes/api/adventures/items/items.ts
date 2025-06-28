@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify'
 import { ObjectId } from 'mongodb'
-import { ItemSchema } from '../../../models'
+import { ItemSchema } from '../../../../models'
 
 const itemsRoutes: FastifyPluginAsync = async (fastify) => {
   const items = fastify.mongoCollections.items

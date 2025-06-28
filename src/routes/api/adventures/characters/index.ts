@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify'
 import { ObjectId } from 'mongodb'
-import { NpcSchema } from '../../../models'
+import { NpcSchema } from '../../../../models'
 
 const charactersRoutes: FastifyPluginAsync = async (fastify) => {
   const npcs = fastify.mongoCollections.npcs
