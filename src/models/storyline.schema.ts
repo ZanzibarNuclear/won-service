@@ -30,6 +30,5 @@ export function validateChapter(data: Partial<Chapter>): string[] | null {
   const errors: string[] = []
   if (!data.title || typeof data.title !== 'string')
     errors.push('Title is required and must be a string')
-  if (typeof data.order !== 'number') errors.push('Order is required and must be a number')
   return errors.length ? errors : null
 }

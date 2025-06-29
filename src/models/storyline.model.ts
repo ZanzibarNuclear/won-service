@@ -38,6 +38,24 @@ export class StorylineModel {
     return cursor.toArray()
   }
 
+  async updateStoryline(
+    id: string,
+    updateData: Partial<Storyline>
+  ): Promise<Storyline | null> {
+    if (!ObjectId.isValid(id)) throw new Error('Invalid ID')
+
+    const updateFields: Partial<Storyline> = {}
+    if (updateData.title !== undefined) updateFields.title = updateData.title
+    if (updateData.author !== undefined) updateFields.author = updateData.author
+
+    const result = await this.collection.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: updateFields },
+      { returnDocument: 'after' }
+    )
+    return result
+  }
+
   async addChapter(storylineId: string, chapterData: Partial<Chapter>): Promise<Chapter> {
     const errors = validateChapter(chapterData)
     if (errors) throw new Error(`Validation failed: ${errors.join(', ')}`)
