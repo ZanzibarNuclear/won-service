@@ -65,6 +65,7 @@ export class StorylineModel {
     const chapter: Chapter = {
       _id: new ObjectId(),
       title: chapterData.title!,
+      description: chapterData.description,
       order: chapterData.order! || 0,
       scenes: [],
       createdAt: new Date(),
@@ -91,15 +92,20 @@ export class StorylineModel {
       throw new Error('Invalid ID')
     }
 
+    // Build the $set object dynamically to only update provided fields
+    const setFields: Record<string, any> = {}
+    if (chapterData.title !== undefined) setFields['chapters.$.title'] = chapterData.title
+    if (chapterData.description !== undefined) setFields['chapters.$.description'] = chapterData.description
+    if (chapterData.order !== undefined) setFields['chapters.$.order'] = chapterData.order
+    if (chapterData.scenes !== undefined) setFields['chapters.$.scenes'] = chapterData.scenes
+
+    if (Object.keys(setFields).length === 0) {
+      throw new Error('No fields provided to update')
+    }
+
     const result = await this.collection.updateOne(
       { _id: new ObjectId(storylineId), 'chapters._id': new ObjectId(chapterId) },
-      {
-        $set: {
-          'chapters.$.title': chapterData.title!,
-          'chapters.$.order': chapterData.order!,
-          'chapters.$.scenes': [],
-        },
-      },
+      { $set: setFields },
     )
 
     if (result.modifiedCount === 0) throw new Error('Chapter or Storyline not found')

@@ -11,6 +11,7 @@ const mongoModels: FastifyPluginAsync = async (fastify, options) => {
       url: fastify.config.MONGO_URI,
       database: 'adventure',
     })
+    fastify.log.info('Connected to mongo instance')
   } catch (err) {
     fastify.log.error('MongoDB connection error:', err)
     throw err
