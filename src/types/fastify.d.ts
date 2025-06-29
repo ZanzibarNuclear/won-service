@@ -37,6 +37,9 @@ declare module 'fastify' {
       userProfiles: UserProfileRepository
       users: UserRepository
     }
+    models: {
+      storyline: Storyline
+    }
     mongoCollections: {
       storylines: Collection<Storyline>
       scenes: Collection<Scene>

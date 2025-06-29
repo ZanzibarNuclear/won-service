@@ -45,6 +45,8 @@
     "fastify": "^5.3.2",
     "fastify-cli": "^7.4.0",
     "fastify-favicon": "^5.0.0",
+    "fastify-mongoose": "^0.3.0",
+    "fastify-mongoose-api": "^1.2.28",
     "fastify-plugin": "^5.0.1",
     "jsonwebtoken": "^9.0.2",
     "kysely": "^0.27.6",
