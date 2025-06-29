@@ -16,7 +16,9 @@ import { Session } from '../types/won-flux-types'
 import { UserProfileRepository } from '../db/access/userProfileRepo'
 import { UserRepository } from '../db/access/userRepo'
 import { Collection } from '@fastify/mongodb'
-import { Campaign, Player, Item, Zone, Room, Npc, Event, Storyline } from '../models'
+import { Campaign, Player, Item, Zone, Room, Npc, Event, Storyline } from '../models/index-v1'
+import { StorylineModel } from '../models/storyline.model'
+import { ChapterModel } from '../models/chapter.model'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -38,18 +40,8 @@ declare module 'fastify' {
       users: UserRepository
     }
     models: {
-      storyline: Storyline
-    }
-    mongoCollections: {
-      storylines: Collection<Storyline>
-      scenes: Collection<Scene>
-      campaigns: Collection<Campaign>
-      players: Collection<Player>
-      zones: Collection<Zone>
-      rooms: Collection<Room>
-      items: Collection<Item>
-      npcs: Collection<Npc>
-      events: Collection<Event>
+      storyline: StorylineModel
+      chapter: ChapterModel
     }
     sendMagicLink: (email: string) => void
     session: UserCredentials | null

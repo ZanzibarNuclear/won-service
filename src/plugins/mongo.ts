@@ -1,48 +1,87 @@
 import fp from 'fastify-plugin'
-import { FastifyPluginAsync } from "fastify"
-import mongoPlugin from '@fastify/mongodb'
-// import fastifyMongoose from 'fastify-mongoose'
+import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
+import fastifyMongo from '@fastify/mongodb'
+import { StorylineModel } from '../models/storyline.model'
+import { ChapterModel } from '../models/chapter.model'
+import { Storyline, Chapter } from '../models/storyline.schema'
 
-const mongo: FastifyPluginAsync = async (fastify, options) => {
+interface StorylineParams {
+  Params: { id: string }
+}
+
+interface ChapterBody {
+  Body: Partial<Chapter>
+}
+
+interface StorylineBody {
+  Body: Partial<Storyline>
+}
+
+const mongoModels: FastifyPluginAsync = async (fastify, options) => {
   try {
-    await fastify.register(fastifyMongoose, {
-      uri: fastify.config.MONGO_URI,
+    await fastify.register(fastifyMongo, {
+      forceClose: true,
+      url: fastify.config.MONGO_URI,
+      database: 'adventure',
     })
-
-    //   await fastify.register(mongoPlugin, {
-    //     forceClose: true,
-    //     url: fastify.config.MONGO_URI,
-    //     database: 'adventure',
-    //   })
-
-    //   // Expose collections for convenience
-    //   const db = fastify.mongo.db!
-    //   fastify.decorate('mongoCollections', {
-    //     adventures: db.collection('adventures'),
-    //     campaigns: db.collection('campaigns'),
-    //     players: db.collection('players'),
-    //     items: db.collection('items'),
-    //     game_maps: db.collection('players'),
-    //     events: db.collection('events')
-    //   })
-    // } catch (err) {
-    //   fastify.log.error('MongoDB connection error:', err)
-    //   throw err
-    // }
-    fastify.log.info('registered mongo plugin')
+  } catch (err) {
+    fastify.log.error('MongoDB connection error:', err)
+    throw err
   }
 
-export default fp(mongo, { name: 'mongo', dependencies: ['env'] })
 
-  const sample = {
-    adventure: {
-      storyline: {
-        title: 'A',
-        descriptoin: 'All about A.',
-        createdAt: new Date(),
-        publishedAt: null,
-        archivedAt: null,
+  fastify.decorate("models", {
+    storyline: null,
+    chapter: null
+  } as any)
 
-      }
+  fastify.addHook('onReady', async function () {
+    if (this.mongo && this.models) {
+      this.models.storyline = new StorylineModel(this.mongo.db!)
+      this.models.chapter = new ChapterModel(this.mongo.db!)
     }
-  }
+  })
+
+  fastify.get(
+    '/api/adv/storylines',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const storylines = await fastify.models.storyline.list()
+      return reply.send(storylines)
+    },
+  )
+
+  fastify.get(
+    '/api/adv/storylines/:id',
+    async (request: FastifyRequest<StorylineParams>, reply: FastifyReply) => {
+      const storylines = await fastify.models.storyline.findById(request.params.id)
+      return reply.send(storylines)
+    },
+  )
+
+  fastify.post<StorylineBody>(
+    '/api/adv/storylines',
+    async (request: FastifyRequest<StorylineBody>, reply: FastifyReply) => {
+      const storyline = await fastify.models.storyline.create(request.body)
+      return reply.code(201).send(storyline)
+    },
+  )
+
+  fastify.post<StorylineParams & ChapterBody>(
+    '/api/adv/storylines/:id/chapters',
+    async (request: FastifyRequest<StorylineParams & ChapterBody>, reply: FastifyReply) => {
+      const chapter = await fastify.models.storyline.addChapter(request.params.id, request.body)
+      return reply.code(201).send(chapter)
+    },
+  )
+
+  fastify.get<StorylineParams>(
+    '/api/adv/storylines/:id/chapters',
+    async (request: FastifyRequest<StorylineParams>, reply: FastifyReply) => {
+      const chapters = await fastify.models.storyline.getChapters(request.params.id)
+      return reply.send(chapters)
+    },
+  )
+  fastify.log.info('registered mongo plugin')
+}
+
+export default fp(mongoModels, { name: 'mongoModels', dependencies: ['env'] })
