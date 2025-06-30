@@ -1,5 +1,6 @@
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
 import { Storyline, Chapter } from '../../../models/storyline.schema'
+import { Adventure } from '../../../models/index-v1'
 
 interface StorylineParams {
   Params: { id: string }

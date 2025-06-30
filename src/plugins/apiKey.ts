@@ -17,13 +17,13 @@ const apiKeyPlugin: FastifyPluginAsync<ApiKeyPluginOptions> = async (fastify, op
   fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
     // Skip if session is already set by the session plugin
     if (request.session) {
-      fastify.log.info('apiKey plug-in: Creds already established')
+      fastify.log.debug('apiKey plug-in: Creds already established')
       return
     }
 
     const authHeader = request.headers.authorization
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      fastify.log.info('apiKey plug-in: no app key')
+      fastify.log.debug('apiKey plug-in: no app key')
       return
     }
 
@@ -40,7 +40,7 @@ const apiKeyPlugin: FastifyPluginAsync<ApiKeyPluginOptions> = async (fastify, op
         throw new Error('API key authentication is only for system users')
       }
 
-      fastify.log.info('Looks like a system user')
+      fastify.log.info('We have a system user')
       const credentials = await fastify.data.users.getCreds(userId)
       const sessionData = {
         userId: credentials.sub,
