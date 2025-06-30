@@ -14,15 +14,16 @@ export class StorylineModel {
     if (errors) throw new Error(`Validation failed: ${errors.join(', ')}`)
 
     const storyline: Storyline = {
-      _id: new ObjectId(),
       title: storylineData.title!,
-      author: storylineData.author!,
+      description: storylineData?.description,
+      coverArt: storylineData?.coverArt,
       createdAt: new Date(),
+      updatedAt: new Date(),
       chapters: [],
     }
 
     const result = await this.collection.insertOne(storyline)
-    return { ...storyline, _id: result.insertedId }
+    return { _id: result.insertedId, ...storyline } as Storyline
   }
 
   async findById(id: string): Promise<Storyline | null> {
@@ -30,7 +31,7 @@ export class StorylineModel {
     return this.collection.findOne({ _id: new ObjectId(id) })
   }
 
-  async list(): Promise<Pick<Storyline, '_id' | 'title' | 'author' | 'createdAt'>[]> {
+  async list(): Promise<Pick<Storyline, '_id' | 'title' | 'description' | 'coverArt' | 'createdAt'>[]> {
     const cursor = this.collection.find(
       {},
       { projection: { _id: 1, title: 1, author: 1, createdAt: 1 } }
@@ -46,7 +47,8 @@ export class StorylineModel {
 
     const updateFields: Partial<Storyline> = {}
     if (updateData.title !== undefined) updateFields.title = updateData.title
-    if (updateData.author !== undefined) updateFields.author = updateData.author
+    if (updateData.description !== undefined) updateFields.description = updateData.description
+    if (updateData.coverArt !== undefined) updateFields.coverArt = updateData.coverArt
 
     const result = await this.collection.findOneAndUpdate(
       { _id: new ObjectId(id) },

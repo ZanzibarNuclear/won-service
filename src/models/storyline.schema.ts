@@ -11,10 +11,13 @@ export interface Chapter {
 }
 
 export interface Storyline {
-  _id: ObjectId
+  _id?: ObjectId
   title: string
-  author: string
-  createdAt: Date
+  description?: string
+  coverArt?: string
+  createdAt?: Date
+  updatedAt?: Date
+  publishedAt?: Date
   chapters: Chapter[]
 }
 
@@ -22,8 +25,6 @@ export function validateStoryline(data: Partial<Storyline>): string[] | null {
   const errors: string[] = []
   if (!data.title || typeof data.title !== 'string')
     errors.push('Title is required and must be a string')
-  if (!data.author || typeof data.author !== 'string')
-    errors.push('Author is required and must be a string')
   return errors.length ? errors : null
 }
 
