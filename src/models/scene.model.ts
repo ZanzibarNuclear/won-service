@@ -113,7 +113,7 @@ export class SceneModel {
 
   async addTransition(sceneId: string, transition: { targetSceneId: string; label: string; prompt: string }): Promise<boolean> {
     if (!ObjectId.isValid(sceneId)) throw new Error('Invalid Scene ID')
-    const newTransition = {
+    const newTransition: Transition = {
       targetSceneId: transition.targetSceneId,
       label: transition.label,
       prompt: transition.prompt,

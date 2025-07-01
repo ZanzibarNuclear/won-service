@@ -3,6 +3,8 @@ import fastifyMongo from '@fastify/mongodb'
 import { FastifyPluginAsync } from 'fastify'
 import { StorylineModel } from '../models/storyline.model'
 import { ChapterModel } from '../models/chapter.model'
+import { SceneModel } from '../models/scene.model'
+import { ContentModel } from '../models/content.model'
 
 const mongoModels: FastifyPluginAsync = async (fastify, options) => {
   try {
@@ -26,6 +28,8 @@ const mongoModels: FastifyPluginAsync = async (fastify, options) => {
     if (this.mongo && this.models) {
       this.models.storyline = new StorylineModel(this.mongo.db!)
       this.models.chapter = new ChapterModel(this.mongo.db!)
+      this.models.scene = new SceneModel(this.mongo.db!)
+      this.models.content = new ContentModel(this.mongo.db!)
     }
   })
 
