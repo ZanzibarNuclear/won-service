@@ -120,3 +120,5 @@ const sceneRoutes: FastifyPluginAsync = async (fastify, options) => {
     },
   )
 }
+
+export default sceneRoutes
