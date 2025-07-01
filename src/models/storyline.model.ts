@@ -72,6 +72,7 @@ export class StorylineModel {
       order: chapterData.order! || 0,
       scenes: [],
       createdAt: new Date(),
+      openingSceneId: chapterData.openingSceneId,
     }
 
     const result = await this.collection.updateOne(
@@ -101,6 +102,7 @@ export class StorylineModel {
     if (chapterData.description !== undefined) setFields['chapters.$.description'] = chapterData.description
     if (chapterData.order !== undefined) setFields['chapters.$.order'] = chapterData.order
     if (chapterData.scenes !== undefined) setFields['chapters.$.scenes'] = chapterData.scenes
+    if (chapterData.openingSceneId !== undefined) setFields['chapters.$.openingSceneId'] = chapterData.openingSceneId
 
     if (Object.keys(setFields).length === 0) {
       throw new Error('No fields provided to update')

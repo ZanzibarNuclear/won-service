@@ -9,6 +9,7 @@ export interface Chapter {
   createdAt?: Date
   updatedAt?: Date
   scenes: String[]
+  openingSceneId?: string
 }
 
 export interface Storyline {
