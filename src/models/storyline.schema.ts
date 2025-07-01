@@ -5,9 +5,10 @@ export interface Chapter {
   _id: ObjectId
   title: string
   description?: string
-  order: number
+  order?: number
+  createdAt?: Date
+  updatedAt?: Date
   scenes: String[]
-  createdAt: Date
 }
 
 export interface Storyline {

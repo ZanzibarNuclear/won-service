@@ -49,6 +49,7 @@ export class StorylineModel {
     if (updateData.title !== undefined) updateFields.title = updateData.title
     if (updateData.description !== undefined) updateFields.description = updateData.description
     if (updateData.coverArt !== undefined) updateFields.coverArt = updateData.coverArt
+    updateFields.updatedAt = new Date()
 
     const result = await this.collection.findOneAndUpdate(
       { _id: new ObjectId(id) },
@@ -104,6 +105,8 @@ export class StorylineModel {
     if (Object.keys(setFields).length === 0) {
       throw new Error('No fields provided to update')
     }
+    // only set updatedAt if any other field is updated
+    setFields['chapters.$.updatedAt'] = new Date()
 
     const result = await this.collection.updateOne(
       { _id: new ObjectId(storylineId), 'chapters._id': new ObjectId(chapterId) },
