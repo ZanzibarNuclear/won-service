@@ -23,12 +23,14 @@ export class ContentModel {
   async updateBlock(sceneId: string, blockId: string, update: Partial<ContentBlock>): Promise<ContentBlock> {
     if (!ObjectId.isValid(sceneId) || !ObjectId.isValid(blockId)) throw new Error('Invalid ID')
     update.updatedAt = new Date()
+    // Exclude _id from the update object
+    const entryUpdate = Object.fromEntries(
+      Object.entries(update).filter(([k]) => k !== '_id').map(([k, v]) => [`content.$.${k}`, v])
+    )
     const result = await this.collection.findOneAndUpdate(
       { _id: new ObjectId(sceneId), 'content._id': new ObjectId(blockId) },
       {
-        $set: Object.fromEntries(
-          Object.entries(update).map(([k, v]) => [`content.$.${k}`, v])
-        )
+        $set: entryUpdate
       },
       { returnDocument: 'after', projection: { content: 1 } }
     )
