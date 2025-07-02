@@ -30,7 +30,8 @@ export type ContentBlock = PassageBlock | ImageBlock | VideoBlock
 
 // --- Transition ---
 export interface Transition {
-  targetSceneId: string
+  _id?: ObjectId
+  toSceneId: string
   label: string
   prompt: string
 }

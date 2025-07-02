@@ -1,3 +1,4 @@
+import { Transition } from './../models/scene.schema';
 import fp from 'fastify-plugin'
 import fastifyMongo from '@fastify/mongodb'
 import { FastifyPluginAsync } from 'fastify'
@@ -5,6 +6,7 @@ import { StorylineModel } from '../models/storyline.model'
 import { ChapterModel } from '../models/chapter.model'
 import { SceneModel } from '../models/scene.model'
 import { ContentModel } from '../models/content.model'
+import { TransitionModel } from '../models/transition.model'
 
 const mongoModels: FastifyPluginAsync = async (fastify, options) => {
   try {
@@ -30,6 +32,7 @@ const mongoModels: FastifyPluginAsync = async (fastify, options) => {
       this.models.chapter = new ChapterModel(this.mongo.db!)
       this.models.scene = new SceneModel(this.mongo.db!)
       this.models.content = new ContentModel(this.mongo.db!)
+      this.models.transition = new TransitionModel(this.mongo.db!)
     }
   })
 

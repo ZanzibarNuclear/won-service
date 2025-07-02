@@ -17,9 +17,17 @@ interface ContentBody {
   Body: Partial<ContentBlock>
 }
 
+interface TransitionParams {
+  Params: { sceneId: string, transitionId: string }
+}
+
+interface TransitionBody {
+  Body: Partial<Transition>
+}
+
 const sceneRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.get(
-    '/',
+    '',
     async (request: FastifyRequest, reply: FastifyReply) => {
       const { chapterId } = request.query as { chapterId?: string }
       if (!chapterId) {
@@ -31,7 +39,7 @@ const sceneRoutes: FastifyPluginAsync = async (fastify, options) => {
   )
 
   fastify.post<SceneBody>(
-    '/',
+    '',
     async (request: FastifyRequest<SceneBody>, reply: FastifyReply) => {
       const scene = await fastify.models.scene.create(request.body)
       return reply.code(201).send(scene)
@@ -119,12 +127,39 @@ const sceneRoutes: FastifyPluginAsync = async (fastify, options) => {
     '/:sceneId/transitions',
     async (request: FastifyRequest<SceneParams & { Body: Transition }>, reply: FastifyReply) => {
       const { sceneId } = request.params
-      const { targetSceneId, label, prompt } = request.body
-      if (!targetSceneId || !label || !prompt) {
+      const { toSceneId, label, prompt } = request.body
+      if (!toSceneId || !label || !prompt) {
         return reply.code(400).send({ error: 'toSceneId, label and prompt are required' })
       }
-      const transition = await fastify.models.scene.addTransition(sceneId, { targetSceneId, label, prompt })
+      const transition = await fastify.models.scene.addTransition(sceneId, { toSceneId, label, prompt })
       return reply.code(201).send(transition)
+    },
+  )
+
+  fastify.get<TransitionParams>(
+    '/:sceneId/transitions/:transitionId',
+    async (request: FastifyRequest<TransitionParams>, reply: FastifyReply) => {
+      const { sceneId, transitionId } = request.params
+      const transitions = await fastify.models.transition.get(sceneId, transitionId)
+      return reply.send(transitions)
+    },
+  )
+
+  fastify.patch<SceneParams & { Body: Partial<Transition> } & { Params: { sceneId: string, transitionId: string } }>(
+    '/:sceneId/transitions/:transitionId',
+    async (request: FastifyRequest<{ Params: { sceneId: string, transitionId: string }, Body: Partial<Transition> }>, reply: FastifyReply) => {
+      const { sceneId, transitionId } = request.params
+      const updated = await fastify.models.transition.update(sceneId, transitionId, request.body)
+      return reply.send(updated)
+    },
+  )
+
+  fastify.delete<{ Params: { sceneId: string, transitionId: string } }>(
+    '/:sceneId/transitions/:transitionId',
+    async (request: FastifyRequest<{ Params: { sceneId: string, transitionId: string } }>, reply: FastifyReply) => {
+      const { sceneId, transitionId } = request.params
+      await fastify.models.transition.delete(sceneId, transitionId)
+      return reply.code(204).send()
     },
   )
 }

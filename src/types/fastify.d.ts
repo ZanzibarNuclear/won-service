@@ -1,3 +1,4 @@
+import { Transition } from './../models/scene.schema';
 import 'fastify'
 import { UserCredentials } from './won-flux-types'
 import { AuthRepository } from '../db/access/authRepo'
@@ -16,11 +17,11 @@ import { Session } from '../types/won-flux-types'
 import { UserProfileRepository } from '../db/access/userProfileRepo'
 import { UserRepository } from '../db/access/userRepo'
 import { Collection } from '@fastify/mongodb'
-import { Campaign, Player, Item, Zone, Room, Npc, Event, Storyline, Scene } from '../models/index-v1'
 import { StorylineModel } from '../models/storyline.model'
 import { ChapterModel } from '../models/chapter.model'
 import { SceneModel } from '../models/scene.model'
 import { ContentModel } from '../models/content.model'
+import { TransitionModel } from '../models/transition.model'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -46,6 +47,7 @@ declare module 'fastify' {
       chapter: ChapterModel
       scene: SceneModel
       content: ContentModel
+      transition: TransitionModel
     }
     sendMagicLink: (email: string) => void
     session: UserCredentials | null
