@@ -39,14 +39,18 @@ export class SceneModel {
 
   async update(id: string, updateData: Partial<Scene>): Promise<Scene | null> {
     if (!ObjectId.isValid(id)) throw new Error('Invalid ID')
-    const shapedUpdate = { ...updateData, title: updateData.title ?? 'mystery scene', content: updateData.content ?? [], transitions: updateData.transitions ?? [] }
-    const errors = validateScene(shapedUpdate)
-    if (errors) throw new Error(`Validation failed: ${errors.join(', ')}`)
 
-    updateData.updatedAt = new Date()
+    const updateFields: Partial<Scene> = {}
+    if (updateData.title !== undefined) updateFields.title = updateData.title
+
+    if (Object.keys(updateFields).length === 0) {
+      throw new Error('No fields provided to update')
+    }
+
+    updateFields.updatedAt = new Date()
     const result = await this.collection.findOneAndUpdate(
       { _id: new ObjectId(id) },
-      { $set: shapedUpdate },
+      { $set: updateFields },
       { returnDocument: 'after' }
     )
     return result
@@ -58,7 +62,7 @@ export class SceneModel {
     return result.deletedCount === 1
   }
 
-  async addPassageBlock(sceneId: string, block: { label: string; html: string }): Promise<boolean> {
+  async addPassageBlock(sceneId: string, block: { label: string; html: string }): Promise<PassageBlock> {
     if (!ObjectId.isValid(sceneId)) throw new Error('Invalid Scene ID')
     const now = new Date()
     const passageBlock: PassageBlock = {
@@ -73,10 +77,10 @@ export class SceneModel {
       { _id: new ObjectId(sceneId) },
       { $push: { content: passageBlock }, $set: { updatedAt: now } }
     )
-    return result.modifiedCount === 1
+    return passageBlock
   }
 
-  async addImageBlock(sceneId: string, block: { label: string; imageSrc: string; position?: string; caption?: string }): Promise<boolean> {
+  async addImageBlock(sceneId: string, block: { label: string; imageSrc: string; position?: string; caption?: string }): Promise<ImageBlock> {
     if (!ObjectId.isValid(sceneId)) throw new Error('Invalid Scene ID')
     const now = new Date()
     const imageBlock: ImageBlock = {
@@ -93,10 +97,10 @@ export class SceneModel {
       { _id: new ObjectId(sceneId) },
       { $push: { content: imageBlock }, $set: { updatedAt: now } }
     )
-    return result.modifiedCount === 1
+    return imageBlock
   }
 
-  async addVideoBlock(sceneId: string, block: { label: string; url: string }): Promise<boolean> {
+  async addVideoBlock(sceneId: string, block: { label: string; url: string }): Promise<VideoBlock> {
     if (!ObjectId.isValid(sceneId)) throw new Error('Invalid Scene ID')
     const now = new Date()
     const videoBlock: VideoBlock = {
@@ -111,10 +115,10 @@ export class SceneModel {
       { _id: new ObjectId(sceneId) },
       { $push: { content: videoBlock }, $set: { updatedAt: now } }
     )
-    return result.modifiedCount === 1
+    return videoBlock
   }
 
-  async addTransition(sceneId: string, transition: { targetSceneId: string; label: string; prompt: string }): Promise<boolean> {
+  async addTransition(sceneId: string, transition: { targetSceneId: string; label: string; prompt: string }): Promise<Transition> {
     if (!ObjectId.isValid(sceneId)) throw new Error('Invalid Scene ID')
     const newTransition: Transition = {
       targetSceneId: transition.targetSceneId,
@@ -126,6 +130,6 @@ export class SceneModel {
       { _id: new ObjectId(sceneId) },
       { $push: { transitions: newTransition }, $set: { updatedAt: now } }
     )
-    return result.modifiedCount === 1
+    return newTransition
   }
 }

@@ -20,16 +20,22 @@ export class ContentModel {
   }
 
   // Update a specific content block by sceneId and blockId
-  async updateBlock(sceneId: string, blockId: string, update: Partial<ContentBlock>): Promise<boolean> {
+  async updateBlock(sceneId: string, blockId: string, update: Partial<ContentBlock>): Promise<ContentBlock> {
     if (!ObjectId.isValid(sceneId) || !ObjectId.isValid(blockId)) throw new Error('Invalid ID')
     update.updatedAt = new Date()
-    const result = await this.collection.updateOne(
+    const result = await this.collection.findOneAndUpdate(
       { _id: new ObjectId(sceneId), 'content._id': new ObjectId(blockId) },
-      { $set: Object.fromEntries(
+      {
+        $set: Object.fromEntries(
           Object.entries(update).map(([k, v]) => [`content.$.${k}`, v])
-        ) }
+        )
+      },
+      { returnDocument: 'after', projection: { content: 1 } }
     )
-    return result.modifiedCount === 1
+    if (!result || !result.content) throw new Error('Block not found')
+    const updatedBlock = result.content.find((b: any) => b._id?.toString() === blockId)
+    if (!updatedBlock) throw new Error('Block not found')
+    return updatedBlock
   }
 
   // Delete a specific content block by sceneId and blockId

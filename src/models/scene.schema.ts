@@ -30,7 +30,7 @@ export type ContentBlock = PassageBlock | ImageBlock | VideoBlock
 
 // --- Transition ---
 export interface Transition {
-  targetSceneId: ObjectId | string
+  targetSceneId: string
   label: string
   prompt: string
 }
@@ -53,8 +53,9 @@ export interface Scene extends SceneInfo {
 export function validateScene(data: Partial<Scene>): string[] | null {
   const errors: string[] = []
   if (!data.title || typeof data.title !== 'string') errors.push('Title is required and must be a string')
-  if (!Array.isArray(data.content)) errors.push('Content must be an array')
-  if (!Array.isArray(data.transitions)) errors.push('Transitions must be an array')
+  if (!data.chapterId) errors.push('ChapterId is required')
+  if (data.content && !Array.isArray(data.content)) errors.push('Content must be an array')
+  if (data.transitions && !Array.isArray(data.transitions)) errors.push('Transitions must be an array')
   return errors.length ? errors : null
 }
 

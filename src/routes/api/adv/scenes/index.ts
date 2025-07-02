@@ -1,5 +1,5 @@
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
-import { Scene, ContentBlock, ImageBlock, PassageBlock, VideoBlock } from '../../../../models/scene.schema'
+import { Scene, ContentBlock, ImageBlock, PassageBlock, VideoBlock, Transition } from '../../../../models/scene.schema'
 
 interface SceneParams {
   Params: { sceneId: string }
@@ -92,6 +92,9 @@ const sceneRoutes: FastifyPluginAsync = async (fastify, options) => {
     '/:sceneId/content/:contentId',
     async (request: FastifyRequest<ContentParams>, reply: FastifyReply) => {
       const content = await fastify.models.content.getBlock(request.params.sceneId, request.params.contentId)
+      if (!content) {
+        return reply.code(404).send({ error: 'content block with that ID not found' })
+      }
       return reply.send(content)
     },
   )
@@ -109,6 +112,19 @@ const sceneRoutes: FastifyPluginAsync = async (fastify, options) => {
     async (request: FastifyRequest<ContentParams>, reply: FastifyReply) => {
       await fastify.models.content.deleteBlock(request.params.sceneId, request.params.contentId)
       return reply.code(204).send()
+    },
+  )
+
+  fastify.post<SceneParams & { Body: Transition }>(
+    '/:sceneId/transitions',
+    async (request: FastifyRequest<SceneParams & { Body: Transition }>, reply: FastifyReply) => {
+      const { sceneId } = request.params
+      const { targetSceneId, label, prompt } = request.body
+      if (!targetSceneId || !label || !prompt) {
+        return reply.code(400).send({ error: 'toSceneId, label and prompt are required' })
+      }
+      const transition = await fastify.models.scene.addTransition(sceneId, { targetSceneId, label, prompt })
+      return reply.code(201).send(transition)
     },
   )
 }
