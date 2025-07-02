@@ -36,13 +36,17 @@ export interface Transition {
 }
 
 // --- Scene ---
-export interface Scene {
+export interface SceneInfo {
   _id?: ObjectId
+  chapterId: ObjectId | string
   title: string
-  content: ContentBlock[]
-  transitions: Transition[]
   createdAt?: Date
   updatedAt?: Date
+}
+
+export interface Scene extends SceneInfo {
+  content: ContentBlock[]
+  transitions: Transition[]
 }
 
 // --- Validation ---

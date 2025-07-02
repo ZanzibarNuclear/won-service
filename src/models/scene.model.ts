@@ -1,5 +1,5 @@
 import { Collection, Db, ObjectId } from 'mongodb'
-import { Scene, PassageBlock, ImageBlock, VideoBlock, Transition, validateScene } from './scene.schema'
+import { Scene, SceneInfo, PassageBlock, ImageBlock, VideoBlock, Transition, validateScene } from './scene.schema'
 
 export class SceneModel {
   private collection: Collection<Scene>
@@ -14,6 +14,7 @@ export class SceneModel {
 
     const now = new Date()
     const scene: Scene = {
+      chapterId: sceneData.chapterId!,
       title: sceneData.title!,
       content: sceneData.content || [],
       transitions: sceneData.transitions || [],
@@ -30,8 +31,10 @@ export class SceneModel {
     return this.collection.findOne({ _id: new ObjectId(id) })
   }
 
-  async list(): Promise<Scene[]> {
-    return this.collection.find({}).toArray()
+  async list(chapterId: string): Promise<SceneInfo[]> {
+    return this.collection
+      .find({ chapterId }, { projection: { _id: 1, chapterId: 1, title: 1, createdAt: 1, updatedAt: 1 } })
+      .toArray() as Promise<SceneInfo[]>
   }
 
   async update(id: string, updateData: Partial<Scene>): Promise<Scene | null> {

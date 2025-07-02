@@ -1,6 +1,5 @@
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
-import { Scene, ContentBlock } from '../../../../models/scene.schema'
-import { ImageBlock, PassageBlock, VideoBlock } from '../../../../models/index-v1'
+import { Scene, ContentBlock, ImageBlock, PassageBlock, VideoBlock } from '../../../../models/scene.schema'
 
 interface SceneParams {
   Params: { sceneId: string }
@@ -19,11 +18,14 @@ interface ContentBody {
 }
 
 const sceneRoutes: FastifyPluginAsync = async (fastify, options) => {
-  // SCENE CRUD
   fastify.get(
     '/',
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const scenes = await fastify.models.scene.list()
+      const { chapterId } = request.query as { chapterId?: string }
+      if (!chapterId) {
+        return reply.code(400).send({ error: 'chapterId is required as a query parameter' })
+      }
+      const scenes = await fastify.models.scene.list(chapterId)
       return reply.send(scenes)
     },
   )
@@ -59,16 +61,6 @@ const sceneRoutes: FastifyPluginAsync = async (fastify, options) => {
       return reply.code(204).send()
     },
   )
-
-  // CONTENT CRUD (nested under scene)
-  // TODO: decide if this is useful - leaning toward not
-  // fastify.get<SceneParams>(
-  //   '/:sceneId/content',
-  //   async (request: FastifyRequest<SceneParams>, reply: FastifyReply) => {
-  //     const contentList = await fastify.models.content.list(request.params.sceneId)
-  //     return reply.send(contentList)
-  //   },
-  // )
 
   fastify.post<SceneParams & ContentBody>(
     '/:sceneId/content',
