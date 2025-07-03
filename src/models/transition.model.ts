@@ -1,5 +1,5 @@
 import { Collection, Db, ObjectId } from 'mongodb'
-import { Scene, ContentBlock } from './scene.schema'
+import { Scene } from './scene.schema'
 
 export class TransitionModel {
   private collection: Collection<Scene>
@@ -28,7 +28,14 @@ export class TransitionModel {
         )
       }
     )
-    return result.modifiedCount > 0
+    if (result.modifiedCount > 0) {
+      const scene = await this.collection.findOne(
+        { _id: new ObjectId(sceneId), 'transitions._id': new ObjectId(transitionId) },
+        { projection: { 'transitions.$': 1 } }
+      )
+      return scene?.transitions?.[0] || null
+    }
+    return null
   }
 
   async delete(sceneId: string, transitionId: string) {
