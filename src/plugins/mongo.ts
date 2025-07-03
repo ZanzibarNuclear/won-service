@@ -12,7 +12,7 @@ const mongoModels: FastifyPluginAsync = async (fastify, options) => {
   try {
     await fastify.register(fastifyMongo, {
       forceClose: true,
-      url: fastify.config.MONGO_URI,
+      url: fastify.config.MONGO_URL,
       database: 'adventure',
     })
     fastify.log.info('Connected to mongo instance')

@@ -80,7 +80,7 @@ declare module 'fastify' {
       ALT_BASE_URL: string
       APP_BASE_URL: string
       DATABASE_URL: string
-      MONGO_URI: string
+      MONGO_URL: string
       JWT_SECRET_KEY: string
       COOKIE_DOMAIN: string
       COOKIE_SECRET: string
