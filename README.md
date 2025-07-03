@@ -118,3 +118,48 @@ npm run test:utils
 - dev/feature branches
 - staging - tag RCs (same as main?)
 - release - tag releases
+
+## MongoDB Model
+
+Working out the modeling of the documents stored in MongoDB
+
+- Adventure[]
+  - ...overview info
+  - Storyline[]
+    - title
+    - description
+    - cover_art
+    - published_at
+    - Chapter[]
+      - title
+      - Scene[]
+        - Content block[] : Passage, Image, Video, Activity (ref)
+  - Artifact[]
+  - NPC[]
+- Players[]
+  - User (ref)
+  - ...traits
+    - max_life_force
+    - strength
+    - intelligence
+    - wisdom
+    - dexterity
+    - charisma
+    - constitution
+  - is_npc
+- Equipment[]
+- GameMap[]
+  - Area[]
+    - Zone[]
+      - Building[]
+        - Room[]
+      - Tunnel[]
+        - Cavern[]
+- Campaign[]
+  - Storyline (ref)
+  - ...game state
+  - Player[]
+    - User (ref)
+    - ...player state
+  - NPC[]
+    - ...NPC state

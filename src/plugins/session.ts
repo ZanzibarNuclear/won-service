@@ -19,16 +19,16 @@ const sessionAuthPlugin: FastifyPluginAsync<SessionAuthPluginOptions> = async (f
   fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
     // Skip if session is already set by the session plugin
     if (request.session) {
-      fastify.log.info('session plug-in: Creds already established')
+      fastify.log.debug('session plug-in: Creds already established')
       return
     }
 
     const sessionToken = request.cookies[sessionCookieName]
     if (!sessionToken) {
-      fastify.log.info('no session token')
+      fastify.log.debug('no session token')
       return
     }
-    fastify.log.info('session token found')
+    fastify.log.debug('session token found')
     try {
       const creds = await verifySessionToken(sessionToken, fastify.config.JWT_SECRET_KEY)
       const sessionData = {
