@@ -70,7 +70,7 @@ const storylineRoutes: FastifyPluginAsync = async (fastify, options) => {
     },
   )
 
-  fastify.put(
+  fastify.patch(
     '/:slId/publish',
     async (request: FastifyRequest<StorylineParams>, reply: FastifyReply) => {
       const userId = request.userId
@@ -84,7 +84,7 @@ const storylineRoutes: FastifyPluginAsync = async (fastify, options) => {
     },
   )
 
-  fastify.put(
+  fastify.patch(
     '/:slId/unpublish',
     async (request: FastifyRequest<StorylineParams>, reply: FastifyReply) => {
       const userId = request.userId
