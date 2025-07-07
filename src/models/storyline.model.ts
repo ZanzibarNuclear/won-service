@@ -15,6 +15,7 @@ export class StorylineModel {
 
     const storyline: Storyline = {
       title: storylineData.title!,
+      author: storylineData.author!,
       description: storylineData?.description,
       coverArt: storylineData?.coverArt,
       createdAt: new Date(),
@@ -31,10 +32,10 @@ export class StorylineModel {
     return this.collection.findOne({ _id: new ObjectId(id) })
   }
 
-  async list(): Promise<Pick<Storyline, '_id' | 'title' | 'description' | 'coverArt' | 'createdAt'>[]> {
+  async list(): Promise<Pick<Storyline, '_id' | 'title' | 'author' | 'description' | 'coverArt' | 'createdAt' | 'publishedAt'>[]> {
     const cursor = this.collection.find(
       {},
-      { projection: { _id: 1, title: 1, author: 1, createdAt: 1 } }
+      { projection: { _id: 1, title: 1, author: 1, description: 1, coverArt: 1, createdAt: 1, publishedAt: 1 } }
     )
     return cursor.toArray()
   }
@@ -126,5 +127,35 @@ export class StorylineModel {
       { projection: { chapters: 1 } },
     )
     return storyline ? storyline.chapters : []
+  }
+
+  async publishStoryline(id: string): Promise<Storyline | null> {
+    if (!ObjectId.isValid(id)) throw new Error('Invalid ID')
+
+    const result = await this.collection.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          publishedAt: new Date(),
+          updatedAt: new Date()
+        }
+      },
+      { returnDocument: 'after' }
+    )
+    return result
+  }
+
+  async unpublishStoryline(id: string): Promise<Storyline | null> {
+    if (!ObjectId.isValid(id)) throw new Error('Invalid ID')
+
+    const result = await this.collection.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      {
+        $unset: { publishedAt: "" },
+        $set: { updatedAt: new Date() }
+      },
+      { returnDocument: 'after' }
+    )
+    return result
   }
 }
