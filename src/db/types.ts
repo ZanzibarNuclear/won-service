@@ -311,6 +311,18 @@ export interface ViolationReports {
   resolution_note: string | null;
 }
 
+export interface Inspirations {
+  id: Generated<number>;
+  title: string | null;
+  content: string | null;
+  media_url: string | null;
+  weight: Generated<number>;
+  active: Generated<boolean>;
+  created_at: Generated<Timestamp>;
+  updated_at: Generated<Timestamp>;
+  created_by: string | null;
+}
+
 export interface DB {
   achievements: Achievements;
   api_keys: ApiKeys;
@@ -325,6 +337,7 @@ export interface DB {
   flux_views: FluxViews;
   fluxes: Fluxes;
   identities: Identities;
+  inspirations: Inspirations;
   invitations: Invitations;
   karma_awards: KarmaAwards;
   learning_bookmarks: LearningBookmarks;
