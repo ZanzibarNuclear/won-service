@@ -8,6 +8,7 @@ import { FeedbackRepository } from '../db/access/feedbackRepo'
 import { FlagRepository } from '../db/access/flagRepo'
 import { FluxRatingRepository } from '../db/access/fluxRatingRepo'
 import { FluxRepository } from '../db/access/fluxRepo'
+import { InspirationRepository } from '../db/access/inspirationRepo'
 import { LessonContentPartRepository } from './../db/access/contentPartRepo';
 import { LessonPathRepository } from '../db/access/lessonPathRepo'
 import { LessonPlanRepository } from '../db/access/lessonPlanRepo'
@@ -34,6 +35,7 @@ declare module 'fastify' {
       flags: FlagRepository
       flux: FluxRepository
       fluxRating: FluxRatingRepository
+      inspirations: InspirationRepository
       lessonPlans: LessonPlanRepository
       lessonContents: LessonContentPartRepository
       lessonPaths: LessonPathRepository

@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from 'fastify'
-import { JsonValue } from "../../../db/types"
 
 const feedbackRoutes: FastifyPluginAsync = async (fastify, options) => {
 
