@@ -53,6 +53,14 @@ export class InspirationRepository {
   }
 
   async getRandomActive() {
+
+    // const totalWeight = await this.db
+    //   .selectFrom('inspirations')
+    //   .select(({ fn }) => fn.sum<number>('weight').as('total_weight'))
+    //   .where('active', '=', true)
+    //   .executeTakeFirst()
+
+    // console.log('totalWeight', totalWeight)
     // Use weighted random selection based on the weight column
     // This uses a technique where we order by random() * weight
     return await this.db
