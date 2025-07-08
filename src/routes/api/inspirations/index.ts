@@ -31,13 +31,12 @@ const inspirationsRoutes: FastifyPluginAsync = async (fastify, options) => {
     Querystring: {
       limit?: number
       offset?: number
-      type?: string
       active?: boolean
     }
   }>('/', {
     preHandler: roleGuard(['admin']),
   }, async (request, reply) => {
-    const { limit = DEFAULT_LIMIT, offset = 0, type, active } = request.query
+    const { limit = DEFAULT_LIMIT, offset = 0, active } = request.query
 
     const guardedLimit = Math.min(limit, MAX_LIMIT)
 
@@ -45,7 +44,6 @@ const inspirationsRoutes: FastifyPluginAsync = async (fastify, options) => {
       const inspirations = await fastify.data.inspirations.getAll({
         limit: guardedLimit,
         offset,
-        type,
         active
       })
 
@@ -81,7 +79,6 @@ const inspirationsRoutes: FastifyPluginAsync = async (fastify, options) => {
 
   fastify.post<{
     Body: {
-      type: string
       title?: string
       content?: string
       media_url?: string
@@ -91,15 +88,10 @@ const inspirationsRoutes: FastifyPluginAsync = async (fastify, options) => {
   }>('/', {
     preHandler: roleGuard(['admin']),
   }, async (request, reply) => {
-    const { type, title, content, media_url, weight, active } = request.body
-
-    if (!type) {
-      return reply.status(400).send({ error: 'Type is required' })
-    }
+    const { title, content, media_url, weight, active } = request.body
 
     try {
       const inspiration = await fastify.data.inspirations.create({
-        type,
         title,
         content,
         media_url,
@@ -118,7 +110,6 @@ const inspirationsRoutes: FastifyPluginAsync = async (fastify, options) => {
   fastify.put<{
     Params: { id: number }
     Body: {
-      type?: string
       title?: string
       content?: string
       media_url?: string

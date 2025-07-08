@@ -4,7 +4,6 @@ export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('inspirations')
     .addColumn('id', 'serial', (col) => col.primaryKey())
-    .addColumn('type', 'text', (col) => col.notNull()) // 'text', 'image', 'video', 'mixed'
     .addColumn('title', 'text')
     .addColumn('content', 'text')
     .addColumn('media_url', 'text')
@@ -20,13 +19,6 @@ export async function up(db: Kysely<any>): Promise<void> {
     .createIndex('inspirations_active_weight_idx')
     .on('inspirations')
     .columns(['active', 'weight'])
-    .execute()
-
-  // Add index for type filtering
-  await db.schema
-    .createIndex('inspirations_type_idx')
-    .on('inspirations')
-    .columns(['type'])
     .execute()
 }
 

@@ -313,7 +313,6 @@ export interface ViolationReports {
 
 export interface Inspirations {
   id: Generated<number>;
-  type: string;
   title: string | null;
   content: string | null;
   media_url: string | null;

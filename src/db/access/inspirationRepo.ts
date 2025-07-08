@@ -2,14 +2,12 @@ import { Kysely, sql } from "kysely"
 import { DB } from '../types'
 
 export interface InspirationFilter {
-  type?: string
   active?: boolean
   limit?: number
   offset?: number
 }
 
 export interface InspirationCreate {
-  type: string
   title?: string
   content?: string
   media_url?: string
@@ -19,7 +17,6 @@ export interface InspirationCreate {
 }
 
 export interface InspirationUpdate {
-  type?: string
   title?: string
   content?: string
   media_url?: string
@@ -31,14 +28,11 @@ export class InspirationRepository {
   constructor(private db: Kysely<DB>) { }
 
   async getAll(filter: InspirationFilter = {}) {
-    const { type, active, limit, offset } = filter
+    const { active, limit, offset } = filter
     let query = this.db
       .selectFrom('inspirations')
       .selectAll()
 
-    if (type) {
-      query = query.where('type', '=', type)
-    }
     if (active !== undefined) {
       query = query.where('active', '=', active)
     }
@@ -74,7 +68,6 @@ export class InspirationRepository {
     return await this.db
       .insertInto('inspirations')
       .values({
-        type: inspiration.type,
         title: inspiration.title || null,
         content: inspiration.content || null,
         media_url: inspiration.media_url || null,
@@ -117,7 +110,7 @@ export class InspirationRepository {
   }
 
   async getStats() {
-    const [total, active, byType] = await Promise.all([
+    const [total, active] = await Promise.all([
       this.db
         .selectFrom('inspirations')
         .select(({ fn }) => [fn.count<number>('id').as('count')])
@@ -127,22 +120,12 @@ export class InspirationRepository {
         .selectFrom('inspirations')
         .select(({ fn }) => [fn.count<number>('id').as('count')])
         .where('active', '=', true)
-        .executeTakeFirst(),
-
-      this.db
-        .selectFrom('inspirations')
-        .select(['type', ({ fn }) => fn.count<number>('id').as('count')])
-        .groupBy('type')
-        .execute()
+        .executeTakeFirst()
     ])
 
     return {
       total: total?.count || 0,
-      active: active?.count || 0,
-      byType: byType.reduce((acc, item) => {
-        acc[item.type] = item.count
-        return acc
-      }, {} as Record<string, number>)
+      active: active?.count || 0
     }
   }
 } 
