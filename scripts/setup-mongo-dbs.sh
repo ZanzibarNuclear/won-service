@@ -69,7 +69,6 @@ create_database() {
     
     mongosh --eval "
         use $db_name;
-        db.createCollection('adventures');
         db.createCollection('storylines');
         db.createCollection('scenes');
         print('Database $db_name created with collections');

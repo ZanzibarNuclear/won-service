@@ -11,7 +11,7 @@ const mongoModels: FastifyPluginAsync = async (fastify, options) => {
   try {
     // Extract database name from connection URL
     const mongoUrl = fastify.config.MONGO_URL
-    const dbName = mongoUrl.split('/').pop()?.split('?')[0] || 'adventure'
+    const dbName = mongoUrl.split('/').pop()?.split('?')[0] || 'test'
 
     await fastify.register(fastifyMongo, {
       forceClose: true,
