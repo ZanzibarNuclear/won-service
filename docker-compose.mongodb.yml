@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Development MongoDB (if you want to run locally too)
+  mongodb-dev:
+    image: mongo:7.0
+    container_name: won-mongodb-dev
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: devpassword123
+      MONGO_INITDB_DATABASE: adventure
+    volumes:
+      - mongodb_dev_data:/data/db
+      - ./scripts/mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - won-network
+
+  # Staging MongoDB
+  mongodb-staging:
+    image: mongo:7.0
+    container_name: won-mongodb-staging
+    restart: unless-stopped
+    ports:
+      - '27018:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: stagingpassword123
+      MONGO_INITDB_DATABASE: adventure
+    volumes:
+      - mongodb_staging_data:/data/db
+      - ./scripts/mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - won-network
+
+  # Production MongoDB
+  mongodb-prod:
+    image: mongo:7.0
+    container_name: won-mongodb-prod
+    restart: unless-stopped
+    ports:
+      - '27019:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: prodpassword123
+      MONGO_INITDB_DATABASE: adventure
+    volumes:
+      - mongodb_prod_data:/data/db
+      - ./scripts/mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - won-network
+
+volumes:
+  mongodb_dev_data:
+  mongodb_staging_data:
+  mongodb_prod_data:
+
+networks:
+  won-network:
+    driver: bridge

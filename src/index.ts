@@ -19,6 +19,12 @@ const envToLogger: Record<string, any> = {
   },
   production: {
     level: process.env.LOG_LEVEL || 'info',
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        translateTime: 'HH:MM:ss Z',
+      },
+    },
   },
   test: false,
 };
