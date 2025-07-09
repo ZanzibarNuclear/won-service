@@ -68,7 +68,7 @@ APP_BASE_URL=https://staging.won-app-next.pages.dev
 DATABASE_URL=postgresql://username:password@localhost:5432/won_staging
 
 # MongoDB Configuration
-MONGO_URL=mongodb://admin:stagingpassword123@localhost:27018/adventure
+MONGO_URL=mongodb://admin:stagingpassword123@localhost:27017/won_staging
 
 # JWT Configuration
 JWT_SECRET_KEY=your-staging-jwt-secret-key-here-minimum-32-characters
@@ -113,7 +113,7 @@ APP_BASE_URL=https://worldofnuclear.com
 DATABASE_URL=postgresql://username:password@localhost:5432/won_production
 
 # MongoDB Configuration
-MONGO_URL=mongodb://admin:prodpassword123@localhost:27019/adventure
+MONGO_URL=mongodb://admin:prodpassword123@localhost:27017/won_prod
 
 # JWT Configuration
 JWT_SECRET_KEY=your-production-jwt-secret-key-here-minimum-48-characters

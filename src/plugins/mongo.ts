@@ -1,4 +1,3 @@
-import { Transition } from './../models/scene.schema';
 import fp from 'fastify-plugin'
 import fastifyMongo from '@fastify/mongodb'
 import { FastifyPluginAsync } from 'fastify'
@@ -10,12 +9,16 @@ import { TransitionModel } from '../models/transition.model'
 
 const mongoModels: FastifyPluginAsync = async (fastify, options) => {
   try {
+    // Extract database name from connection URL
+    const mongoUrl = fastify.config.MONGO_URL
+    const dbName = mongoUrl.split('/').pop()?.split('?')[0] || 'adventure'
+
     await fastify.register(fastifyMongo, {
       forceClose: true,
-      url: fastify.config.MONGO_URL,
-      database: 'adventure',
+      url: mongoUrl,
+      database: dbName,
     })
-    fastify.log.info('Connected to mongo instance')
+    fastify.log.info(`Connected to mongo instance with database: ${dbName}`)
   } catch (err) {
     fastify.log.error('MongoDB connection error:', err)
     throw err

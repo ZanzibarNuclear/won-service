@@ -5,11 +5,11 @@ const collections = [
   'adventures',
   'storylines',
   'scenes',
-  // 'campaigns',
-  // 'players',
-  // 'items',
-  // 'game_maps',
-  // 'events'
+  'campaigns',
+  'players',
+  'items',
+  'game_maps',
+  'events'
 ]
 const dbName = 'adventure'
 

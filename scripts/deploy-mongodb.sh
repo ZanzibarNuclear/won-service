@@ -62,7 +62,7 @@ services:
       - "${port}:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${environment}password123
+      MONGO_INITDB_ROOT_PASSWORD: ${environment}HotR0cks4theWin^
       MONGO_INITDB_DATABASE: adventure
     volumes:
       - mongodb_${environment}_data:/data/db
